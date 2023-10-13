@@ -1,0 +1,20 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker image
+      run: 
+        docker login ghcr.io -u MANH-mei --password ${{ secrets.GH_PAT }}
+        docker build . --file Dockerfile --tag ghcr.io/presentation-web-app/slidey-be:latest
