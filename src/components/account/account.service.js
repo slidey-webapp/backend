@@ -61,6 +61,7 @@ export const createToken = async ({ accountID }, getRefreshToken = false) => {
     const accountToken = await AccountTokenTable.create({
         accountID,
         token: token,
+        type: TOKEN_TYPE.TOKEN,
     });
 
     result.token = token;
@@ -82,6 +83,22 @@ export const updatePassword = async ({ accountID, newPassword }) => {
     const result = await AccountTable.update(
         {
             password: newPassword,
+        },
+        {
+            where: {
+                accountID,
+            },
+            raw: true,
+            returning: true,
+        }
+    );
+    return result && result.length ? result[1] : null;
+};
+
+export const verifyAccount = async ({ accountID }) => {
+    const result = await AccountTable.update(
+        {
+            status: ACCOUNT_STATUS.ACTIVE,
         },
         {
             where: {

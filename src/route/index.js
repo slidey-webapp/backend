@@ -4,7 +4,6 @@ import { API_STATUS, RESPONSE_CODE } from "../config/contants";
 export const router = (app) => {
     app.use("/account", accountRoute);
     app.use("/", async (req, res, next) => {
-        console.log(req.hostname, req.originalUrl);
         try {
             res.status(RESPONSE_CODE.SUCCESS).json({
                 status: API_STATUS.OK,

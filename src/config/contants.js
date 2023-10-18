@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 export const JWT_KEY = "VERY_SECRET_AND_IMPORTANT_KEY";
 export const BCRYPT_SALT = 10;
 export const CODE_LENGTH = 6;
@@ -53,10 +55,9 @@ export const COMMON_STATUS = {
     ACTIVE: "ACTIVE",
     INACTIVE: "INACTIVE",
 };
-
 export const APP_EMAIL = process.env.APP_EMAIL;
 export const APP_EMAIL_PASSWORD = process.env.APP_EMAIL_PASSWORD;
-export const APP_Name = process.env.APP_Name;
+export const APP_NAME = process.env.APP_NAME;
 export const APP_HOMEPAGE = process.env.APP_HOMEPAGE;
 export const APP_LOGO = process.env.APP_LOGO;
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;

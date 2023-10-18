@@ -3,7 +3,7 @@ const nodemailer = require("nodemailer");
 import * as handlebars from "handlebars";
 import * as fs from "fs";
 import * as path from "path";
-import { APP_EMAIL, APP_EMAIL_PASSWORD } from "../config/contants";
+import { APP_EMAIL, APP_EMAIL_PASSWORD, APP_NAME } from "../config/contants";
 export const sendEmail = async ({
     emailTo,
     text,
@@ -40,8 +40,20 @@ export const sendEmail = async ({
                     },
                 ];
         }
-        await transporter.sendMail({
+        console.log({
             from: APP_EMAIL,
+            to: emailTo,
+            subject: subject,
+            text: text,
+            ...(replyID && { inReplyTo: replyID, references: [replyID] }),
+            attachments: htmlFileToSend ?? attachments,
+            ...(htmlToSend && { html: htmlToSend }),
+        });
+        await transporter.sendMail({
+            from: {
+                name: APP_NAME,
+                address: APP_EMAIL,
+            },
             to: emailTo,
             subject: subject,
             text: text,

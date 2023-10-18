@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import {
     API_STATUS,
     APP_HOMEPAGE,
+    APP_LOGO,
     BCRYPT_SALT,
     INPUT_ERROR,
     JWT_KEY,
@@ -149,26 +150,26 @@ export const login = async (req, res, next) => {
             accountID: account.accountID,
         });
         if (account.status === ACCOUNT_STATUS.UNVERIFIED) {
-            const verifyURL = `${process.env.BASE_URL}/account/${account.accountID}/verify/${token}`;
+            const verifyURL = `${APP_HOMEPAGE}/account/${account.accountID}/verify/${token}`;
             await sendEmail({
                 emailTo: {
                     name: person ? person.fullname : "",
                     address: email,
                 },
                 subject: MESSAGE.VERIFY_MAIL_SUBJECT,
-                sendingHtml: {
-                    dir: "/src/resource/EmailHTMLTemplate/ResetPassword.html",
-                    replace: { resetUrl: verifyURL, appHomePage: APP_HOMEPAGE },
-                    image: {
-                        name: "logo.png",
-                        dir: "/src/resource/images/logo.png",
-                        cid: "logo",
+                htmlData: {
+                    dir: "/src/resource/htmlEmailTemplate/verifyEmail.html",
+                    replace: {
+                        verifyUrl: verifyURL,
+                        appHomePage: APP_HOMEPAGE,
+                        logoUrl: APP_LOGO,
                     },
                 },
             });
             return res.status(401).json({
                 status: API_STATUS.NOT_VERIFIED,
                 message: MESSAGE.SEND_VERIFY_EMAIL(account.email),
+                verifyURL,
             });
         }
 
@@ -197,8 +198,8 @@ export const login = async (req, res, next) => {
 
 export const verifyEmail = async (req, res, next) => {
     try {
-        const accountID = req.params.id;
-        const token = req.params.token;
+        const accountID = req.body.accountID;
+        const token = req.body.token;
         const { message: emptyMessage, inputError: emptyInputError } =
             handleEmptyInput({
                 accountID,
@@ -238,10 +239,13 @@ export const verifyEmail = async (req, res, next) => {
             });
         }
 
-        await AccountService.accountVerified(accountID);
+        await AccountService.verifyAccount({
+            accountID,
+        });
         const person = await PersonService.findPerson({
             accountID: account.accountID,
         });
+        account.status = ACCOUNT_STATUS.ACTIVE;
         return res.status(200).json({
             status: API_STATUS.OK,
             data: [
@@ -250,7 +254,7 @@ export const verifyEmail = async (req, res, next) => {
                     ...account,
                 },
             ],
-            message: MESSAGE.POST_SUCCESS("Xác minh tài khoản"),
+            message: MESSAGE.POST_SUCCESS("Verify account"),
         });
     } catch (error) {
         console.log(error);
