@@ -497,8 +497,8 @@ export const changePassword = async (req, res, next) => {
         }
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
-            message: MESSAGE.POST_SUCCESS("Đổi mật khẩu"),
-            data: [...user],
+            message: MESSAGE.POST_SUCCESS("Change password"),
+            data: [user],
         });
     } catch (error) {
         console.log(error);

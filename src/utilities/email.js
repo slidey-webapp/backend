@@ -40,15 +40,6 @@ export const sendEmail = async ({
                     },
                 ];
         }
-        console.log({
-            from: APP_EMAIL,
-            to: emailTo,
-            subject: subject,
-            text: text,
-            ...(replyID && { inReplyTo: replyID, references: [replyID] }),
-            attachments: htmlFileToSend ?? attachments,
-            ...(htmlToSend && { html: htmlToSend }),
-        });
         await transporter.sendMail({
             from: {
                 name: APP_NAME,

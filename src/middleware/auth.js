@@ -12,7 +12,15 @@ export const auth = (req, res, next) => {
                 const person = await PersonService.findPerson({
                     accountID: account.accountID,
                 });
+
                 if (person) {
+                    delete account.password;
+                    const clone = { ...account };
+                    Object.keys(clone).forEach((key) => {
+                        if (key.includes(".")) {
+                            delete account[key];
+                        }
+                    });
                     req.user = {
                         ...person,
                         ...account,
