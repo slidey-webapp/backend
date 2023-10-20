@@ -17,6 +17,6 @@ jobs:
     - name: Build the Docker image
       run: |
         docker login ghcr.io -u MANH-mei --password ${{ secrets.GH_PAT }}
-        docker build . --file Dockerfile --tag ghcr.io/presentation-web-app/slidey-be:latest
-        docker push ghcr.io/presentation-web-app/slidey-be:latest
+        docker build . --file Dockerfile --tag ghcr.io/slidey-webapp/slidey-be:latest
+        docker push ghcr.io/slidey-webapp/slidey-be:latest
 
