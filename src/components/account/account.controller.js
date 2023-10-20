@@ -18,6 +18,7 @@ import { comparePassword } from "./account.util";
 import { ACCOUNT_STATUS } from "./account.model";
 import { sendEmail } from "../../utilities/email";
 import { validateGoogleToken } from "../../utilities/oauth";
+import { mapUser } from "../../utilities/mapUser";
 export const signUp = async (req, res, next) => {
     try {
         const { password, email, fullname, confirmPassword } = req.body;
@@ -71,15 +72,14 @@ export const signUp = async (req, res, next) => {
             accountID: account.accountID,
             fullname,
         });
-        delete account.password;
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             data: [
                 {
-                    user: {
+                    user: mapUser({
                         ...person,
                         ...account,
-                    },
+                    }),
                     token: token,
                     refreshToken,
                 },
@@ -166,22 +166,21 @@ export const login = async (req, res, next) => {
                     },
                 },
             });
-            return res.status(401).json({
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.NOT_VERIFIED,
                 message: MESSAGE.SEND_VERIFY_EMAIL(account.email),
                 verifyURL,
             });
         }
 
-        delete account.password;
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             data: [
                 {
-                    user: {
+                    user: mapUser({
                         ...person,
                         ...account,
-                    },
+                    }),
                     token: token,
                     refreshToken: refreshToken,
                 },
@@ -249,10 +248,10 @@ export const verifyEmail = async (req, res, next) => {
         return res.status(200).json({
             status: API_STATUS.OK,
             data: [
-                {
+                mapUser({
                     ...person,
                     ...account,
-                },
+                }),
             ],
             message: MESSAGE.POST_SUCCESS("Verify account"),
         });
@@ -302,14 +301,14 @@ export const googleLogin = async (req, res, next) => {
             const person = await PersonService.findPerson({
                 accountID: account.accountID,
             });
-            return res.status(200).json({
+            return res.status(RESPONSE_CODE.SUCCESS).json({
                 status: API_STATUS.OK,
                 data: [
                     {
-                        user: {
+                        user: mapUser({
                             ...person,
                             ...account,
-                        },
+                        }),
                         token: token,
                         refreshToken: refreshToken,
                     },
@@ -320,6 +319,7 @@ export const googleLogin = async (req, res, next) => {
             //not found account to login, so signup instead
             const account = await AccountService.createAccount({
                 email,
+                status: ACCOUNT_STATUS.ACTIVE,
             });
             const person = await PersonService.createPerson({
                 accountID: account.accountID,
@@ -332,14 +332,14 @@ export const googleLogin = async (req, res, next) => {
                 true
             );
 
-            res.status(200).json({
+            return res.status(RESPONSE_CODE.SUCCESS).json({
                 status: API_STATUS.OK,
                 data: [
                     {
-                        user: {
+                        user: mapUser({
                             ...person,
                             ...account,
-                        },
+                        }),
                         token: token,
                         refreshToken: refreshToken,
                     },
@@ -386,9 +386,8 @@ export const googleSignup = async (req, res, next) => {
         const account = await AccountService.findAccount({ email: email });
         if (account) {
             //sign up to an existed email, so login instead
-            const person = await PersonService.createPerson({
+            const person = await PersonService.findPerson({
                 accountID: account.accountID,
-                fullname,
             });
             const { token, refreshToken } = await AccountService.createToken(
                 {
@@ -396,14 +395,14 @@ export const googleSignup = async (req, res, next) => {
                 },
                 true
             );
-            return res.status(200).json({
+            return res.status(RESPONSE_CODE.SUCCESS).json({
                 status: API_STATUS.OK,
                 data: [
                     {
-                        user: {
+                        user: mapUser({
                             ...person,
                             ...account,
-                        },
+                        }),
                         token: token,
                         refreshToken: refreshToken,
                     },
@@ -414,6 +413,7 @@ export const googleSignup = async (req, res, next) => {
             //not found account to login, so signup instead
             const account = await AccountService.createAccount({
                 email,
+                status: ACCOUNT_STATUS.ACTIVE,
             });
             const person = await PersonService.createPerson({
                 accountID: account.accountID,
@@ -426,14 +426,14 @@ export const googleSignup = async (req, res, next) => {
                 true
             );
 
-            res.status(200).json({
+            return res.status(RESPONSE_CODE.SUCCESS).json({
                 status: API_STATUS.OK,
                 data: [
                     {
-                        user: {
+                        user: mapUser({
                             ...person,
                             ...account,
-                        },
+                        }),
                         token: token,
                         refreshToken: refreshToken,
                     },
@@ -498,7 +498,7 @@ export const changePassword = async (req, res, next) => {
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             message: MESSAGE.POST_SUCCESS("Change password"),
-            data: [user],
+            data: [mapUser(user)],
         });
     } catch (error) {
         console.log(error);

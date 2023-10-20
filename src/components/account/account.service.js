@@ -21,12 +21,12 @@ export const findAccount = async (data) => {
     return null;
 };
 
-export const createAccount = async ({ password, email }) => {
+export const createAccount = async ({ password, email, status }) => {
     const newAccount = (
         await AccountTable.create({
             password,
             email: email,
-            status: ACCOUNT_STATUS.UNVERIFIED,
+            status: status || ACCOUNT_STATUS.UNVERIFIED,
         })
     ).get({
         plain: true,
