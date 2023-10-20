@@ -20,3 +20,13 @@ jobs:
         docker build . --file Dockerfile --tag ghcr.io/slidey-webapp/slidey-be:latest
         docker push ghcr.io/slidey-webapp/slidey-be:latest
 
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: dkershner6/post-api-call-action@v1
+      name: Trigger deploy
+      with:
+        url: ${{ secrets.RENDER_WEBHOOK }}
+
