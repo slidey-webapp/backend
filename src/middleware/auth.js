@@ -1,19 +1,50 @@
-import { API_STATUS, RESPONSE_CODE } from "../config/contants";
+import {
+    API_STATUS,
+    APP_HOMEPAGE,
+    APP_LOGO,
+    RESPONSE_CODE,
+} from "../config/contants";
 import { getToken } from "../utilities/request";
 import passport from "./passport";
 import * as MESSAGE from "../resource/message";
 import * as PersonService from "../components/person/person.service";
+import { ACCOUNT_STATUS } from "../components/account/account.model";
+import { sendEmail } from "../utilities/email";
 export const auth = (req, res, next) => {
     return passport.authenticate(
         "normalStrategy",
         { session: false },
         async function (err, account, info) {
             if (account) {
+                const token = getToken(req.headers);
                 const person = await PersonService.findPerson({
                     accountID: account.accountID,
                 });
 
                 if (person) {
+                    if (account.status === ACCOUNT_STATUS.UNVERIFIED) {
+                        const verifyURL = `${APP_HOMEPAGE}/api/account/${account.accountID}/verify/${token}`;
+                        await sendEmail({
+                            emailTo: {
+                                name: person ? person.fullname : "",
+                                address: account.email,
+                            },
+                            subject: MESSAGE.VERIFY_MAIL_SUBJECT,
+                            htmlData: {
+                                dir: "/src/resource/htmlEmailTemplate/verifyEmail.html",
+                                replace: {
+                                    verifyUrl: verifyURL,
+                                    appHomePage: APP_HOMEPAGE,
+                                    logoUrl: APP_LOGO,
+                                },
+                            },
+                        });
+                        return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                            status: API_STATUS.NOT_VERIFIED,
+                            message: MESSAGE.SEND_VERIFY_EMAIL(account.email),
+                            result: verifyURL,
+                        });
+                    }
                     delete account.password;
                     const clone = { ...account };
                     Object.keys(clone).forEach((key) => {
@@ -25,7 +56,7 @@ export const auth = (req, res, next) => {
                         ...person,
                         ...account,
                     };
-                    req.token = getToken(req.headers);
+                    req.token = token;
                     next();
                 } else {
                     return res.status(RESPONSE_CODE.UNAUTHORIZED).json({

@@ -206,7 +206,7 @@ export const verifyEmail = async (req, res, next) => {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
                 message: emptyMessage,
-                inputError: emptyInputError,
+                errors: emptyInputError,
             });
         }
         const account = await AccountService.findAccount({
@@ -245,12 +245,12 @@ export const verifyEmail = async (req, res, next) => {
         account.status = ACCOUNT_STATUS.ACTIVE;
         return res.status(200).json({
             status: API_STATUS.OK,
-            data: [
-                mapUser({
+            result: {
+                user: mapUser({
                     ...person,
                     ...account,
                 }),
-            ],
+            },
             message: MESSAGE.POST_SUCCESS("Verify account"),
         });
     } catch (error) {
@@ -275,7 +275,7 @@ export const googleLogin = async (req, res, next) => {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
                 message: emptyMessage,
-                inputError: emptyInputError,
+                errors: emptyInputError,
             });
         }
         //Validate google token
@@ -301,16 +301,14 @@ export const googleLogin = async (req, res, next) => {
             });
             return res.status(RESPONSE_CODE.SUCCESS).json({
                 status: API_STATUS.OK,
-                data: [
-                    {
-                        user: mapUser({
-                            ...person,
-                            ...account,
-                        }),
-                        token: token,
-                        refreshToken: refreshToken,
-                    },
-                ],
+                result: {
+                    user: mapUser({
+                        ...person,
+                        ...account,
+                    }),
+                    token: token,
+                    refreshToken: refreshToken,
+                },
                 message: MESSAGE.POST_SUCCESS("Login"),
             });
         } else {
@@ -332,16 +330,14 @@ export const googleLogin = async (req, res, next) => {
 
             return res.status(RESPONSE_CODE.SUCCESS).json({
                 status: API_STATUS.OK,
-                data: [
-                    {
-                        user: mapUser({
-                            ...person,
-                            ...account,
-                        }),
-                        token: token,
-                        refreshToken: refreshToken,
-                    },
-                ],
+                result: {
+                    user: mapUser({
+                        ...person,
+                        ...account,
+                    }),
+                    token: token,
+                    refreshToken: refreshToken,
+                },
                 message: MESSAGE.POST_SUCCESS("signup"),
             });
         }
@@ -367,7 +363,7 @@ export const googleSignup = async (req, res, next) => {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
                 message: emptyMessage,
-                inputError: emptyInputError,
+                errors: emptyInputError,
             });
         }
 
@@ -395,16 +391,14 @@ export const googleSignup = async (req, res, next) => {
             );
             return res.status(RESPONSE_CODE.SUCCESS).json({
                 status: API_STATUS.OK,
-                data: [
-                    {
-                        user: mapUser({
-                            ...person,
-                            ...account,
-                        }),
-                        token: token,
-                        refreshToken: refreshToken,
-                    },
-                ],
+                result: {
+                    user: mapUser({
+                        ...person,
+                        ...account,
+                    }),
+                    token: token,
+                    refreshToken: refreshToken,
+                },
                 message: MESSAGE.POST_SUCCESS("Login"),
             });
         } else {
@@ -426,16 +420,14 @@ export const googleSignup = async (req, res, next) => {
 
             return res.status(RESPONSE_CODE.SUCCESS).json({
                 status: API_STATUS.OK,
-                data: [
-                    {
-                        user: mapUser({
-                            ...person,
-                            ...account,
-                        }),
-                        token: token,
-                        refreshToken: refreshToken,
-                    },
-                ],
+                result: {
+                    user: mapUser({
+                        ...person,
+                        ...account,
+                    }),
+                    token: token,
+                    refreshToken: refreshToken,
+                },
                 message: MESSAGE.POST_SUCCESS("signup"),
             });
         }
@@ -462,7 +454,7 @@ export const changePassword = async (req, res, next) => {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
                 message: emptyMessage,
-                inputError: emptyInputError,
+                errors: emptyInputError,
             });
         }
         const account = await AccountService.findAccount({
@@ -476,7 +468,7 @@ export const changePassword = async (req, res, next) => {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
                 message: MESSAGE.INCORRECT_PASSWORD,
-                inputError: {
+                errors: {
                     password: INPUT_ERROR.IN_CORRECT,
                 },
             });
@@ -496,13 +488,60 @@ export const changePassword = async (req, res, next) => {
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             message: MESSAGE.POST_SUCCESS("Change password"),
-            data: [mapUser(user)],
+            result: {
+                user: mapUser(user),
+            },
         });
     } catch (error) {
         console.log(error);
         return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
             status: API_STATUS.INTERNAL_ERROR,
             message: error.message,
+        });
+    }
+};
+
+export const authToken = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const token = req.token;
+
+        return res.status(RESPONSE_CODE.SUCCESS).json({
+            status: API_STATUS.OK,
+            result: {
+                user: user,
+                token: token,
+                claims: [],
+            },
+            message: MESSAGE.POST_SUCCESS("Auth"),
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+            status: API_STATUS.INTERNAL_ERROR,
+            error,
+        });
+    }
+};
+
+export const logout = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const token = req.token;
+        await AccountService.deleteToken({
+            accountID: user.accountID,
+            token,
+        });
+        return res.status(RESPONSE_CODE.SUCCESS).json({
+            status: API_STATUS.OK,
+            result: {},
+            message: MESSAGE.POST_SUCCESS("Logout"),
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+            status: API_STATUS.INTERNAL_ERROR,
+            error,
         });
     }
 };
