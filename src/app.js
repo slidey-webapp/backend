@@ -8,7 +8,7 @@ import { myCors, passport } from "./middleware";
 import { router } from "./route";
 import { sequelize, testDBConnection } from "./database";
 dotenv.config();
-const port = 3030;
+const port = 5000;
 const app = express();
 
 app.use(bodyParser.json());

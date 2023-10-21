@@ -4,9 +4,9 @@ import { API_STATUS, RESPONSE_CODE } from "../config/contants";
 import { auth } from "../middleware/auth";
 
 export const router = (app) => {
-    app.use("/account", accountRoute);
-    app.use("/presentation", auth, presentationRoute);
-    app.use("/", async (req, res, next) => {
+    app.use("/api/account", accountRoute);
+    app.use("/api/presentation", auth, presentationRoute);
+    app.use("/api", async (req, res, next) => {
         try {
             res.status(RESPONSE_CODE.SUCCESS).json({
                 status: API_STATUS.OK,
