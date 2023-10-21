@@ -10,15 +10,15 @@ import {
     JWT_KEY,
     RESPONSE_CODE,
 } from "../../config/contants";
-import { handleEmptyInput } from "../../utilities/api";
 import * as MESSAGE from "../../resource/message";
-import * as AccountService from "./account.service";
-import * as PersonService from "../person/person.service";
-import { comparePassword } from "./account.util";
-import { ACCOUNT_STATUS } from "./account.model";
+import { handleEmptyInput } from "../../utilities/api";
 import { sendEmail } from "../../utilities/email";
-import { validateGoogleToken } from "../../utilities/oauth";
 import { mapUser } from "../../utilities/mapUser";
+import { validateGoogleToken } from "../../utilities/oauth";
+import * as PersonService from "../person/person.service";
+import { ACCOUNT_STATUS } from "./account.model";
+import * as AccountService from "./account.service";
+import { comparePassword } from "./account.util";
 export const signUp = async (req, res, next) => {
     try {
         const { password, email, fullname, confirmPassword } = req.body;
@@ -33,14 +33,14 @@ export const signUp = async (req, res, next) => {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
                 message: emptyMessage,
-                inputError: emptyInputError,
+                errors: emptyInputError,
             });
         }
         if (confirmPassword !== password) {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
                 message: MESSAGE.PASSWORD_NOT_MATCH,
-                inputError: {
+                errors: {
                     confirmPassword: INPUT_ERROR.NOT_MATCH,
                 },
             });
@@ -52,7 +52,7 @@ export const signUp = async (req, res, next) => {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.EXISTED,
                 message: MESSAGE.EXISTED_USER,
-                inputError: {
+                errors: {
                     email: INPUT_ERROR.EXISTED,
                 },
             });
@@ -74,16 +74,15 @@ export const signUp = async (req, res, next) => {
         });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
-            data: [
-                {
-                    user: mapUser({
-                        ...person,
-                        ...account,
-                    }),
-                    token: token,
-                    refreshToken,
-                },
-            ],
+            result: {
+                user: mapUser({
+                    ...person,
+                    ...account,
+                }),
+                token: token,
+                refreshToken,
+                claims: [],
+            },
             message: MESSAGE.POST_SUCCESS("Create acccount"),
         });
     } catch (error) {
@@ -107,7 +106,7 @@ export const login = async (req, res, next) => {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
                 message: emptyMessage,
-                inputError: emptyInputError,
+                errors: emptyInputError,
             });
         }
         const account = await AccountService.findAccount({
@@ -128,7 +127,7 @@ export const login = async (req, res, next) => {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
                 message: MESSAGE.INCORRECT_PASSWORD,
-                inputError: {
+                errors: {
                     password: INPUT_ERROR.IN_CORRECT,
                 },
             });
@@ -150,7 +149,7 @@ export const login = async (req, res, next) => {
             accountID: account.accountID,
         });
         if (account.status === ACCOUNT_STATUS.UNVERIFIED) {
-            const verifyURL = `${APP_HOMEPAGE}/account/${account.accountID}/verify/${token}`;
+            const verifyURL = `${APP_HOMEPAGE}/api/account/${account.accountID}/verify/${token}`;
             await sendEmail({
                 emailTo: {
                     name: person ? person.fullname : "",
@@ -169,22 +168,25 @@ export const login = async (req, res, next) => {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.NOT_VERIFIED,
                 message: MESSAGE.SEND_VERIFY_EMAIL(account.email),
-                verifyURL,
+                result: verifyURL,
             });
         }
 
+        const user = mapUser({
+            ...person,
+            ...account,
+        });
+
+        req.session.user = user;
+
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
-            data: [
-                {
-                    user: mapUser({
-                        ...person,
-                        ...account,
-                    }),
-                    token: token,
-                    refreshToken: refreshToken,
-                },
-            ],
+            result: {
+                user: user,
+                token: token,
+                refreshToken: refreshToken,
+                claims: [],
+            },
         });
     } catch (error) {
         console.log(error);

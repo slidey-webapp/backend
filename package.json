@@ -36,7 +36,8 @@
         "pg": "^8.11.3",
         "rimraf": "^5.0.1",
         "sequelize": "^6.33.0",
-        "sequelize-auto": "^0.8.8"
+        "sequelize-auto": "^0.8.8",
+        "lodash": "4.17.21"
     },
     "devDependencies": {
         "@babel/cli": "^7.19.3",
