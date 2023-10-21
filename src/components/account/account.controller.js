@@ -172,15 +172,13 @@ export const login = async (req, res, next) => {
             });
         }
 
-        const user = mapUser({
-            ...person,
-            ...account,
-        });
-
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             result: {
-                user: user,
+                user: mapUser({
+                    ...person,
+                    ...account,
+                }),
                 token: token,
                 refreshToken: refreshToken,
                 claims: [],
