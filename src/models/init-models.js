@@ -69,7 +69,7 @@ export default function initModels(sequelize) {
     MultipleChoiceSlideOption.belongsTo(MultipleChoiceSlide, {
         foreignKey: "slideID",
     });
-    MultipleChoiceSlide.hasOne(MultipleChoiceSlideOption, {
+    MultipleChoiceSlide.hasMany(MultipleChoiceSlideOption, {
         foreignKey: "slideID",
     });
     Collaboration.belongsTo(Presentation, { foreignKey: "presentationID" });

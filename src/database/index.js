@@ -23,7 +23,7 @@ export const testDBConnection = async (sequelize) => {
 
         /*======= do not delete this =======*/
         // eslint-disable-next-line no-constant-condition
-        if (false) {
+        if (true) {
             const options = {
                 caseFile: "c",
                 caseModel: "p",

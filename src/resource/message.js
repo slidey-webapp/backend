@@ -8,6 +8,8 @@ export const QUERY_SUCCESS = (name) => `Query ${name || "data"} success`;
 export const EXISTED_USER = "Username existed";
 export const EXISTED_GROUP = "Group's name existed";
 export const EXISTED_EMAIL = "Email existed";
+export const EXISTED_PRESENTATION =
+    "Presentation with this name already exists";
 export const MISSING_INPUT = (input) => `${input} cant be empty`;
 export const POST_SUCCESS = (action) => `${action} success`;
 export const QUERY_NOT_FOUND = (name) => `Not found any ${name}`;
