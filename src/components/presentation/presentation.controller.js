@@ -20,7 +20,7 @@ export const createPresentation = async (req, res, next) => {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
                 message: emptyMessage,
-                inputError: emptyInputError,
+                errors: emptyInputError,
             });
         }
         const oldPresentation = await PresentationService.findPresentation({
@@ -51,17 +51,15 @@ export const createPresentation = async (req, res, next) => {
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             message: MESSAGE.POST_SUCCESS("Create presentation"),
-            data: [
-                {
-                    presentation: newPresentation,
-                    slides: [
-                        {
-                            ...firstSlide,
-                            ...headingSlide,
-                        },
-                    ],
-                },
-            ],
+            result: {
+                presentation: newPresentation,
+                slides: [
+                    {
+                        ...firstSlide,
+                        ...headingSlide,
+                    },
+                ],
+            },
         });
     } catch (error) {
         console.log(error);
@@ -90,13 +88,13 @@ export const getMyPresentations = async (req, res, next) => {
         if (!presentations || !presentations.length) {
             return res.status(RESPONSE_CODE.NOT_FOUND).json({
                 status: API_STATUS.NOT_FOUND,
-                data: [],
+                result: {},
                 message: MESSAGE.QUERY_NOT_FOUND("Presentation"),
             });
         }
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
-            data: {
+            result: {
                 presentations: presentations,
                 ...(getTotal ? { total } : {}),
             },

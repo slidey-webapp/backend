@@ -11,7 +11,6 @@ export const router = (app) => {
             res.status(RESPONSE_CODE.SUCCESS).json({
                 status: API_STATUS.OK,
                 message: "Hello",
-                data: process.env.CURRENT_ENV,
             });
         } catch (error) {
             res.status(RESPONSE_CODE.INTERNAL_SERVER).json({

@@ -110,3 +110,14 @@ export const verifyAccount = async ({ accountID }) => {
     );
     return result && result.length ? result[1] : null;
 };
+
+export const deleteToken = ({ accountID, token }) => {
+    return AccountTokenTable.destroy({
+        where: {
+            accountID,
+            token,
+            type: TOKEN_TYPE.TOKEN,
+        },
+        force: true,
+    });
+};
