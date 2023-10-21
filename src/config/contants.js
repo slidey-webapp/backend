@@ -5,9 +5,11 @@ export const BCRYPT_SALT = 10;
 export const CODE_LENGTH = 6;
 export const TOKEN_EXPIRES_IN = "8h";
 export const REFRESH_TOKEN_EXPIRES_IN = "14d";
-export const DEFAULT_LIMIT = 1000;
+export const DEFAULT_LIMIT = 10;
+export const DEFAULT_OFFSET = 0;
 export const SOCKET_TIMEOUT = 2000;
 export const CUSTOMER_ACCESS_TOKEN_HEADER = "access_token";
+
 export const API_STATUS = {
     OK: "OK",
     NOT_FOUND: "NOT_FOUND",
