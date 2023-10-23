@@ -10,7 +10,6 @@ accountRoute.get("/auth", auth, AccountController.authToken);
 accountRoute.post("/logout", auth, AccountController.logout);
 
 accountRoute.post("/google-login", AccountController.googleLogin);
-accountRoute.post("/google-sign-up", AccountController.googleSignup);
 
 accountRoute.post("/change-password", auth, AccountController.changePassword);
 accountRoute.post("/forgot-password", AccountController.forgetPassword);
