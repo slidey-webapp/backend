@@ -609,67 +609,70 @@ export const forgetPassword = async (req, res, next) => {
     }
 };
 
-// export const resetPassword = async (req, res, next) => {
-//     try {
-//         const accountID = req.body.accountID;
-//         const token = req.body.token;
-//         const { message: emptyMessage, inputError: emptyInputError } =
-//             handleEmptyInput({
-//                 accountID,
-//                 token,
-//             });
-//         if (emptyMessage) {
-//             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
-//                 status: API_STATUS.INVALID_INPUT,
-//                 message: emptyMessage,
-//                 errors: emptyInputError,
-//             });
-//         }
-//         const account = await AccountService.findAccount({
-//             email,
-//         });
-//         if (!account) {
-//             return res.status(RESPONSE_CODE.NOT_FOUND).json({
-//                 message: MESSAGE.QUERY_NOT_FOUND("Account"),
-//                 status: API_STATUS.NOT_FOUND,
-//             });
-//         }
-//         const { token, refreshToken } = await AccountService.createToken(
-//             {
-//                 accountID: account.accountID,
-//             },
-//             true
-//         );
-//         const person = await PersonService.findPerson({
-//             accountID: account.accountID,
-//         });
-
-//         const resetPasswordURL = `${APP_HOMEPAGE}/account/${account.accountID}/reset-password/${token}`;
-//         await sendEmail({
-//             emailTo: {
-//                 name: person ? person.fullname : "",
-//                 address: email,
-//             },
-//             subject: MESSAGE.RESET_PASSWORD_MAIL_SUBJECT,
-//             htmlData: {
-//                 dir: "/src/resource/htmlEmailTemplate/resetPassword.html",
-//                 replace: {
-//                     verifyUrl: resetPasswordURL,
-//                     appHomePage: APP_HOMEPAGE,
-//                     logoUrl: APP_LOGO,
-//                 },
-//             },
-//         });
-//         return res.status(RESPONSE_CODE.SUCCESS).json({
-//             status: API_STATUS.OK,
-//             message: MESSAGE.POST_SUCCESS("Request password reseting"),
-//             result: resetPasswordURL,
-//         });
-//     } catch (error) {
-//         console.log(error);
-//         return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
-//             status: API_STATUS.INTERNAL_ERROR,
-//             message: error.message,
-//         });
-//     }
-// }
+export const resetPassword = async (req, res, next) => {
+    try {
+        const accountID = req.body.accountID;
+        const token = req.body.token;
+        const password = req.body.password;
+        const { message: emptyMessage, inputError: emptyInputError } =
+            handleEmptyInput({
+                accountID,
+                token,
+                password,
+            });
+        if (emptyMessage) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: emptyMessage,
+                errors: emptyInputError,
+            });
+        }
+        const account = await AccountService.findAccount({
+            accountID,
+        });
+        if (!account) {
+            return res.status(RESPONSE_CODE.NOT_FOUND).json({
+                message: MESSAGE.QUERY_NOT_FOUND("Account"),
+                status: API_STATUS.NOT_FOUND,
+            });
+        }
+        const data = jwt.verify(token, JWT_KEY);
+        if (!data) {
+            return res.status(RESPONSE_CODE.UNAUTHORIZED).json({
+                status: API_STATUS.UNAUTHORIZED,
+                message: MESSAGE.UNAUTHORIZED,
+            });
+        }
+        const accountByToken = await AccountService.findAccountByToken(
+            account.accountID,
+            token
+        );
+        if (!accountByToken) {
+            return res.status(RESPONSE_CODE.NOT_FOUND).json({
+                status: API_STATUS.NOT_FOUND,
+                message: MESSAGE.QUERY_NOT_FOUND("account"),
+            });
+        }
+        const hashPassword = await bcrypt.hash(password, BCRYPT_SALT);
+        const changeResult = await AccountService.updatePassword({
+            accountID,
+            newPassword: hashPassword,
+        });
+        if (!changeResult) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.NOT_FOUND,
+                message: MESSAGE.QUERY_NOT_FOUND("account"),
+            });
+        }
+        return res.status(RESPONSE_CODE.SUCCESS).json({
+            status: API_STATUS.OK,
+            message: MESSAGE.POST_SUCCESS("Reset password"),
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+            status: API_STATUS.INTERNAL_ERROR,
+            message: error.message,
+        });
+    }
+};
