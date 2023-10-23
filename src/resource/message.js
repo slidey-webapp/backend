@@ -23,3 +23,4 @@ export const PASSWORD_NOT_MATCH =
 export const VERIFY_MAIL_SUBJECT = "Verify account";
 export const VERIFY_MAIL_CONTENT = (link) =>
     `Plese verify your account email by clicking the link bellow: \n ${link}`;
+export const RESET_PASSWORD_MAIL_SUBJECT = "Reset password";

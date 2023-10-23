@@ -1,11 +1,11 @@
 import * as PresentationService from "./presentation.service";
-import * as SlideService from "../slide/slide.service";
+import * as SlideService from "./slide/slide.service";
 
 import * as MESSAGE from "../../resource/message";
 import { API_STATUS, RESPONSE_CODE } from "../../config/contants";
 import { handleEmptyInput } from "../../utilities/api";
 import { generateCode } from "../../utilities/string";
-import { SLIDE_TYPE } from "../slide/slide.model";
+import { SLIDE_TYPE } from "./slide/slide.model";
 import { getPaginationInfo } from "../../utilities/pagination";
 
 export const createPresentation = async (req, res, next) => {
