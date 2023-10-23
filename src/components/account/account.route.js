@@ -13,5 +13,6 @@ accountRoute.post("/google-login", AccountController.googleLogin);
 accountRoute.post("/google-sign-up", AccountController.googleSignup);
 
 accountRoute.post("/change-password", auth, AccountController.changePassword);
-// accountRoute.post("/forgot-password", AccountController.forgetPassword);
+accountRoute.post("/forgot-password", AccountController.forgetPassword);
+accountRoute.post("/reset-password", AccountController.resetPassword);
 export default accountRoute;

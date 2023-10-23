@@ -83,7 +83,7 @@ export const signUp = async (req, res, next) => {
                 refreshToken,
                 claims: [],
             },
-            message: MESSAGE.POST_SUCCESS("Create acccount"),
+            message: MESSAGE.POST_SUCCESS("Tạo tài khoản"),
         });
     } catch (error) {
         console.log(error);
@@ -215,7 +215,7 @@ export const verifyEmail = async (req, res, next) => {
         if (!account) {
             return res.status(RESPONSE_CODE.NOT_FOUND).json({
                 status: API_STATUS.NOT_FOUND,
-                message: MESSAGE.QUERY_NOT_FOUND("account"),
+                message: MESSAGE.QUERY_NOT_FOUND("Tài khoản"),
             });
         }
         const data = jwt.verify(token, JWT_KEY);
@@ -232,7 +232,7 @@ export const verifyEmail = async (req, res, next) => {
         if (!accountByToken) {
             return res.status(RESPONSE_CODE.NOT_FOUND).json({
                 status: API_STATUS.NOT_FOUND,
-                message: MESSAGE.QUERY_NOT_FOUND("account"),
+                message: MESSAGE.QUERY_NOT_FOUND("Tài khoản"),
             });
         }
 
@@ -243,7 +243,7 @@ export const verifyEmail = async (req, res, next) => {
             accountID: account.accountID,
         });
         account.status = ACCOUNT_STATUS.ACTIVE;
-        return res.status(200).json({
+        return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             result: {
                 user: mapUser({
@@ -251,7 +251,7 @@ export const verifyEmail = async (req, res, next) => {
                     ...account,
                 }),
             },
-            message: MESSAGE.POST_SUCCESS("Verify account"),
+            message: MESSAGE.POST_SUCCESS("Xác thực tài khoản"),
         });
     } catch (error) {
         console.log(error);
@@ -309,7 +309,7 @@ export const googleLogin = async (req, res, next) => {
                     token: token,
                     refreshToken: refreshToken,
                 },
-                message: MESSAGE.POST_SUCCESS("Login"),
+                message: MESSAGE.POST_SUCCESS("Đăng nhập"),
             });
         } else {
             //not found account to login, so signup instead
@@ -338,102 +338,12 @@ export const googleLogin = async (req, res, next) => {
                     token: token,
                     refreshToken: refreshToken,
                 },
-                message: MESSAGE.POST_SUCCESS("signup"),
+                message: MESSAGE.POST_SUCCESS("Đăng kí"),
             });
         }
     } catch (error) {
         console.log(error);
         return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
-            status: API_STATUS.INTERNAL_ERROR,
-            message: error.message,
-        });
-    }
-};
-
-export const googleSignup = async (req, res, next) => {
-    try {
-        const { token: ggToken } = req.body;
-        const { message: emptyMessage, inputError: emptyInputError } =
-            handleEmptyInput({
-                ggToken,
-            });
-        if (emptyMessage) {
-            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
-                status: API_STATUS.INVALID_INPUT,
-                message: emptyMessage,
-                errors: emptyInputError,
-            });
-        }
-
-        //Validate google token
-        const verifiedTokenResponse = await validateGoogleToken(ggToken);
-        if (verifiedTokenResponse.error) {
-            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
-                message: MESSAGE.INVALID_INPUT("TOKEN"),
-                status: API_STATUS.INVALID_INPUT,
-                error: verifiedTokenResponse.error,
-            });
-        }
-        const payload = verifiedTokenResponse.payload;
-        const account = await AccountService.findAccount({
-            email: payload.email,
-        });
-        if (account) {
-            //sign up to an existed email, so login instead
-            const person = await PersonService.findPerson({
-                accountID: account.accountID,
-            });
-            const { token, refreshToken } = await AccountService.createToken(
-                {
-                    accountID: account.accountID,
-                },
-                true
-            );
-            return res.status(RESPONSE_CODE.SUCCESS).json({
-                status: API_STATUS.OK,
-                result: {
-                    user: mapUser({
-                        ...person,
-                        ...account,
-                    }),
-                    token: token,
-                    refreshToken: refreshToken,
-                },
-                message: MESSAGE.POST_SUCCESS("Login"),
-            });
-        } else {
-            //not found account to login, so signup instead
-            const account = await AccountService.createAccount({
-                email: payload.email,
-                status: ACCOUNT_STATUS.ACTIVE,
-            });
-            const person = await PersonService.createPerson({
-                accountID: account.accountID,
-                fullname: payload.name,
-            });
-            const { token, refreshToken } = await AccountService.createToken(
-                {
-                    accountID: account.accountID,
-                },
-                true
-            );
-
-            return res.status(RESPONSE_CODE.SUCCESS).json({
-                status: API_STATUS.OK,
-                result: {
-                    user: mapUser({
-                        ...person,
-                        ...account,
-                    }),
-                    token: token,
-                    refreshToken: refreshToken,
-                },
-                message: MESSAGE.POST_SUCCESS("signup"),
-            });
-        }
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
             status: API_STATUS.INTERNAL_ERROR,
             message: error.message,
         });
@@ -482,12 +392,12 @@ export const changePassword = async (req, res, next) => {
         if (!changeResult) {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.NOT_FOUND,
-                message: MESSAGE.QUERY_NOT_FOUND("account"),
+                message: MESSAGE.QUERY_NOT_FOUND("Tài khoản"),
             });
         }
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
-            message: MESSAGE.POST_SUCCESS("Change password"),
+            message: MESSAGE.POST_SUCCESS("Đổi mật khẩu"),
             result: {
                 user: mapUser(user),
             },
@@ -513,7 +423,7 @@ export const authToken = async (req, res, next) => {
                 token: token,
                 claims: [],
             },
-            message: MESSAGE.POST_SUCCESS("Auth"),
+            message: MESSAGE.POST_SUCCESS("Xác thực"),
         });
     } catch (error) {
         console.log(error);
@@ -535,7 +445,7 @@ export const logout = async (req, res, next) => {
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             result: {},
-            message: MESSAGE.POST_SUCCESS("Logout"),
+            message: MESSAGE.POST_SUCCESS("Đăng xuất"),
         });
     } catch (error) {
         console.log(error);
@@ -565,7 +475,7 @@ export const forgetPassword = async (req, res, next) => {
         });
         if (!account) {
             return res.status(RESPONSE_CODE.NOT_FOUND).json({
-                message: MESSAGE.QUERY_NOT_FOUND("Account"),
+                message: MESSAGE.QUERY_NOT_FOUND("Tài khoản"),
                 status: API_STATUS.NOT_FOUND,
             });
         }
@@ -597,7 +507,7 @@ export const forgetPassword = async (req, res, next) => {
         });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
-            message: MESSAGE.POST_SUCCESS("Request password reseting"),
+            message: MESSAGE.POST_SUCCESS("Yêu cầu đặt lại mật khẩu"),
             result: resetPasswordURL,
         });
     } catch (error) {
@@ -609,67 +519,70 @@ export const forgetPassword = async (req, res, next) => {
     }
 };
 
-// export const resetPassword = async (req, res, next) => {
-//     try {
-//         const accountID = req.body.accountID;
-//         const token = req.body.token;
-//         const { message: emptyMessage, inputError: emptyInputError } =
-//             handleEmptyInput({
-//                 accountID,
-//                 token,
-//             });
-//         if (emptyMessage) {
-//             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
-//                 status: API_STATUS.INVALID_INPUT,
-//                 message: emptyMessage,
-//                 errors: emptyInputError,
-//             });
-//         }
-//         const account = await AccountService.findAccount({
-//             email,
-//         });
-//         if (!account) {
-//             return res.status(RESPONSE_CODE.NOT_FOUND).json({
-//                 message: MESSAGE.QUERY_NOT_FOUND("Account"),
-//                 status: API_STATUS.NOT_FOUND,
-//             });
-//         }
-//         const { token, refreshToken } = await AccountService.createToken(
-//             {
-//                 accountID: account.accountID,
-//             },
-//             true
-//         );
-//         const person = await PersonService.findPerson({
-//             accountID: account.accountID,
-//         });
-
-//         const resetPasswordURL = `${APP_HOMEPAGE}/account/${account.accountID}/reset-password/${token}`;
-//         await sendEmail({
-//             emailTo: {
-//                 name: person ? person.fullname : "",
-//                 address: email,
-//             },
-//             subject: MESSAGE.RESET_PASSWORD_MAIL_SUBJECT,
-//             htmlData: {
-//                 dir: "/src/resource/htmlEmailTemplate/resetPassword.html",
-//                 replace: {
-//                     verifyUrl: resetPasswordURL,
-//                     appHomePage: APP_HOMEPAGE,
-//                     logoUrl: APP_LOGO,
-//                 },
-//             },
-//         });
-//         return res.status(RESPONSE_CODE.SUCCESS).json({
-//             status: API_STATUS.OK,
-//             message: MESSAGE.POST_SUCCESS("Request password reseting"),
-//             result: resetPasswordURL,
-//         });
-//     } catch (error) {
-//         console.log(error);
-//         return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
-//             status: API_STATUS.INTERNAL_ERROR,
-//             message: error.message,
-//         });
-//     }
-// }
+export const resetPassword = async (req, res, next) => {
+    try {
+        const accountID = req.body.accountID;
+        const token = req.body.token;
+        const password = req.body.password;
+        const { message: emptyMessage, inputError: emptyInputError } =
+            handleEmptyInput({
+                accountID,
+                token,
+                password,
+            });
+        if (emptyMessage) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: emptyMessage,
+                errors: emptyInputError,
+            });
+        }
+        const account = await AccountService.findAccount({
+            accountID,
+        });
+        if (!account) {
+            return res.status(RESPONSE_CODE.NOT_FOUND).json({
+                message: MESSAGE.QUERY_NOT_FOUND("Tài khoản"),
+                status: API_STATUS.NOT_FOUND,
+            });
+        }
+        const data = jwt.verify(token, JWT_KEY);
+        if (!data) {
+            return res.status(RESPONSE_CODE.UNAUTHORIZED).json({
+                status: API_STATUS.UNAUTHORIZED,
+                message: MESSAGE.UNAUTHORIZED,
+            });
+        }
+        const accountByToken = await AccountService.findAccountByToken(
+            account.accountID,
+            token
+        );
+        if (!accountByToken) {
+            return res.status(RESPONSE_CODE.NOT_FOUND).json({
+                status: API_STATUS.NOT_FOUND,
+                message: MESSAGE.QUERY_NOT_FOUND("Tài khoản"),
+            });
+        }
+        const hashPassword = await bcrypt.hash(password, BCRYPT_SALT);
+        const changeResult = await AccountService.updatePassword({
+            accountID,
+            newPassword: hashPassword,
+        });
+        if (!changeResult) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.NOT_FOUND,
+                message: MESSAGE.QUERY_NOT_FOUND("Tài khoản"),
+            });
+        }
+        return res.status(RESPONSE_CODE.SUCCESS).json({
+            status: API_STATUS.OK,
+            message: MESSAGE.POST_SUCCESS("Đặt lại mật khẩu"),
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+            status: API_STATUS.INTERNAL_ERROR,
+            message: error.message,
+        });
+    }
+};
