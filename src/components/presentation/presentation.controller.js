@@ -50,7 +50,7 @@ export const createPresentation = async (req, res, next) => {
         });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
-            message: MESSAGE.POST_SUCCESS("Create presentation"),
+            message: MESSAGE.POST_SUCCESS("Tạo bản trình bày"),
             result: {
                 presentation: newPresentation,
                 slides: [
@@ -89,7 +89,7 @@ export const getMyPresentations = async (req, res, next) => {
             return res.status(RESPONSE_CODE.NOT_FOUND).json({
                 status: API_STATUS.NOT_FOUND,
                 result: {},
-                message: MESSAGE.QUERY_NOT_FOUND("Presentation"),
+                message: MESSAGE.QUERY_NOT_FOUND("Bản trình bày"),
             });
         }
         return res.status(RESPONSE_CODE.SUCCESS).json({
@@ -98,7 +98,7 @@ export const getMyPresentations = async (req, res, next) => {
                 presentations: presentations,
                 ...(getTotal ? { total } : {}),
             },
-            message: MESSAGE.QUERY_SUCCESS("Presentation"),
+            message: MESSAGE.QUERY_SUCCESS("Bản trình bày"),
         });
     } catch (error) {
         console.log(error);
