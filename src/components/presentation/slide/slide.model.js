@@ -1,4 +1,4 @@
-import { models } from "../../database";
+import { models } from "../../../database";
 const SlideTable = models.Slide;
 export default SlideTable;
 

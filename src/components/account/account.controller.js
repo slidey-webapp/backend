@@ -149,7 +149,7 @@ export const login = async (req, res, next) => {
             accountID: account.accountID,
         });
         if (account.status === ACCOUNT_STATUS.UNVERIFIED) {
-            const verifyURL = `${APP_HOMEPAGE}/api/account/${account.accountID}/verify/${token}`;
+            const verifyURL = `${APP_HOMEPAGE}/account/${account.accountID}/verify/${token}`;
             await sendEmail({
                 emailTo: {
                     name: person ? person.fullname : "",
@@ -264,11 +264,9 @@ export const verifyEmail = async (req, res, next) => {
 
 export const googleLogin = async (req, res, next) => {
     try {
-        const { email, fullname, token: ggToken } = req.body;
+        const { token: ggToken } = req.body;
         const { message: emptyMessage, inputError: emptyInputError } =
             handleEmptyInput({
-                email,
-                fullname,
                 ggToken,
             });
         if (emptyMessage) {
@@ -287,8 +285,10 @@ export const googleLogin = async (req, res, next) => {
                 error: verifiedTokenResponse.error,
             });
         }
-
-        const account = await AccountService.findAccount({ email });
+        const payload = verifiedTokenResponse.payload;
+        const account = await AccountService.findAccount({
+            email: payload.email,
+        });
         if (account) {
             const { token, refreshToken } = await AccountService.createToken(
                 {
@@ -314,12 +314,12 @@ export const googleLogin = async (req, res, next) => {
         } else {
             //not found account to login, so signup instead
             const account = await AccountService.createAccount({
-                email,
+                email: payload.email,
                 status: ACCOUNT_STATUS.ACTIVE,
             });
             const person = await PersonService.createPerson({
                 accountID: account.accountID,
-                fullname,
+                fullname: payload.name,
             });
             const { token, refreshToken } = await AccountService.createToken(
                 {
@@ -352,11 +352,9 @@ export const googleLogin = async (req, res, next) => {
 
 export const googleSignup = async (req, res, next) => {
     try {
-        const { token: ggToken, email, fullname } = req.body;
+        const { token: ggToken } = req.body;
         const { message: emptyMessage, inputError: emptyInputError } =
             handleEmptyInput({
-                email,
-                fullname,
                 ggToken,
             });
         if (emptyMessage) {
@@ -376,8 +374,10 @@ export const googleSignup = async (req, res, next) => {
                 error: verifiedTokenResponse.error,
             });
         }
-
-        const account = await AccountService.findAccount({ email: email });
+        const payload = verifiedTokenResponse.payload;
+        const account = await AccountService.findAccount({
+            email: payload.email,
+        });
         if (account) {
             //sign up to an existed email, so login instead
             const person = await PersonService.findPerson({
@@ -404,12 +404,12 @@ export const googleSignup = async (req, res, next) => {
         } else {
             //not found account to login, so signup instead
             const account = await AccountService.createAccount({
-                email,
+                email: payload.email,
                 status: ACCOUNT_STATUS.ACTIVE,
             });
             const person = await PersonService.createPerson({
                 accountID: account.accountID,
-                fullname,
+                fullname: payload.name,
             });
             const { token, refreshToken } = await AccountService.createToken(
                 {
@@ -545,3 +545,131 @@ export const logout = async (req, res, next) => {
         });
     }
 };
+
+export const forgetPassword = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        const { message: emptyMessage, inputError: emptyInputError } =
+            handleEmptyInput({
+                email,
+            });
+        if (emptyMessage) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: emptyMessage,
+                errors: emptyInputError,
+            });
+        }
+        const account = await AccountService.findAccount({
+            email,
+        });
+        if (!account) {
+            return res.status(RESPONSE_CODE.NOT_FOUND).json({
+                message: MESSAGE.QUERY_NOT_FOUND("Account"),
+                status: API_STATUS.NOT_FOUND,
+            });
+        }
+        const { token, refreshToken } = await AccountService.createToken(
+            {
+                accountID: account.accountID,
+            },
+            true
+        );
+        const person = await PersonService.findPerson({
+            accountID: account.accountID,
+        });
+
+        const resetPasswordURL = `${APP_HOMEPAGE}/account/${account.accountID}/reset-password/${token}`;
+        await sendEmail({
+            emailTo: {
+                name: person ? person.fullname : "",
+                address: email,
+            },
+            subject: MESSAGE.RESET_PASSWORD_MAIL_SUBJECT,
+            htmlData: {
+                dir: "/src/resource/htmlEmailTemplate/resetPassword.html",
+                replace: {
+                    verifyUrl: resetPasswordURL,
+                    appHomePage: APP_HOMEPAGE,
+                    logoUrl: APP_LOGO,
+                },
+            },
+        });
+        return res.status(RESPONSE_CODE.SUCCESS).json({
+            status: API_STATUS.OK,
+            message: MESSAGE.POST_SUCCESS("Request password reseting"),
+            result: resetPasswordURL,
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+            status: API_STATUS.INTERNAL_ERROR,
+            message: error.message,
+        });
+    }
+};
+
+// export const resetPassword = async (req, res, next) => {
+//     try {
+//         const accountID = req.body.accountID;
+//         const token = req.body.token;
+//         const { message: emptyMessage, inputError: emptyInputError } =
+//             handleEmptyInput({
+//                 accountID,
+//                 token,
+//             });
+//         if (emptyMessage) {
+//             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+//                 status: API_STATUS.INVALID_INPUT,
+//                 message: emptyMessage,
+//                 errors: emptyInputError,
+//             });
+//         }
+//         const account = await AccountService.findAccount({
+//             email,
+//         });
+//         if (!account) {
+//             return res.status(RESPONSE_CODE.NOT_FOUND).json({
+//                 message: MESSAGE.QUERY_NOT_FOUND("Account"),
+//                 status: API_STATUS.NOT_FOUND,
+//             });
+//         }
+//         const { token, refreshToken } = await AccountService.createToken(
+//             {
+//                 accountID: account.accountID,
+//             },
+//             true
+//         );
+//         const person = await PersonService.findPerson({
+//             accountID: account.accountID,
+//         });
+
+//         const resetPasswordURL = `${APP_HOMEPAGE}/account/${account.accountID}/reset-password/${token}`;
+//         await sendEmail({
+//             emailTo: {
+//                 name: person ? person.fullname : "",
+//                 address: email,
+//             },
+//             subject: MESSAGE.RESET_PASSWORD_MAIL_SUBJECT,
+//             htmlData: {
+//                 dir: "/src/resource/htmlEmailTemplate/resetPassword.html",
+//                 replace: {
+//                     verifyUrl: resetPasswordURL,
+//                     appHomePage: APP_HOMEPAGE,
+//                     logoUrl: APP_LOGO,
+//                 },
+//             },
+//         });
+//         return res.status(RESPONSE_CODE.SUCCESS).json({
+//             status: API_STATUS.OK,
+//             message: MESSAGE.POST_SUCCESS("Request password reseting"),
+//             result: resetPasswordURL,
+//         });
+//     } catch (error) {
+//         console.log(error);
+//         return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+//             status: API_STATUS.INTERNAL_ERROR,
+//             message: error.message,
+//         });
+//     }
+// }
