@@ -1,26 +1,24 @@
 export const UNAUTHORIZED = "Unauthorized";
-export const NOT_FOUND_ACCOUNT = "Not found any matched account!";
-export const INCORRECT_PASSWORD = "Password incorrect";
-export const BLOCKED_ACCOUNT = "Your account has been blocked";
+export const NOT_FOUND_ACCOUNT = "Không tìm thấy tài khoản nào";
+export const INCORRECT_PASSWORD = "Mật khẩu không chính xác";
+export const BLOCKED_ACCOUNT = "Tài khoản của bạn đã bị xóa";
 export const SEND_VERIFY_EMAIL = (email) =>
-    `A verification email has been sent to ${email}. Please check your inbox (or spam folder) and follow the instructions.`;
-export const QUERY_SUCCESS = (name) => `Query ${name || "data"} success`;
-export const EXISTED_USER = "Username existed";
-export const EXISTED_GROUP = "Group's name existed";
-export const EXISTED_EMAIL = "Email existed";
-export const EXISTED_PRESENTATION =
-    "Presentation with this name already exists";
-export const MISSING_INPUT = (input) => `${input} cant be empty`;
-export const POST_SUCCESS = (action) => `${action} success`;
-export const QUERY_NOT_FOUND = (name) => `Not found any ${name}`;
-export const INVALID_INPUT = (name) => `invalid ${name}`;
+    `Một email xác minh đã được gửi đến ${email}. Vui lòng kiểm tra hộp thư đến (hoặc thư mục thư rác) của bạn và làm theo hướng dẫn.`;
+export const QUERY_SUCCESS = (name) =>
+    `Truy vấn ${name || "dữ liệu"} thành công`;
+export const EXISTED_USER = "Tên đăng nhập đã tồn tại";
+export const EXISTED_GROUP = "Tên nhóm đã được sử dụng";
+export const EXISTED_EMAIL = "Địa chỉ email đã được sử dụng";
+export const EXISTED_PRESENTATION = "Bản trình bày với tên này đã tồn tại";
+export const MISSING_INPUT = (input) => `${input}  không được bỏ trống`;
+export const POST_SUCCESS = (action) => `${action} thành công`;
+export const QUERY_NOT_FOUND = (name) => `Không tìm thấy ${name} nào`;
+export const INVALID_INPUT = (name) => `${name} không hợp lệ`;
 export const PERMISSION_NOT_FOUND =
-    "You dont have permission to do this action";
-export const SEND_EMAIL_SUCCESS = "Email sent successfully!";
+    "Bạn không có quyền thực hiện hành động này";
+export const SEND_EMAIL_SUCCESS = "Gửi email thành công";
 export const AUTHENTICATE_FAILED = "AUTHENTICATE_FAILED";
-export const PASSWORD_NOT_MATCH =
-    "Confirm password and password are not the same";
-export const VERIFY_MAIL_SUBJECT = "Verify account";
-export const VERIFY_MAIL_CONTENT = (link) =>
-    `Plese verify your account email by clicking the link bellow: \n ${link}`;
-export const RESET_PASSWORD_MAIL_SUBJECT = "Reset password";
+export const PASSWORD_NOT_MATCH = "Mật khẩu và mật khẩu nhập lại không khớp";
+export const VERIFY_MAIL_SUBJECT = "Xác thực tài khoản";
+
+export const RESET_PASSWORD_MAIL_SUBJECT = "Đặt lại mật khẩu";
