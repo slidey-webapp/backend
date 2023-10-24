@@ -15,3 +15,10 @@ export const generateCode = (n = 6) => {
 
     return result;
 };
+
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+export const getInsensitiveCaseRegextForSearchLike = (keyword) => {
+    return "(?i).*" + escapeRegExp(keyword) + ".*";
+};

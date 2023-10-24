@@ -35,7 +35,7 @@ export const createPresentation = async (req, res, next) => {
 
         const newPresentation = await PresentationService.createPresentation({
             name,
-            accountID: req.accountID,
+            accountID: user.accountID,
             code: generateCode(),
         });
         const firstSlide = await SlideService.createSlide({
