@@ -456,7 +456,7 @@ export const logout = async (req, res, next) => {
     }
 };
 
-export const forgetPassword = async (req, res, next) => {
+export const forgotPassword = async (req, res, next) => {
     try {
         const { email } = req.body;
         const { message: emptyMessage, inputError: emptyInputError } =
