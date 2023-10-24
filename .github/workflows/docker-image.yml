@@ -17,12 +17,6 @@ jobs:
         docker login ghcr.io -u MANH-mei --password ${{ secrets.GH_PAT }}
         docker build . --file Dockerfile --tag ghcr.io/slidey-webapp/slidey-be:latest
         docker push ghcr.io/slidey-webapp/slidey-be:latest
-
-  deploy:
-
-    runs-on: ubuntu-latest
-
-    steps:
     - uses: dkershner6/post-api-call-action@v1
       name: Trigger deploy
       with:
