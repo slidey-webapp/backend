@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 export const JWT_KEY = "VERY_SECRET_AND_IMPORTANT_KEY";
+export const GROUP_SECRET_KEY = "VERY_SECRET_AND_IMPORTANT_GROUP_KEY";
 export const BCRYPT_SALT = 10;
 export const CODE_LENGTH = 6;
 export const TOKEN_EXPIRES_IN = "8h";
