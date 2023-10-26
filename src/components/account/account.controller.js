@@ -72,6 +72,22 @@ export const signUp = async (req, res, next) => {
             accountID: account.accountID,
             fullname,
         });
+        const verifyURL = `${APP_HOMEPAGE}/account/${account.accountID}/verify/${token}`;
+        await sendEmail({
+            emailTo: {
+                name: person ? person.fullname : "",
+                address: email,
+            },
+            subject: MESSAGE.VERIFY_MAIL_SUBJECT,
+            htmlData: {
+                dir: "/src/resource/htmlEmailTemplate/verifyEmail.html",
+                replace: {
+                    verifyUrl: verifyURL,
+                    appHomePage: APP_HOMEPAGE,
+                    logoUrl: APP_LOGO,
+                },
+            },
+        });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             result: {

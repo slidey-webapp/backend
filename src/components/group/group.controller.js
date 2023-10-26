@@ -10,11 +10,13 @@ import {
 import * as MESSAGE from "../../resource/message";
 import { handleEmptyInput, queryParamToBool } from "../../utilities/api";
 import { sendEmail } from "../../utilities/email";
+import { mapGroupMember } from "../../utilities/mapUser";
 import { getPaginationInfo } from "../../utilities/pagination";
 import { generateCode } from "../../utilities/string";
 import { GROUP_MEMBER_ROLE } from "./group.models";
 import * as GroupService from "./group.service";
 import jwt from "jsonwebtoken";
+import { isValidRole } from "./group.util";
 
 export const createGroup = async (req, res, next) => {
     try {
@@ -164,13 +166,13 @@ export const sendInviteEmail = async (req, res, next) => {
                 replace: {
                     inviteURL,
                     appHomePage: APP_HOMEPAGE,
-                    logoURL: APP_LOGO,
+                    logoUrl: APP_LOGO,
                     groupName: group.name,
                     sender: user.fullname,
                 },
             },
         });
-        return res.status(RESPONSE_CODE.OK).json({
+        return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             message: MESSAGE.POST_SUCCESS("Gửi lời mời tham gia nhóm"),
             result: inviteURL,
@@ -256,7 +258,7 @@ export const joinGroup = async (req, res, next) => {
 export const getGroupMember = async (req, res, next) => {
     try {
         const { offset, limit, getTotal } = getPaginationInfo(req);
-        const groupID = req.query;
+        const groupID = req.query.groupID;
         const name = req.query.name;
         const email = req.query.email;
         const members = await GroupService.getGroupMember({
@@ -283,7 +285,7 @@ export const getGroupMember = async (req, res, next) => {
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             result: {
-                members,
+                members: members.map((item) => mapGroupMember(item)),
                 ...(getTotal && { total }),
             },
             message: MESSAGE.QUERY_SUCCESS("Thành viên nhóm"),
@@ -299,7 +301,7 @@ export const getGroupMember = async (req, res, next) => {
 
 export const getGroupDetail = async (req, res, next) => {
     try {
-        const groupID = req.query;
+        const { groupID } = req.query;
         const { message: emptyMessage, inputError: emptyInputError } =
             handleEmptyInput({
                 groupID,
@@ -357,8 +359,18 @@ export const removeGroupMember = async (req, res, next) => {
                 message: MESSAGE.QUERY_NOT_FOUND("Nhóm"),
             });
         }
+        if (parseFloat(accountID) === user.accountID) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.OK,
+                message: MESSAGE.CANT_REMOVE_YOURSELF,
+                errors: {
+                    accountID: INPUT_ERROR.INVALID,
+                },
+            });
+        }
         const myRole = await GroupService.findGroupMember({
             accountID: user.accountID,
+            groupID: groupID,
         });
         if (!myRole || myRole.role !== GROUP_MEMBER_ROLE.OWNER) {
             return res.status(RESPONSE_CODE.FORBIDDEN).json({
@@ -400,6 +412,15 @@ export const updateGroupMemberRole = async (req, res, next) => {
                 errors: emptyInputError,
             });
         }
+        if (!isValidRole(role) || role === GROUP_MEMBER_ROLE.OWNER) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: MESSAGE.INVALID_INPUT("Vai trò"),
+                errors: {
+                    role: INPUT_ERROR.INVALID,
+                },
+            });
+        }
         const group = await GroupService.findGroup({ groupID });
         if (!group) {
             return res.status(RESPONSE_CODE.NOT_FOUND).json({
@@ -417,15 +438,6 @@ export const updateGroupMemberRole = async (req, res, next) => {
             });
         }
 
-        if (role === GROUP_MEMBER_ROLE.OWNER) {
-            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
-                status: API_STATUS.INVALID_INPUT,
-                message: MESSAGE.CANT_ASSIGN_OWNER,
-                errors: {
-                    role: INPUT_ERROR.VIOLATE_RULE,
-                },
-            });
-        }
         await GroupService.updateGroupMemberRole({
             groupID,
             accountID,

@@ -184,27 +184,25 @@ export const getGroupMember = ({ groupID, offset, limit, name, email }) => {
         order: [["createdAt", "DESC"]],
         where: {
             groupID,
-            "$Accounts.email$": {
+            "$Account.email$": {
                 [Op.regexp]: searchName,
             },
-            "$Persons.fullname$": {
+            "$Account.Person.fullname$": {
                 [Op.regexp]: searchEmail,
             },
         },
-        include: [
-            {
-                model: AccountTable,
-                attributes: ["email"],
-                as: "Accounts",
-                duplicating: false,
-            },
-            {
+        include: {
+            model: AccountTable,
+            attributes: ["email"],
+            as: "Account",
+            duplicating: false,
+            include: {
                 model: PersonTable,
                 attributes: ["fullname"],
-                as: "Persons",
+                as: "Person",
                 duplicating: false,
             },
-        ],
+        },
     });
 };
 
@@ -215,27 +213,25 @@ export const countGroupMember = ({ groupID, name, email }) => {
         raw: true,
         where: {
             groupID,
-            "$Accounts.email$": {
+            "$Account.email$": {
                 [Op.regexp]: searchName,
             },
-            "$Persons.fullname$": {
+            "$Account.Person.fullname$": {
                 [Op.regexp]: searchEmail,
             },
         },
-        include: [
-            {
-                model: AccountTable,
-                attributes: ["email"],
-                as: "Accounts",
-                duplicating: false,
-            },
-            {
+        include: {
+            model: AccountTable,
+            attributes: ["email"],
+            as: "Account",
+            duplicating: false,
+            include: {
                 model: PersonTable,
                 attributes: ["fullname"],
-                as: "Persons",
+                as: "Person",
                 duplicating: false,
             },
-        ],
+        },
     });
 };
 

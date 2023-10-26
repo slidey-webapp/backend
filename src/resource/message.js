@@ -24,3 +24,4 @@ export const VERIFY_MAIL_SUBJECT = "Xác thực tài khoản";
 export const RESET_PASSWORD_MAIL_SUBJECT = "Đặt lại mật khẩu";
 export const GROUP_INVITATION_MAIL_SUBJECT = "Mời tham gia nhóm";
 export const CANT_ASSIGN_OWNER = "Không thể đặt người khác làm trưởng nhóm";
+export const CANT_REMOVE_YOURSELF = "Bạn không thể xóa chính mình khỏi nhóm";
