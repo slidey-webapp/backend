@@ -2,7 +2,7 @@
 <html lang="vi">
     <head>
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-        <title>Xác thực email</title>
+        <title>Mời tham gia nhóm</title>
         <meta name="description" content="Reset Password Email Template." />
         <style type="text/css">
             a:hover {
@@ -96,7 +96,7 @@
                                                     font-size: 32px;
                                                 "
                                             >
-                                                Xác thực tài khoản
+                                                Lời mời tham gia nhóm
                                             </h1>
                                             <span
                                                 style="
@@ -116,14 +116,11 @@
                                                     margin: 0;
                                                 "
                                             >
-                                                Vui lòng xác minh địa chỉ email
-                                                của bạn cho Sildey. Nếu bạn
-                                                không thực hiện yêu cầu/cập nhật
-                                                nào đối với tài khoản của bạn,
-                                                vui lòng bỏ qua email này.
+                                                {{sender}} đã gửi lời mời tham
+                                                gia nhóm {{groupName}} cho bạn.
                                             </p>
                                             <a
-                                                href="{{verifyUrl}}"
+                                                href="{{inviteURL}}"
                                                 style="
                                                     background: #a509bd;
                                                     text-decoration: none !important;
@@ -136,7 +133,7 @@
                                                     display: inline-block;
                                                     border-radius: 10px;
                                                 "
-                                                >Xác thực</a
+                                                >Tham gia nhóm</a
                                             >
                                         </td>
                                     </tr>
