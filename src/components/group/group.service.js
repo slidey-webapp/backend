@@ -260,3 +260,19 @@ export const updateGroupMemberRole = async ({ groupID, accountID, role }) => {
     );
     return result && result.length ? result[1] : null;
 };
+
+export const deleteGroup = ({ groupID }) => {
+    return GroupTable.destroy({
+        where: {
+            groupID,
+        },
+    });
+};
+
+export const removeAllGroupMember = ({ groupID }) => {
+    return GroupMemberTable.destroy({
+        where: {
+            groupID,
+        },
+    });
+};

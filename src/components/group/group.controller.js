@@ -430,6 +430,7 @@ export const updateGroupMemberRole = async (req, res, next) => {
         }
         const myRole = await GroupService.findGroupMember({
             accountID: user.accountID,
+            groupID,
         });
         if (!myRole || myRole.role === GROUP_MEMBER_ROLE.MEMBER) {
             return res.status(RESPONSE_CODE.FORBIDDEN).json({
@@ -446,6 +447,130 @@ export const updateGroupMemberRole = async (req, res, next) => {
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             message: MESSAGE.POST_SUCCESS("Cập nhật vai trò của thành viên"),
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+            status: API_STATUS.INTERNAL_ERROR,
+            error,
+        });
+    }
+};
+
+export const leaveGroup = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const { groupID } = req.body;
+        const { message: emptyMessage, inputError: emptyInputError } =
+            handleEmptyInput({
+                groupID,
+            });
+        if (emptyMessage) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: emptyMessage,
+                errors: emptyInputError,
+            });
+        }
+        const group = await GroupService.findGroup({ groupID });
+        if (!group) {
+            return res.status(RESPONSE_CODE.NOT_FOUND).json({
+                status: API_STATUS.NOT_FOUND,
+                message: MESSAGE.QUERY_NOT_FOUND("Nhóm"),
+            });
+        }
+        const myRole = await GroupService.findGroupMember({
+            accountID: user.accountID,
+            groupID,
+        });
+        if (!myRole) {
+            return res.status(RESPONSE_CODE.NOT_FOUND).json({
+                status: API_STATUS.NOT_FOUND,
+            });
+        }
+        await GroupService.removeGroupMember({
+            groupID,
+            accountID: user.accountID,
+        });
+        if (myRole.role === GROUP_MEMBER_ROLE.OWNER) {
+            const coowner = await GroupService.findGroup({
+                groupID,
+                role: GROUP_MEMBER_ROLE.COOWNER,
+            });
+            if (coowner) {
+                await GroupService.updateGroupMemberRole({
+                    groupID,
+                    accountID: coowner.accountID,
+                    role: GROUP_MEMBER_ROLE.OWNER,
+                });
+            } else {
+                const member = await GroupService.findGroup({
+                    groupID,
+                    role: GROUP_MEMBER_ROLE.MEMBER,
+                });
+                if (member) {
+                    await GroupService.updateGroupMemberRole({
+                        groupID,
+                        accountID: member.accountID,
+                        role: GROUP_MEMBER_ROLE.OWNER,
+                    });
+                } else {
+                    await GroupService.deleteGroup({
+                        groupID,
+                    });
+                }
+            }
+        }
+        return res.status(RESPONSE_CODE.SUCCESS).json({
+            status: API_STATUS.OK,
+            message: MESSAGE.POST_SUCCESS("Rời nhóm"),
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+            status: API_STATUS.INTERNAL_ERROR,
+            error,
+        });
+    }
+};
+
+export const deleteGroup = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const { groupID } = req.body;
+        const { message: emptyMessage, inputError: emptyInputError } =
+            handleEmptyInput({
+                groupID,
+            });
+        if (emptyMessage) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: emptyMessage,
+                errors: emptyInputError,
+            });
+        }
+        const group = await GroupService.findGroup({ groupID });
+        if (!group) {
+            return res.status(RESPONSE_CODE.NOT_FOUND).json({
+                status: API_STATUS.NOT_FOUND,
+                message: MESSAGE.QUERY_NOT_FOUND("Nhóm"),
+            });
+        }
+        const myRole = await GroupService.findGroupMember({
+            accountID: user.accountID,
+            groupID,
+        });
+        if (!myRole || myRole.role !== GROUP_MEMBER_ROLE.OWNER) {
+            return res.status(RESPONSE_CODE.FORBIDDEN).json({
+                status: API_STATUS.PERMISSION_DENIED,
+                message: MESSAGE.PERMISSION_NOT_FOUND,
+            });
+        }
+        await GroupService.removeAllGroupMember({ groupID });
+        await GroupService.deleteGroup({ groupID });
+        return res.status(RESPONSE_CODE.SUCCESS).json({
+            status: API_STATUS.OK,
+            message: MESSAGE.POST_SUCCESS("Xóa nhóm"),
         });
     } catch (error) {
         console.log(error);
