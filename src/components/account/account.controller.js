@@ -73,7 +73,7 @@ export const signUp = async (req, res, next) => {
             fullname,
         });
         const verifyURL = `${APP_HOMEPAGE}/account/${account.accountID}/verify/${token}`;
-        await sendEmail({
+        sendEmail({
             emailTo: {
                 name: person ? person.fullname : "",
                 address: email,
@@ -166,7 +166,7 @@ export const login = async (req, res, next) => {
         });
         if (account.status === ACCOUNT_STATUS.UNVERIFIED) {
             const verifyURL = `${APP_HOMEPAGE}/account/${account.accountID}/verify/${token}`;
-            await sendEmail({
+            sendEmail({
                 emailTo: {
                     name: person ? person.fullname : "",
                     address: email,
@@ -506,7 +506,7 @@ export const forgotPassword = async (req, res, next) => {
         });
 
         const resetPasswordURL = `${APP_HOMEPAGE}/account/${account.accountID}/reset-password/${token}`;
-        await sendEmail({
+        sendEmail({
             emailTo: {
                 name: person ? person.fullname : "",
                 address: email,

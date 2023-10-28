@@ -24,7 +24,7 @@ export const auth = (req, res, next) => {
                 if (person) {
                     if (account.status === ACCOUNT_STATUS.UNVERIFIED) {
                         const verifyURL = `${APP_HOMEPAGE}/api/account/${account.accountID}/verify/${token}`;
-                        await sendEmail({
+                        sendEmail({
                             emailTo: {
                                 name: person ? person.fullname : "",
                                 address: account.email,
