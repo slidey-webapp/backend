@@ -155,7 +155,7 @@ export const sendInviteEmail = async (req, res, next) => {
             { expiresIn: TOKEN_EXPIRES_IN }
         );
         const inviteURL = `${APP_HOMEPAGE}/group/join/${token}`;
-        await sendEmail({
+        sendEmail({
             emailTo: {
                 address: email,
                 name: "",
