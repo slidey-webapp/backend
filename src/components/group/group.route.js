@@ -7,8 +7,11 @@ groupRoute.post("/send-invitation", GroupController.sendInviteEmail);
 groupRoute.post("/join", GroupController.joinGroup);
 groupRoute.post("/member/remove", GroupController.removeGroupMember);
 groupRoute.post("/member/update-role", GroupController.updateGroupMemberRole);
+groupRoute.post("/leave", GroupController.leaveGroup);
+groupRoute.post("/delete", GroupController.deleteGroup);
 
 groupRoute.get("/detail", GroupController.getGroupDetail);
 groupRoute.get("/members", GroupController.getGroupMember);
 groupRoute.get("/", GroupController.getListGroup);
+
 export default groupRoute;
