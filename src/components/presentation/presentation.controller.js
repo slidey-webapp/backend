@@ -7,7 +7,7 @@ import { handleEmptyInput } from "../../utilities/api";
 import { generateCode } from "../../utilities/string";
 import { SLIDE_TYPE } from "./slide/slide.model";
 import { getPaginationInfo } from "../../utilities/pagination";
-import { deleteSlideReference } from "./slide/slide.util";
+import { deleteSlideReference, mapSlide } from "./slide/slide.util";
 
 export const createPresentation = async (req, res, next) => {
     try {
@@ -49,6 +49,10 @@ export const createPresentation = async (req, res, next) => {
             heading: "",
             subHeading: "",
         });
+        await PresentationService.updatePresentation({
+            presentationID: newPresentation.presentationID,
+            currentSlideID: firstSlide.slideID,
+        });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             message: MESSAGE.POST_SUCCESS("Tạo bản trình bày"),
@@ -74,30 +78,24 @@ export const createPresentation = async (req, res, next) => {
 export const getMyPresentations = async (req, res, next) => {
     try {
         const user = req.user;
-        const { offset, limit, getTotal } = getPaginationInfo(req);
+        const { offset, limit } = getPaginationInfo(req);
         const presentations = await PresentationService.getUserPresentation({
             createdBy: user.accountID,
             offset,
             limit,
         });
-        let total = null;
-        if (getTotal) {
-            total = await PresentationService.countPresentation({
-                createdBy: user.accountID,
-            });
-        }
-        if (!presentations || !presentations.length) {
-            return res.status(RESPONSE_CODE.NOT_FOUND).json({
-                status: API_STATUS.NOT_FOUND,
-                result: {},
-                message: MESSAGE.QUERY_NOT_FOUND("Bản trình bày"),
-            });
-        }
+        const total = await PresentationService.countPresentation({
+            createdBy: user.accountID,
+        });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             result: {
-                presentations: presentations,
-                ...(getTotal ? { total } : {}),
+                items: presentations,
+                totalCount: total,
+                totalPages: Math.floor(total / limit) + 1,
+                limit,
+                offset,
+                currentPage: Math.floor(offset / limit),
             },
             message: MESSAGE.QUERY_SUCCESS("Bản trình bày"),
         });
@@ -139,7 +137,9 @@ export const deletePresentation = async (req, res, next) => {
             presentationID,
             currentSlideID: null,
         });
-        const slides = SlideService.getSlideOfPresentation({ presentationID });
+        const slides = await SlideService.getSlideOfPresentation({
+            presentationID,
+        });
         const promises = slides.map((slide) =>
             deleteSlideReference({ slideID: slide.slideID, type: slide.type })
         );
@@ -147,9 +147,57 @@ export const deletePresentation = async (req, res, next) => {
         await SlideService.deleteSlideOfPresentation({
             presentationID,
         });
+        await PresentationService.deletePresentation({
+            presentationID,
+        });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             message: MESSAGE.POST_SUCCESS("Xóa bản trình bày"),
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+            status: API_STATUS.INTERNAL_ERROR,
+            error,
+        });
+    }
+};
+
+export const getPresentationSlides = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const { presentationID } = req.query;
+        const { message: emptyMessage, inputError: emptyInputError } =
+            handleEmptyInput({
+                presentationID,
+            });
+        if (emptyMessage) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: emptyMessage,
+                errors: emptyInputError,
+            });
+        }
+        const presentation = await PresentationService.findPresentation({
+            presentationID,
+            createdBy: user.accountID,
+        });
+        if (!presentation) {
+            return res.status(RESPONSE_CODE.NOT_FOUND).json({
+                status: API_STATUS.NOT_FOUND,
+                message: MESSAGE.QUERY_NOT_FOUND("Bản trình bày"),
+            });
+        }
+        const slides = await SlideService.getSlideOfPresentation({
+            presentationID,
+        });
+        return res.status(RESPONSE_CODE.SUCCESS).json({
+            status: API_STATUS.OK,
+            result: {
+                items: slides.map((slide) => mapSlide(slide)),
+                totalCount: slides.length,
+            },
+            message: MESSAGE.QUERY_SUCCESS("Slide"),
         });
     } catch (error) {
         console.log(error);

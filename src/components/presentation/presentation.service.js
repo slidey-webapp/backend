@@ -68,3 +68,11 @@ export const updatePresentation = async ({
     );
     return result && result.length ? result[1] : null;
 };
+
+export const deletePresentation = ({ presentationID }) => {
+    return PresentationTable.destroy({
+        where: {
+            presentationID,
+        },
+    });
+};
