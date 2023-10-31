@@ -71,8 +71,7 @@ export const createGroup = async (req, res, next) => {
 export const getListGroup = async (req, res, next) => {
     try {
         const user = req.user;
-        const { offset, limit, getTotal } = getPaginationInfo(req);
-        const getCounter = queryParamToBool(req.query.getCounter);
+        const { offset, limit } = getPaginationInfo(req);
         const getMine = queryParamToBool(req.query.getMine);
         const getJoined = queryParamToBool(req.query.getJoined);
         const getAll = getMine === getJoined;
@@ -91,29 +90,27 @@ export const getListGroup = async (req, res, next) => {
             getJoined,
             getMine,
         });
-        let counter = getCounter
-            ? {
-                  total: await GroupService.countAllGroup(query),
-                  totalOwned: await GroupService.countMyGroup(query),
-                  totalJoined: await GroupService.countJoinedGroup(query),
-              }
-            : null;
-        if (!groups.length) {
-            return res.status(RESPONSE_CODE.NOT_FOUND).json({
-                status: API_STATUS.NOT_FOUND,
-                message: MESSAGE.QUERY_NOT_FOUND("Nhóm"),
-            });
+        let total = 0;
+        if (getAll) {
+            total = await GroupService.countAllGroup(query);
+        } else if (getMine) {
+            total = await GroupService.countMyGroup(query);
+        } else if (getJoined) {
+            total = await GroupService.countJoinedGroup(query);
         }
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             result: {
-                groups,
-                ...(getCounter && counter),
+                items: groups || [],
+                totalCount: total,
+                totalPages: Math.floor(total / limit),
+                limit,
+                offset,
+                currentPage: Math.floor(offset / limit),
             },
             message: MESSAGE.QUERY_SUCCESS("Nhóm"),
         });
     } catch (error) {
-        console.log(error);
         return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
             status: API_STATUS.INTERNAL_ERROR,
             error,
