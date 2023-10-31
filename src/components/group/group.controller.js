@@ -103,7 +103,7 @@ export const getListGroup = async (req, res, next) => {
             result: {
                 items: groups || [],
                 totalCount: total,
-                totalPages: Math.floor(total / limit),
+                totalPages: Math.floor(total / limit) + 1,
                 limit,
                 offset,
                 currentPage: Math.floor(offset / limit),
