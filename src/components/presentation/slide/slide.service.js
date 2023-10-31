@@ -1,15 +1,17 @@
 import SlideTable, {
     HeadingSlideTable,
     MultipleChoiceSlideOptionTable,
+    MultipleChoiceSlideTable,
     ParagraphSlideTable,
+    SLIDE_TYPE,
     SlideResultTable,
 } from "./slide.model";
 
-export const createSlide = async ({ type, presenetationID, slideOrder }) => {
+export const createSlide = async ({ type, presentationID, slideOrder }) => {
     const newSlide = (
         await SlideTable.create({
             type,
-            presenetationID,
+            presentationID,
             slideOrder,
         })
     ).get({
@@ -20,7 +22,7 @@ export const createSlide = async ({ type, presenetationID, slideOrder }) => {
 
 export const createMultipleChoiceSlide = async ({ slideID, question }) => {
     const newSlide = (
-        await MultipleChoiceSlideOptionTable.create({
+        await MultipleChoiceSlideTable.create({
             slideID,
             question,
         })
@@ -79,4 +81,90 @@ export const createSlideResult = async ({ slideID, accountID, value }) => {
         plain: true,
     });
     return newSlide;
+};
+
+export const deleteSlide = ({ slideID }) => {
+    return SlideTable.destroy({
+        where: {
+            slideID,
+        },
+    });
+};
+
+export const deleteSlideOfPresentation = ({ presentationID }) => {
+    return SlideTable.destroy({
+        where: {
+            presentationID,
+        },
+    });
+};
+
+export const deleteSlideContent = ({ slideID, type }) => {
+    if (type === SLIDE_TYPE.HEADING) {
+        return HeadingSlideTable.destroy({
+            where: {
+                slideID,
+            },
+        });
+    }
+    if (type === SLIDE_TYPE.PARAGRAPH) {
+        return ParagraphSlideTable.destroy({
+            where: {
+                slideID,
+            },
+        });
+    }
+    if (type === SLIDE_TYPE.MULTIPLE_CHOICE) {
+        return MultipleChoiceSlideTable.destroy({
+            where: {
+                slideID,
+            },
+        });
+    }
+};
+
+export const deleteMultipleChoiceSlideOption = ({ slideID }) => {
+    return MultipleChoiceSlideOptionTable.destroy({
+        where: {
+            slideID,
+        },
+    });
+};
+
+export const deleteSlideResult = ({ slideID }) => {
+    return SlideResultTable.destroy({
+        where: {
+            slideID,
+        },
+    });
+};
+
+export const getSlideOfPresentation = ({ presentationID }) => {
+    return SlideTable.findAll({
+        raw: true,
+        where: {
+            presentationID,
+        },
+        order: [["slideOrder", "ASC"]],
+        include: [
+            {
+                model: HeadingSlideTable,
+                duplicating: false,
+            },
+            {
+                model: ParagraphSlideTable,
+                duplicating: false,
+            },
+            {
+                model: MultipleChoiceSlideTable,
+                duplicating: false,
+                include: [
+                    {
+                        model: MultipleChoiceSlideOptionTable,
+                        duplicating: false,
+                    },
+                ],
+            },
+        ],
+    });
 };
