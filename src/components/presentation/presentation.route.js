@@ -1,8 +1,10 @@
 import express from "express";
 import * as PresentationController from "./presentation.controller";
+import collabRoute from "./collaboration/collaboration.route";
 const presentationRoute = express.Router();
-
-presentationRoute.post("/slide", PresentationController.getPresentationSlides);
+presentationRoute.use("/collab", collabRoute);
+presentationRoute.get("/slide", PresentationController.getPresentationSlides);
+presentationRoute.post("/slide", PresentationController.addSlide);
 presentationRoute.post("/create", PresentationController.createPresentation);
 presentationRoute.post("/delete", PresentationController.deletePresentation);
 presentationRoute.get("/", PresentationController.getMyPresentations);

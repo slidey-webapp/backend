@@ -1,3 +1,6 @@
+import { Op } from "../../database";
+import { getInsensitiveCaseRegextForSearchLike } from "../../utilities/string";
+import CollabTable from "./collaboration/collaboration.model";
 import PresentationTable from "./presentation.model";
 
 export const createPresentation = async ({ accountID, name, code }) => {
@@ -25,23 +28,46 @@ export const findPresentation = (data) => {
     });
 };
 
-export const getUserPresentation = ({ createdBy, offset, limit }) => {
+export const getUserPresentation = ({ accountID, offset, limit, name }) => {
+    const searchName = getInsensitiveCaseRegextForSearchLike(name || "");
+
     return PresentationTable.findAll({
         raw: true,
         where: {
-            createdBy,
+            [Op.or]: {
+                createdBy: accountID,
+                "$Collaborations.accountID$": accountID,
+            },
+            [Op.regexp]: searchName,
         },
         order: [["createdAt", "DESC"]],
         offset: offset,
         limit: limit,
+        include: {
+            model: CollabTable,
+            attributes: [],
+            as: "Collaborations",
+            duplicating: false,
+        },
     });
 };
 
-export const countPresentation = ({ createdBy }) => {
+export const countPresentation = ({ accountID, name }) => {
+    const searchName = getInsensitiveCaseRegextForSearchLike(name || "");
     return PresentationTable.count({
         raw: true,
         where: {
-            createdBy,
+            [Op.or]: {
+                createdBy: accountID,
+                "$Collaborations.accountID$": accountID,
+            },
+            [Op.regexp]: searchName,
+        },
+        include: {
+            model: CollabTable,
+            attributes: [],
+            as: "Collaborations",
+            duplicating: false,
         },
     });
 };
@@ -73,6 +99,25 @@ export const deletePresentation = ({ presentationID }) => {
     return PresentationTable.destroy({
         where: {
             presentationID,
+        },
+    });
+};
+
+export const findAccessiblePresentation = ({ accountID, presentationID }) => {
+    return PresentationTable.findOne({
+        raw: true,
+        where: {
+            [Op.or]: {
+                createdBy: accountID,
+                "$Collaborations.accountID$": accountID,
+            },
+            presentationID,
+        },
+        include: {
+            model: CollabTable,
+            attributes: [],
+            as: "Collaborations",
+            duplicating: false,
         },
     });
 };
