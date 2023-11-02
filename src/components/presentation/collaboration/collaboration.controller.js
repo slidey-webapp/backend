@@ -1,9 +1,18 @@
-import { API_STATUS, RESPONSE_CODE } from "../../../config/contants";
+import {
+    API_STATUS,
+    APP_HOMEPAGE,
+    APP_LOGO,
+    PRESENTATION_SECRET_KEY,
+    RESPONSE_CODE,
+    TOKEN_EXPIRES_IN,
+} from "../../../config/contants";
 import { handleEmptyInput } from "../../../utilities/api";
 import * as CollabService from "./collaboration.service";
 import * as MESSAGE from "../../../resource/message";
 import * as PresentationService from "../presentation.service";
 import { getPaginationInfo } from "../../../utilities/pagination";
+import jwt from "jsonwebtoken";
+import { sendEmail } from "../../../utilities/email";
 
 export const getCollabs = async (req, res, next) => {
     try {
@@ -52,14 +61,13 @@ export const getCollabs = async (req, res, next) => {
     }
 };
 
-export const addCollab = async (req, res, next) => {
+export const joinCollab = async (req, res, next) => {
     try {
         const user = req.user;
-        const { accountID, presentationID } = req.body;
+        const { token } = req.body;
         const { message: emptyMessage, inputError: emptyInputError } =
             handleEmptyInput({
-                presentationID,
-                accountID,
+                token,
             });
         if (emptyMessage) {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
@@ -68,8 +76,22 @@ export const addCollab = async (req, res, next) => {
                 errors: emptyInputError,
             });
         }
+        const data = jwt.verify(token, PRESENTATION_SECRET_KEY);
+        if (!data) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: MESSAGE.INVALID_INPUT("Token"),
+            });
+        }
+        const presentationID = data.presentationID;
+        const email = data.email;
+        if (!presentationID || !email) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: MESSAGE.INVALID_INPUT("Token"),
+            });
+        }
         const presentation = await PresentationService.findPresentation({
-            createdBy: user.accountID,
             presentationID,
         });
         if (!presentation) {
@@ -78,18 +100,30 @@ export const addCollab = async (req, res, next) => {
                 message: MESSAGE.PERMISSION_NOT_FOUND,
             });
         }
-        await CollabService.addCollaborator({
+        if (email !== user.email) {
+            return res.status(RESPONSE_CODE.FORBIDDEN).json({
+                status: API_STATUS.PERMISSION_DENIED,
+                message: MESSAGE.PERMISSION_NOT_FOUND,
+            });
+        }
+        const oldCollab = await CollabService.findCollaborator({
+            accountID: user.accountID,
             presentationID,
-            accountID,
         });
-        const collab = await CollabService.getCollaboratorByID({
+        if (!oldCollab) {
+            await CollabService.addCollaborator({
+                presentationID,
+                accountID: user.accountID,
+            });
+        }
+        const collab = await CollabService.findCollaborator({
             presentationID,
-            accountID,
+            accountID: user.accountID,
         });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             result: collab,
-            message: MESSAGE.QUERY_SUCCESS("Người cộng tác"),
+            message: MESSAGE.POST_SUCCESS("Tham gia cộng tác"),
         });
     } catch (error) {
         console.log(error);
@@ -149,6 +183,74 @@ export const removeCollab = async (req, res, next) => {
             status: API_STATUS.OK,
             result: collab,
             message: MESSAGE.QUERY_SUCCESS("Người cộng tác"),
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+            status: API_STATUS.INTERNAL_ERROR,
+            error,
+        });
+    }
+};
+
+export const sendInviteEmail = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const { email, presentationID } = req.body;
+        const { message: emptyMessage, inputError: emptyInputError } =
+            handleEmptyInput({
+                email,
+                presentationID,
+            });
+        if (emptyMessage) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: emptyMessage,
+                errors: emptyInputError,
+            });
+        }
+        const presentation = await PresentationService.findPresentation({
+            presentationID,
+            createdBy: user.accountID,
+        });
+        if (!presentation) {
+            return res.status(RESPONSE_CODE.FORBIDDEN).json({
+                status: API_STATUS.PERMISSION_DENIED,
+                message: MESSAGE.PERMISSION_NOT_FOUND,
+            });
+        }
+        const token = jwt.sign(
+            {
+                presentationID: presentationID,
+                email,
+            },
+            PRESENTATION_SECRET_KEY,
+            { expiresIn: TOKEN_EXPIRES_IN }
+        );
+        const inviteURL = `${APP_HOMEPAGE}/presentation/collab/join/${token}`;
+        sendEmail({
+            emailTo: {
+                address: email,
+                name: "",
+            },
+            subject: MESSAGE.GROUP_INVITATION_MAIL_SUBJECT,
+            htmlData: {
+                dir: "/src/resource/htmlEmailTemplate/groupInvitation.html",
+                replace: {
+                    inviteURL,
+                    appHomePage: APP_HOMEPAGE,
+                    logoUrl: APP_LOGO,
+                    presentation: presentation.name,
+                    sender: user.fullname,
+                },
+            },
+        });
+        return res.status(RESPONSE_CODE.SUCCESS).json({
+            status: API_STATUS.OK,
+            message: MESSAGE.POST_SUCCESS(
+                "Gửi lời mời tham gia chỉnh sửa bản trình bày"
+            ),
+            result: inviteURL,
         });
     } catch (error) {
         console.log(error);
