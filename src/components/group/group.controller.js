@@ -111,6 +111,7 @@ export const getListGroup = async (req, res, next) => {
             message: MESSAGE.QUERY_SUCCESS("Nhóm"),
         });
     } catch (error) {
+        console.log("error:", error);
         return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
             status: API_STATUS.INTERNAL_ERROR,
             error,
