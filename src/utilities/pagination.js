@@ -1,4 +1,5 @@
 import { DEFAULT_LIMIT, DEFAULT_OFFSET } from "../config/contants";
+import { isStringValidNumber } from "./number";
 
 export const getPaginationInfo = (req) => {
     const result = {
@@ -10,11 +11,15 @@ export const getPaginationInfo = (req) => {
         return result;
     }
 
-    const page = req.query.page || DEFAULT_OFFSET + 1;
-    const limit = req.query.limit || DEFAULT_LIMIT;
+    const offset = isStringValidNumber(req.query.offset)
+        ? parseInt(req.query.offset)
+        : DEFAULT_OFFSET;
+    const limit = isStringValidNumber(req.query.limit)
+        ? parseInt(req.query.limit)
+        : DEFAULT_LIMIT;
     const getTotal = !!req.query.getTotal || false;
 
-    result.offset = (page - 1) * limit;
+    result.offset = offset;
     result.limit = limit;
     result.getTotal = getTotal;
 
