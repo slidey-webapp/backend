@@ -13,6 +13,7 @@ import * as PresentationService from "../presentation.service";
 import { getPaginationInfo } from "../../../utilities/pagination";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../../../utilities/email";
+import { mapCollaborator } from "../../../utilities/mapUser";
 
 export const getCollabs = async (req, res, next) => {
     try {
@@ -36,16 +37,16 @@ export const getCollabs = async (req, res, next) => {
             offset,
             limit,
         });
-        const total = await CollabService.countPresentation({
-            accountID: user.accountID,
+        const total = await CollabService.countCollaborator({
+            presentationID,
             name,
         });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             result: {
-                items: collabs,
+                items: collabs.map((item) => mapCollaborator(item)),
                 totalCount: total,
-                totalPages: Math.floor(total / limit) + 1,
+                totalPages: total ? Math.floor(total / limit) + 1 : 0,
                 limit,
                 offset,
                 currentPage: Math.floor(offset / limit),
@@ -106,6 +107,12 @@ export const joinCollab = async (req, res, next) => {
                 message: MESSAGE.PERMISSION_NOT_FOUND,
             });
         }
+        if (presentation.createdBy === user.accountID) {
+            return res.status(RESPONSE_CODE.SUCCESS).json({
+                status: API_STATUS.OK,
+                message: MESSAGE.POST_SUCCESS("Tham gia cộng tác"),
+            });
+        }
         const oldCollab = await CollabService.findCollaborator({
             accountID: user.accountID,
             presentationID,
@@ -122,7 +129,7 @@ export const joinCollab = async (req, res, next) => {
         });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
-            result: collab,
+            result: mapCollaborator(collab),
             message: MESSAGE.POST_SUCCESS("Tham gia cộng tác"),
         });
     } catch (error) {
@@ -160,29 +167,13 @@ export const removeCollab = async (req, res, next) => {
                 message: MESSAGE.PERMISSION_NOT_FOUND,
             });
         }
-        const oldCollab = await CollabService.findCollaborator({
-            presentationID,
-            accountID,
-        });
-        if (!oldCollab) {
-            return res.status(RESPONSE_CODE.SUCCESS).json({
-                status: API_STATUS.OK,
-                result: oldCollab,
-                message: MESSAGE.QUERY_SUCCESS("Người cộng tác"),
-            });
-        }
-        await CollabService.addCollaborator({
-            presentationID,
-            accountID,
-        });
-        const collab = await CollabService.findCollaborator({
+        await CollabService.removeCollaborator({
             presentationID,
             accountID,
         });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
-            result: collab,
-            message: MESSAGE.QUERY_SUCCESS("Người cộng tác"),
+            message: MESSAGE.POST_SUCCESS("Xóa người cộng tác"),
         });
     } catch (error) {
         console.log(error);
@@ -207,6 +198,12 @@ export const sendInviteEmail = async (req, res, next) => {
                 status: API_STATUS.INVALID_INPUT,
                 message: emptyMessage,
                 errors: emptyInputError,
+            });
+        }
+        if (email === user.email) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: MESSAGE.CANT_SEND_INVITATION_TO_YOURSELF,
             });
         }
         const presentation = await PresentationService.findPresentation({

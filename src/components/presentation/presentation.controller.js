@@ -99,7 +99,7 @@ export const getMyPresentations = async (req, res, next) => {
             result: {
                 items: presentations,
                 totalCount: total,
-                totalPages: Math.floor(total / limit) + 1,
+                totalPages: total ? Math.floor(total / limit) + 1 : 0,
                 limit,
                 offset,
                 currentPage: Math.floor(offset / limit),

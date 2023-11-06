@@ -25,3 +25,5 @@ export const RESET_PASSWORD_MAIL_SUBJECT = "Đặt lại mật khẩu";
 export const GROUP_INVITATION_MAIL_SUBJECT = "Mời tham gia nhóm";
 export const CANT_ASSIGN_OWNER = "Không thể đặt người khác làm trưởng nhóm";
 export const CANT_REMOVE_YOURSELF = "Bạn không thể xóa chính mình khỏi nhóm";
+export const CANT_SEND_INVITATION_TO_YOURSELF =
+    "Bạn không thể gửi lời mời đến chính mình";

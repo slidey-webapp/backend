@@ -45,7 +45,7 @@ export const getCollaborator = ({ presentationID, offset, limit, name }) => {
     });
 };
 
-export const countCollaborator = ({ presentationID, offset, limit, name }) => {
+export const countCollaborator = ({ presentationID, name }) => {
     const searchName = getInsensitiveCaseRegextForSearchLike(name || "");
     return CollabTable.count({
         raw: true,
