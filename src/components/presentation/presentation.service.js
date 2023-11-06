@@ -38,7 +38,9 @@ export const getUserPresentation = ({ accountID, offset, limit, name }) => {
                 createdBy: accountID,
                 "$Collaborations.accountID$": accountID,
             },
-            [Op.regexp]: searchName,
+            name: {
+                [Op.regexp]: searchName,
+            },
         },
         order: [["createdAt", "DESC"]],
         offset: offset,
@@ -61,7 +63,9 @@ export const countPresentation = ({ accountID, name }) => {
                 createdBy: accountID,
                 "$Collaborations.accountID$": accountID,
             },
-            [Op.regexp]: searchName,
+            name: {
+                [Op.regexp]: searchName,
+            },
         },
         include: {
             model: CollabTable,
