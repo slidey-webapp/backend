@@ -21,3 +21,16 @@ export const mapGroupMember = (groupMember) => {
     });
     return result;
 };
+
+export const mapCollaborator = (collaborator) => {
+    const result = { ...collaborator };
+    delete result.password;
+    Object.keys(collaborator).forEach((key) => {
+        if (key.includes(".")) {
+            delete result[key];
+        }
+    });
+    result.email = collaborator["Account.email"];
+    result.fullname = collaborator["Account.Person.fullname"];
+    return result;
+};

@@ -34,3 +34,36 @@ export const mapSlide = (slide) => {
     });
     return result;
 };
+
+export const slideGenerator = async ({ presentationID, type, slideOrder }) => {
+    const slide = await SlideService.createSlide({
+        type,
+        presentationID,
+        slideOrder,
+    });
+    const slideID = slide.slideID;
+    if (type === SLIDE_TYPE.HEADING) {
+        await SlideService.createHeadingSlide({
+            slideID,
+            heading: "",
+            subHeading: "",
+        });
+        slide.subHeading = "";
+        slide.heading = "";
+    } else if (type === SLIDE_TYPE.MULTIPLE_CHOICE) {
+        await SlideService.createMultipleChoiceSlide({
+            slideID,
+            question: "",
+        });
+        slide.question = "";
+    } else if (type === SLIDE_TYPE.PARAGRAPH) {
+        await SlideService.createParagraphSlide({
+            slideID,
+            paragraph: "",
+            heading: "",
+        });
+        slide.paragraph = "";
+        slide.heading = "";
+    }
+    return slide;
+};
