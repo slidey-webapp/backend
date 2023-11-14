@@ -158,13 +158,25 @@ export const getSlideOfPresentation = ({ presentationID }) => {
             {
                 model: MultipleChoiceSlideTable,
                 duplicating: false,
-                include: [
-                    {
-                        model: MultipleChoiceSlideOptionTable,
-                        duplicating: false,
-                    },
-                ],
             },
         ],
+    });
+};
+
+export const getMultipleChoiceSlideOption = ({ slideID }) => {
+    return MultipleChoiceSlideOptionTable.findAll({
+        raw: true,
+        where: {
+            slideID,
+        },
+    });
+};
+
+export const getSlideResult = ({ slideID }) => {
+    return SlideResultTable.findAll({
+        raw: true,
+        where: {
+            slideID,
+        },
     });
 };

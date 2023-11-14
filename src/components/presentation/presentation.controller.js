@@ -2,13 +2,14 @@ import * as PresentationService from "./presentation.service";
 import * as SlideService from "./slide/slide.service";
 
 import * as MESSAGE from "../../resource/message";
-import { API_STATUS, RESPONSE_CODE } from "../../config/contants";
+import { API_STATUS, INPUT_ERROR, RESPONSE_CODE } from "../../config/contants";
 import { handleEmptyInput } from "../../utilities/api";
 import { generateCode } from "../../utilities/string";
 import { SLIDE_TYPE } from "./slide/slide.model";
 import { getPaginationInfo } from "../../utilities/pagination";
 import {
     deleteSlideReference,
+    getDetailSlideOfPresentation,
     mapSlide,
     slideGenerator,
 } from "./slide/slide.util";
@@ -196,7 +197,7 @@ export const getPresentationSlides = async (req, res, next) => {
                 message: MESSAGE.QUERY_NOT_FOUND("Bản trình bày"),
             });
         }
-        const slides = await SlideService.getSlideOfPresentation({
+        const slides = await getDetailSlideOfPresentation({
             presentationID,
         });
         return res.status(RESPONSE_CODE.SUCCESS).json({
@@ -232,6 +233,15 @@ export const addSlide = async (req, res, next) => {
             });
         }
         const type = req.body.type || SLIDE_TYPE.MULTIPLE_CHOICE;
+        if (!SLIDE_TYPE[type]) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: MESSAGE.INVALID_INPUT("Loại slide"),
+                errors: {
+                    type: INPUT_ERROR.INVALID,
+                },
+            });
+        }
         const presentation =
             await PresentationService.findAccessiblePresentation({
                 presentationID,
@@ -255,6 +265,115 @@ export const addSlide = async (req, res, next) => {
             status: API_STATUS.OK,
             result: slide,
             message: MESSAGE.POST_SUCCESS("Tạo slide"),
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+            status: API_STATUS.INTERNAL_ERROR,
+            error,
+        });
+    }
+};
+
+export const getPresentationDetail = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const { presentationID } = req.params;
+        const { message: emptyMessage, inputError: emptyInputError } =
+            handleEmptyInput({
+                presentationID,
+            });
+        if (emptyMessage) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: emptyMessage,
+                errors: emptyInputError,
+            });
+        }
+
+        const presentation =
+            await PresentationService.findAccessiblePresentation({
+                presentationID,
+                accountID: user.accountID,
+            });
+        if (!presentation) {
+            return res.status(RESPONSE_CODE.NOT_FOUND).json({
+                status: API_STATUS.NOT_FOUND,
+                message: MESSAGE.QUERY_NOT_FOUND("Bản trình bày"),
+            });
+        }
+        const slides = await getDetailSlideOfPresentation({
+            presentationID,
+        });
+        return res.status(RESPONSE_CODE.SUCCESS).json({
+            status: API_STATUS.OK,
+            result: {
+                ...presentation,
+                slides, // slides.map((item) => mapSlide(item)),
+            },
+            message: MESSAGE.QUERY_SUCCESS("Bản trình bày"),
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+            status: API_STATUS.INTERNAL_ERROR,
+            error,
+        });
+    }
+};
+
+export const updatePresentation = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const { presentationID, name, slides } = req.body;
+        const { message: emptyMessage, inputError: emptyInputError } =
+            handleEmptyInput({
+                presentationID,
+                name,
+                slides,
+            });
+        if (emptyMessage) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: emptyMessage,
+                errors: emptyInputError,
+            });
+        }
+
+        const presentation =
+            await PresentationService.findAccessiblePresentation({
+                presentationID,
+                accountID: user.accountID,
+            });
+        if (!presentation) {
+            return res.status(RESPONSE_CODE.NOT_FOUND).json({
+                status: API_STATUS.NOT_FOUND,
+                message: MESSAGE.QUERY_NOT_FOUND("Bản trình bày"),
+            });
+        }
+
+        const newSlides = [...slides];
+        console.log("newSlides:", newSlides);
+        const oldSlides = (
+            await SlideService.getDetailSlideOfPresentation({
+                presentationID,
+            })
+        ).map((item) => mapSlide(item));
+        console.log("oldSlides:", oldSlides);
+
+        await PresentationService.updatePresentation({
+            name,
+            presentationID,
+            updatedBy: user.accountID,
+        });
+
+        return res.status(RESPONSE_CODE.SUCCESS).json({
+            status: API_STATUS.OK,
+            result: {
+                ...presentation,
+                slides: slides.map((item) => mapSlide(item)),
+            },
+            message: MESSAGE.POST_SUCCESS("Cập nhật bản trình bày"),
         });
     } catch (error) {
         console.log(error);
