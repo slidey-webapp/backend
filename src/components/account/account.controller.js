@@ -22,13 +22,12 @@ import { comparePassword } from "./account.util";
 export const signUp = async (req, res, next) => {
     try {
         const { password, email, fullname, confirmPassword } = req.body;
-        const { message: emptyMessage, inputError: emptyInputError } =
-            handleEmptyInput({
-                password,
-                email,
-                fullname,
-                confirmPassword,
-            });
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            password,
+            email,
+            fullname,
+            confirmPassword,
+        });
         if (emptyMessage) {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
@@ -113,11 +112,10 @@ export const signUp = async (req, res, next) => {
 export const login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
-        const { message: emptyMessage, inputError: emptyInputError } =
-            handleEmptyInput({
-                password,
-                email,
-            });
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            password,
+            email,
+        });
         if (emptyMessage) {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
@@ -213,11 +211,10 @@ export const verifyEmail = async (req, res, next) => {
     try {
         const accountID = req.body.accountID;
         const token = req.body.token;
-        const { message: emptyMessage, inputError: emptyInputError } =
-            handleEmptyInput({
-                accountID,
-                token,
-            });
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            accountID,
+            token,
+        });
         if (emptyMessage) {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
@@ -241,10 +238,7 @@ export const verifyEmail = async (req, res, next) => {
                 message: MESSAGE.UNAUTHORIZED,
             });
         }
-        const accountByToken = await AccountService.findAccountByToken(
-            account.accountID,
-            token
-        );
+        const accountByToken = await AccountService.findAccountByToken(account.accountID, token);
         if (!accountByToken) {
             return res.status(RESPONSE_CODE.NOT_FOUND).json({
                 status: API_STATUS.NOT_FOUND,
@@ -281,10 +275,9 @@ export const verifyEmail = async (req, res, next) => {
 export const googleLogin = async (req, res, next) => {
     try {
         const { token: ggToken } = req.body;
-        const { message: emptyMessage, inputError: emptyInputError } =
-            handleEmptyInput({
-                ggToken,
-            });
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            ggToken,
+        });
         if (emptyMessage) {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
@@ -371,11 +364,10 @@ export const changePassword = async (req, res, next) => {
         const user = req.user;
         const accountID = user.accountID;
         const { password, newPassword } = req.body;
-        const { message: emptyMessage, inputError: emptyInputError } =
-            handleEmptyInput({
-                password,
-                newPassword,
-            });
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            password,
+            newPassword,
+        });
         if (emptyMessage) {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
@@ -475,10 +467,9 @@ export const logout = async (req, res, next) => {
 export const forgotPassword = async (req, res, next) => {
     try {
         const { email } = req.body;
-        const { message: emptyMessage, inputError: emptyInputError } =
-            handleEmptyInput({
-                email,
-            });
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            email,
+        });
         if (emptyMessage) {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
@@ -540,12 +531,11 @@ export const resetPassword = async (req, res, next) => {
         const accountID = req.body.accountID;
         const token = req.body.token;
         const password = req.body.password;
-        const { message: emptyMessage, inputError: emptyInputError } =
-            handleEmptyInput({
-                accountID,
-                token,
-                password,
-            });
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            accountID,
+            token,
+            password,
+        });
         if (emptyMessage) {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
@@ -569,10 +559,7 @@ export const resetPassword = async (req, res, next) => {
                 message: MESSAGE.UNAUTHORIZED,
             });
         }
-        const accountByToken = await AccountService.findAccountByToken(
-            account.accountID,
-            token
-        );
+        const accountByToken = await AccountService.findAccountByToken(account.accountID, token);
         if (!accountByToken) {
             return res.status(RESPONSE_CODE.NOT_FOUND).json({
                 status: API_STATUS.NOT_FOUND,

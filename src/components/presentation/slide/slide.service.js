@@ -123,10 +123,11 @@ export const deleteSlideContent = ({ slideID, type }) => {
     }
 };
 
-export const deleteMultipleChoiceSlideOption = ({ slideID }) => {
+export const deleteMultipleChoiceSlideOption = ({ slideID, optionID }) => {
     return MultipleChoiceSlideOptionTable.destroy({
         where: {
             slideID,
+            optionID,
         },
     });
 };
@@ -158,13 +159,124 @@ export const getSlideOfPresentation = ({ presentationID }) => {
             {
                 model: MultipleChoiceSlideTable,
                 duplicating: false,
-                include: [
-                    {
-                        model: MultipleChoiceSlideOptionTable,
-                        duplicating: false,
-                    },
-                ],
             },
         ],
     });
+};
+
+export const getMultipleChoiceSlideOption = ({ slideID }) => {
+    return MultipleChoiceSlideOptionTable.findAll({
+        raw: true,
+        where: {
+            slideID,
+        },
+    });
+};
+
+export const getSlideResult = ({ slideID }) => {
+    return SlideResultTable.findAll({
+        raw: true,
+        where: {
+            slideID,
+        },
+    });
+};
+
+export const updateHeadingSlide = async ({ slideID, heading, subHeading }) => {
+    const result = await HeadingSlideTable.update(
+        {
+            ...(heading && { heading }),
+            ...(subHeading && { subHeading }),
+        },
+        {
+            where: {
+                slideID,
+            },
+            raw: true,
+            returning: true,
+            logging: console.log,
+        }
+    );
+    console.log("🚀 ~ file: slide.service.js:201 ~ updateHeadingSlide ~ result:", result);
+    return result && result.length ? result[1] : null;
+};
+
+export const updateParagrahSlide = async ({ slideID, heading, paragraph }) => {
+    const result = await ParagraphSlideTable.update(
+        {
+            ...(heading && { heading }),
+            ...(paragraph && { paragraph }),
+        },
+        {
+            where: {
+                slideID,
+            },
+            raw: true,
+            returning: true,
+        }
+    );
+    return result && result.length ? result[1] : null;
+};
+
+export const updateMultipleChoiceSlide = async ({ slideID, question }) => {
+    console.log("🚀 ~ file: slide.service.js:220 ~ updateMultipleChoiceSlide ~ question:", question, slideID);
+    const result = await MultipleChoiceSlideTable.update(
+        {
+            ...(question && { question }),
+        },
+        {
+            where: {
+                slideID,
+            },
+            raw: true,
+            returning: true,
+            logging: console.log,
+        }
+    );
+    console.log("🚀 ~ file: slide.service.js:237 ~ updateMultipleChoiceSlide ~ result:", result);
+    return result && result.length ? result[1] : null;
+};
+
+export const findSlide = async (data) => {
+    return SlideTable.findOne({
+        raw: true,
+        where: {
+            ...data,
+        },
+    });
+};
+
+export const updateMultipleChoiceSlideOption = async ({ slideID, optionID, option }) => {
+    const result = await MultipleChoiceSlideOptionTable.update(
+        {
+            ...(option && { option }),
+        },
+        {
+            where: {
+                slideID,
+                optionID,
+            },
+            raw: true,
+            returning: true,
+        }
+    );
+    return result && result.length ? result[1] : null;
+};
+
+export const updateSlide = async ({ slideID, presentationID, slideOrder, type }) => {
+    const result = await SlideTable.update(
+        {
+            slideOrder,
+            ...(type && { type }),
+        },
+        {
+            where: {
+                slideID,
+                presentationID,
+            },
+            raw: true,
+            returning: true,
+        }
+    );
+    return result && result.length ? result[1] : null;
 };

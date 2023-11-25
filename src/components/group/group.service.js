@@ -1,8 +1,5 @@
 import { getInsensitiveCaseRegextForSearchLike } from "../../utilities/string";
-import GroupTable, {
-    GROUP_MEMBER_ROLE,
-    GroupMemberTable,
-} from "./group.models";
+import GroupTable, { GROUP_MEMBER_ROLE, GroupMemberTable } from "./group.models";
 import { Op } from "../../database";
 import { DEFAULT_LIMIT, DEFAULT_OFFSET } from "../../config/contants";
 import AccountTable from "../account/account.model";
@@ -35,16 +32,7 @@ export const createGroupMember = async ({ groupID, accountID, role }) => {
     return newGroupMember;
 };
 
-export const getListGroup = ({
-    accountID,
-    offset,
-    limit,
-    name,
-    code,
-    getMine,
-    getAll,
-    getJoined,
-}) => {
+export const getListGroup = ({ accountID, offset, limit, name, code, getMine, getAll, getJoined }) => {
     const searchName = getInsensitiveCaseRegextForSearchLike(name || "");
     const searchCode = getInsensitiveCaseRegextForSearchLike(code || "");
     return GroupTable.findAll({
@@ -67,10 +55,7 @@ export const getListGroup = ({
                 getJoined && {
                     [Op.and]: {
                         "$GroupMembers.accountID$": accountID,
-                        "$GroupMembers.role$": [
-                            GROUP_MEMBER_ROLE.COOWNER,
-                            GROUP_MEMBER_ROLE.MEMBER,
-                        ],
+                        "$GroupMembers.role$": [GROUP_MEMBER_ROLE.COOWNER, GROUP_MEMBER_ROLE.MEMBER],
                     },
                 }),
             ...(getAll && {
@@ -127,10 +112,7 @@ export const countJoinedGroup = ({ accountID, name, code }) => {
                 [Op.regexp]: searchCode,
             },
             "$GroupMembers.accountID$": accountID,
-            "$GroupMembers.role$": [
-                GROUP_MEMBER_ROLE.COOWNER,
-                GROUP_MEMBER_ROLE.MEMBER,
-            ],
+            "$GroupMembers.role$": [GROUP_MEMBER_ROLE.COOWNER, GROUP_MEMBER_ROLE.MEMBER],
         },
         include: {
             model: GroupMemberTable,

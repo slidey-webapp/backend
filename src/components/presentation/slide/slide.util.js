@@ -67,3 +67,25 @@ export const slideGenerator = async ({ presentationID, type, slideOrder }) => {
     }
     return slide;
 };
+
+const getSlideDetail = async (slide) => {
+    const result = { ...slide };
+    const [option] = await Promise.all([
+        SlideService.getMultipleChoiceSlideOption({
+            slideID: slide.slideID,
+        }),
+    ]);
+    if (slide.type === SLIDE_TYPE.MULTIPLE_CHOICE) {
+        result.options = option;
+    }
+    return result;
+};
+
+export const getDetailSlideOfPresentation = async ({ presentationID }) => {
+    let slides = await SlideService.getSlideOfPresentation({
+        presentationID,
+    });
+    slides = slides.map((item) => mapSlide(item));
+    slides = await Promise.all(slides.map((item) => getSlideDetail(item)));
+    return slides;
+};

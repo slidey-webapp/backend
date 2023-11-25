@@ -9,17 +9,11 @@ opts.secretOrKey = JWT_KEY;
 opts.passReqToCallback = true;
 
 const webHookOpts = {};
-webHookOpts.jwtFromRequest = ExtractJwt.fromHeader(
-    CUSTOMER_ACCESS_TOKEN_HEADER
-);
+webHookOpts.jwtFromRequest = ExtractJwt.fromHeader(CUSTOMER_ACCESS_TOKEN_HEADER);
 webHookOpts.secretOrKey = JWT_KEY;
 webHookOpts.passReqToCallback = true;
 
-const normalStrategy = new Strategy(opts, function (
-    request,
-    jwt_payload,
-    next
-) {
+const normalStrategy = new Strategy(opts, function (request, jwt_payload, next) {
     findAccountByToken(jwt_payload.accountID, getToken(request.headers))
         .then((user) => {
             if (user) {
