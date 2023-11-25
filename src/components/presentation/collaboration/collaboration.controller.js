@@ -20,10 +20,9 @@ export const getCollabs = async (req, res, next) => {
         const user = req.user;
         const { offset, limit } = getPaginationInfo(req);
         const { name, presentationID } = req.query;
-        const { message: emptyMessage, inputError: emptyInputError } =
-            handleEmptyInput({
-                presentationID,
-            });
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            presentationID,
+        });
         if (emptyMessage) {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
@@ -66,10 +65,9 @@ export const joinCollab = async (req, res, next) => {
     try {
         const user = req.user;
         const { token } = req.body;
-        const { message: emptyMessage, inputError: emptyInputError } =
-            handleEmptyInput({
-                token,
-            });
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            token,
+        });
         if (emptyMessage) {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
@@ -145,11 +143,10 @@ export const removeCollab = async (req, res, next) => {
     try {
         const user = req.user;
         const { accountID, presentationID } = req.body;
-        const { message: emptyMessage, inputError: emptyInputError } =
-            handleEmptyInput({
-                presentationID,
-                accountID,
-            });
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            presentationID,
+            accountID,
+        });
         if (emptyMessage) {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
@@ -188,11 +185,10 @@ export const sendInviteEmail = async (req, res, next) => {
     try {
         const user = req.user;
         const { email, presentationID } = req.body;
-        const { message: emptyMessage, inputError: emptyInputError } =
-            handleEmptyInput({
-                email,
-                presentationID,
-            });
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            email,
+            presentationID,
+        });
         if (emptyMessage) {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
@@ -244,9 +240,7 @@ export const sendInviteEmail = async (req, res, next) => {
         });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
-            message: MESSAGE.POST_SUCCESS(
-                "Gửi lời mời tham gia chỉnh sửa bản trình bày"
-            ),
+            message: MESSAGE.POST_SUCCESS("Gửi lời mời tham gia chỉnh sửa bản trình bày"),
             result: inviteURL,
         });
     } catch (error) {

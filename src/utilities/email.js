@@ -4,14 +4,7 @@ import * as handlebars from "handlebars";
 import * as fs from "fs";
 import * as path from "path";
 import { APP_EMAIL, APP_EMAIL_PASSWORD, APP_NAME } from "../config/contants";
-export const sendEmail = async ({
-    emailTo,
-    text,
-    subject,
-    replyID,
-    attachments,
-    htmlData,
-}) => {
+export const sendEmail = async ({ emailTo, text, subject, replyID, attachments, htmlData }) => {
     try {
         const transporter = nodemailer.createTransport({
             host: MAIL_HOST,

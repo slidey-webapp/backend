@@ -21,10 +21,9 @@ import { isValidRole } from "./group.util";
 export const createGroup = async (req, res, next) => {
     try {
         const { name, description } = req.body;
-        const { message: emptyMessage, inputError: emptyInputError } =
-            handleEmptyInput({
-                name,
-            });
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            name,
+        });
         if (emptyMessage) {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
@@ -123,11 +122,10 @@ export const sendInviteEmail = async (req, res, next) => {
     try {
         const user = req.user;
         const { email, groupID } = req.body;
-        const { message: emptyMessage, inputError: emptyInputError } =
-            handleEmptyInput({
-                email,
-                groupID,
-            });
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            email,
+            groupID,
+        });
         if (emptyMessage) {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
@@ -188,10 +186,9 @@ export const joinGroup = async (req, res, next) => {
     try {
         const user = req.user;
         const { token } = req.body;
-        const { message: emptyMessage, inputError: emptyInputError } =
-            handleEmptyInput({
-                token,
-            });
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            token,
+        });
         if (emptyMessage) {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
@@ -300,10 +297,9 @@ export const getGroupMember = async (req, res, next) => {
 export const getGroupDetail = async (req, res, next) => {
     try {
         const { groupID } = req.query;
-        const { message: emptyMessage, inputError: emptyInputError } =
-            handleEmptyInput({
-                groupID,
-            });
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            groupID,
+        });
         if (emptyMessage) {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
@@ -338,11 +334,10 @@ export const removeGroupMember = async (req, res, next) => {
     try {
         const user = req.user;
         const { groupID, accountID } = req.body;
-        const { message: emptyMessage, inputError: emptyInputError } =
-            handleEmptyInput({
-                groupID,
-                accountID,
-            });
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            groupID,
+            accountID,
+        });
         if (emptyMessage) {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
@@ -397,12 +392,11 @@ export const updateGroupMemberRole = async (req, res, next) => {
     try {
         const user = req.user;
         const { groupID, accountID, role } = req.body;
-        const { message: emptyMessage, inputError: emptyInputError } =
-            handleEmptyInput({
-                groupID,
-                accountID,
-                role,
-            });
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            groupID,
+            accountID,
+            role,
+        });
         if (emptyMessage) {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
@@ -459,10 +453,9 @@ export const leaveGroup = async (req, res, next) => {
     try {
         const user = req.user;
         const { groupID } = req.body;
-        const { message: emptyMessage, inputError: emptyInputError } =
-            handleEmptyInput({
-                groupID,
-            });
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            groupID,
+        });
         if (emptyMessage) {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
@@ -536,10 +529,9 @@ export const deleteGroup = async (req, res, next) => {
     try {
         const user = req.user;
         const { groupID } = req.body;
-        const { message: emptyMessage, inputError: emptyInputError } =
-            handleEmptyInput({
-                groupID,
-            });
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            groupID,
+        });
         if (emptyMessage) {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,

@@ -30,10 +30,7 @@ export default function initModels(sequelize) {
     const HeadingSlide = _HeadingSlide.init(sequelize, DataTypes);
     const Message = _Message.init(sequelize, DataTypes);
     const MultipleChoiceSlide = _MultipleChoiceSlide.init(sequelize, DataTypes);
-    const MultipleChoiceSlideOption = _MultipleChoiceSlideOption.init(
-        sequelize,
-        DataTypes
-    );
+    const MultipleChoiceSlideOption = _MultipleChoiceSlideOption.init(sequelize, DataTypes);
     const ParagraphSlide = _ParagraphSlide.init(sequelize, DataTypes);
     const Person = _Person.init(sequelize, DataTypes);
     const Presentation = _Presentation.init(sequelize, DataTypes);

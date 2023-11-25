@@ -1,12 +1,6 @@
-import {
-    JWT_KEY,
-    REFRESH_TOKEN_EXPIRES_IN,
-    TOKEN_EXPIRES_IN,
-} from "../../config/contants";
+import { JWT_KEY, REFRESH_TOKEN_EXPIRES_IN, TOKEN_EXPIRES_IN } from "../../config/contants";
 import AccountTable, { ACCOUNT_STATUS } from "./account.model";
-import AccountTokenTable, {
-    TOKEN_TYPE,
-} from "./accountToken/accountToken.model";
+import AccountTokenTable, { TOKEN_TYPE } from "./accountToken/accountToken.model";
 import jwt from "jsonwebtoken";
 
 export const findAccount = async (data) => {

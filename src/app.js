@@ -24,8 +24,6 @@ router(app);
 
 testDBConnection(sequelize).then(() => {
     app.listen(process.env.PORT || port, async () => {
-        console.log(
-            `App listening at http://localhost:${process.env.PORT || port}`
-        );
+        console.log(`App listening at http://localhost:${process.env.PORT || port}`);
     });
 });

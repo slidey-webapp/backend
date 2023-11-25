@@ -76,12 +76,7 @@ export const countPresentation = ({ accountID, name }) => {
     });
 };
 
-export const updatePresentation = async ({
-    name,
-    currentSlideID,
-    updatedBy,
-    presentationID,
-}) => {
+export const updatePresentation = async ({ name, currentSlideID, updatedBy, presentationID }) => {
     const result = await PresentationTable.update(
         {
             ...(name && { name }),
