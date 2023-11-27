@@ -1,29 +1,17 @@
 import _sequelize from "sequelize";
 const { Model, Sequelize } = _sequelize;
 
-export default class Message extends Model {
+export default class SessionParticipant extends Model {
     static init(sequelize, DataTypes) {
         return sequelize.define(
-            "Message",
+            "SessionParticipant",
             {
-                messageID: {
+                participantID: {
                     autoIncrement: true,
                     type: DataTypes.INTEGER,
                     allowNull: false,
                     primaryKey: true,
-                    field: "messageID",
-                },
-                content: {
-                    type: DataTypes.STRING,
-                    allowNull: true,
-                },
-                createdBy: {
-                    type: DataTypes.INTEGER,
-                    allowNull: true,
-                    references: {
-                        model: "ACCOUNT",
-                        key: "accountID",
-                    },
+                    field: "participantID",
                 },
                 sessionID: {
                     type: DataTypes.INTEGER,
@@ -34,17 +22,26 @@ export default class Message extends Model {
                     },
                     field: "sessionID",
                 },
+                accountID: {
+                    type: DataTypes.INTEGER,
+                    allowNull: true,
+                    field: "accountID",
+                },
+                name: {
+                    type: DataTypes.STRING,
+                    allowNull: true,
+                },
             },
             {
-                tableName: "MESSAGE",
+                tableName: "SESSION_PARTICIPANT",
                 schema: "public",
                 timestamps: true,
                 paranoid: true,
                 indexes: [
                     {
-                        name: "MESSAGE_pkey",
+                        name: "SESSION_PARTICIPANT_pkey",
                         unique: true,
-                        fields: [{ name: "messageID" }],
+                        fields: [{ name: "participantID" }],
                     },
                 ],
             }

@@ -16,7 +16,7 @@ export const createPresentation = async ({ accountID, name, code }) => {
     return newPresentation;
 };
 
-export const findPresentation = (data) => {
+export const findPresentation = (data, noSession = true) => {
     if (!data) {
         return null;
     }
@@ -24,11 +24,14 @@ export const findPresentation = (data) => {
         raw: true,
         where: {
             ...data,
+            ...(noSession && {
+                sessionID: null,
+            }),
         },
     });
 };
 
-export const getUserPresentation = ({ accountID, offset, limit, name }) => {
+export const getUserPresentation = ({ accountID, offset, limit, name }, noSession = true) => {
     const searchName = getInsensitiveCaseRegextForSearchLike(name || "");
 
     return PresentationTable.findAll({
@@ -41,6 +44,9 @@ export const getUserPresentation = ({ accountID, offset, limit, name }) => {
             name: {
                 [Op.regexp]: searchName,
             },
+            ...(noSession && {
+                sessionID: null,
+            }),
         },
         order: [["createdAt", "DESC"]],
         offset: offset,
@@ -102,7 +108,7 @@ export const deletePresentation = ({ presentationID }) => {
     });
 };
 
-export const findAccessiblePresentation = ({ accountID, presentationID }) => {
+export const findAccessiblePresentation = ({ accountID, presentationID }, noSession = true) => {
     return PresentationTable.findOne({
         raw: true,
         where: {
@@ -111,6 +117,9 @@ export const findAccessiblePresentation = ({ accountID, presentationID }) => {
                 "$Collaborations.accountID$": accountID,
             },
             presentationID,
+            ...(noSession && {
+                sessionID: null,
+            }),
         },
         include: {
             model: CollabTable,

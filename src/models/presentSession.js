@@ -1,50 +1,46 @@
 import _sequelize from "sequelize";
 const { Model, Sequelize } = _sequelize;
 
-export default class Message extends Model {
+export default class PresentSession extends Model {
     static init(sequelize, DataTypes) {
         return sequelize.define(
-            "Message",
+            "PresentSession",
             {
-                messageID: {
+                sessionID: {
                     autoIncrement: true,
                     type: DataTypes.INTEGER,
                     allowNull: false,
                     primaryKey: true,
-                    field: "messageID",
+                    field: "sessionID",
                 },
-                content: {
+                presentationID: {
+                    type: DataTypes.INTEGER,
+                    allowNull: true,
+                    references: {
+                        model: "PRESENTATION",
+                        key: "presentationID",
+                    },
+                    field: "presentationID",
+                },
+                status: {
                     type: DataTypes.STRING,
                     allowNull: true,
                 },
-                createdBy: {
+                host: {
                     type: DataTypes.INTEGER,
                     allowNull: true,
-                    references: {
-                        model: "ACCOUNT",
-                        key: "accountID",
-                    },
-                },
-                sessionID: {
-                    type: DataTypes.INTEGER,
-                    allowNull: true,
-                    references: {
-                        model: "PRESENT_SESSION",
-                        key: "sessionID",
-                    },
-                    field: "sessionID",
                 },
             },
             {
-                tableName: "MESSAGE",
+                tableName: "PRESENT_SESSION",
                 schema: "public",
                 timestamps: true,
                 paranoid: true,
                 indexes: [
                     {
-                        name: "MESSAGE_pkey",
+                        name: "PRESENT_SESSION_pkey",
                         unique: true,
-                        fields: [{ name: "messageID" }],
+                        fields: [{ name: "sessionID" }],
                     },
                 ],
             }

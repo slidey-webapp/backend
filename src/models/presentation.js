@@ -38,6 +38,15 @@ export default class Presentation extends Model {
                     type: DataTypes.INTEGER,
                     allowNull: true,
                 },
+                sessionID: {
+                    type: DataTypes.INTEGER,
+                    allowNull: true,
+                    references: {
+                        model: "PRESENT_SESSION",
+                        key: "sessionID",
+                    },
+                    field: "sessionID",
+                },
             },
             {
                 tableName: "PRESENTATION",
