@@ -35,7 +35,15 @@ export const mapSlide = (slide) => {
     return result;
 };
 
-export const slideGenerator = async ({ presentationID, type, slideOrder }) => {
+export const slideGenerator = async ({
+    presentationID,
+    type,
+    slideOrder,
+    heading,
+    subHeading,
+    question,
+    paragraph,
+}) => {
     const slide = await SlideService.createSlide({
         type,
         presentationID,
@@ -45,27 +53,53 @@ export const slideGenerator = async ({ presentationID, type, slideOrder }) => {
     if (type === SLIDE_TYPE.HEADING) {
         await SlideService.createHeadingSlide({
             slideID,
-            heading: "",
-            subHeading: "",
+            heading: heading || "",
+            subHeading: subHeading || "",
         });
-        slide.subHeading = "";
-        slide.heading = "";
+        slide.subHeading = subHeading || "";
+        slide.heading = heading || "";
     } else if (type === SLIDE_TYPE.MULTIPLE_CHOICE) {
         await SlideService.createMultipleChoiceSlide({
             slideID,
-            question: "",
+            question: question || "",
         });
-        slide.question = "";
+        slide.question = question || "";
     } else if (type === SLIDE_TYPE.PARAGRAPH) {
         await SlideService.createParagraphSlide({
             slideID,
-            paragraph: "",
-            heading: "",
+            paragraph: paragraph || "",
+            heading: heading || "",
         });
-        slide.paragraph = "";
-        slide.heading = "";
+        slide.paragraph = paragraph || "";
+        slide.heading = heading || "";
     }
     return slide;
+};
+
+export const cloneSlides = async (slides, presentationID) => {
+    const createSlidePromises = slides.map((slide) => {
+        return slideGenerator({
+            ...slide,
+            presentationID,
+        });
+    });
+    const createOptionsPromises = [];
+    const newSlides = await Promise.all(createSlidePromises);
+    newSlides.forEach((newSlide) => {
+        if (newSlide.type === SLIDE_TYPE.MULTIPLE_CHOICE) {
+            const oldSlide = slides.find((item) => item.slideOrder === newSlide.slideOrder);
+            oldSlide.options.forEach((item) => {
+                createOptionsPromises.push(
+                    SlideService.createMultipleChoiceSlideOption({
+                        slideID: newSlide.slideID,
+                        option: item.option,
+                    })
+                );
+            });
+        }
+    });
+    await Promise.all(createOptionsPromises);
+    return newSlides;
 };
 
 const getSlideDetail = async (slide) => {

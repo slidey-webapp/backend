@@ -3,12 +3,13 @@ import { getInsensitiveCaseRegextForSearchLike } from "../../utilities/string";
 import CollabTable from "./collaboration/collaboration.model";
 import PresentationTable from "./presentation.model";
 
-export const createPresentation = async ({ accountID, name, code }) => {
+export const createPresentation = async ({ accountID, name, code, sessionID }) => {
     const newPresentation = (
         await PresentationTable.create({
             createdBy: accountID,
             name,
             code,
+            sessionID,
         })
     ).get({
         plain: true,

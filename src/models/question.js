@@ -36,6 +36,15 @@ export default class Question extends Model {
                     },
                     field: "sessionID",
                 },
+                participantID: {
+                    type: DataTypes.INTEGER,
+                    allowNull: true,
+                    references: {
+                        model: "SESSION_PARTICIPANT",
+                        key: "participantID",
+                    },
+                    field: "participantID",
+                },
             },
             {
                 tableName: "QUESTION",

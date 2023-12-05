@@ -1,0 +1,10 @@
+import express from "express";
+import * as SessionController from "./session.controller";
+import { auth } from "../../middleware/auth";
+import { getMe } from "../../middleware/getMe";
+const sessionRoute = express.Router();
+sessionRoute.post("/start", auth, SessionController.startPresentation);
+sessionRoute.post("/join", getMe, SessionController.joinPresentation);
+sessionRoute.post("/submit-answer", getMe, SessionController.submitAnswer);
+sessionRoute.get("/", auth, SessionController.getMySession);
+export default sessionRoute;

@@ -22,18 +22,18 @@ export default class SlideResult extends Model {
                     },
                     field: "slideID",
                 },
-                accountID: {
-                    type: DataTypes.INTEGER,
-                    allowNull: true,
-                    references: {
-                        model: "ACCOUNT",
-                        key: "accountID",
-                    },
-                    field: "accountID",
-                },
                 value: {
                     type: DataTypes.STRING,
                     allowNull: true,
+                },
+                participantID: {
+                    type: DataTypes.INTEGER,
+                    allowNull: true,
+                    references: {
+                        model: "SESSION_PARTICIPANT",
+                        key: "participantID",
+                    },
+                    field: "participantID",
                 },
             },
             {

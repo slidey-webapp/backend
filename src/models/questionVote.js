@@ -22,22 +22,14 @@ export default class QuestionVote extends Model {
                     },
                     field: "questionID",
                 },
-                accountID: {
+                participantID: {
                     type: DataTypes.INTEGER,
                     allowNull: true,
                     references: {
-                        model: "ACCOUNT",
-                        key: "accountID",
+                        model: "SESSION_PARTICIPANT",
+                        key: "participantID",
                     },
-                    field: "accountID",
-                },
-                createdBy: {
-                    type: DataTypes.INTEGER,
-                    allowNull: true,
-                    references: {
-                        model: "ACCOUNT",
-                        key: "accountID",
-                    },
+                    field: "participantID",
                 },
             },
             {

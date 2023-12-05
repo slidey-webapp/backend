@@ -24,3 +24,7 @@ export const GROUP_INVITATION_MAIL_SUBJECT = "Mời tham gia nhóm";
 export const CANT_ASSIGN_OWNER = "Không thể đặt người khác làm trưởng nhóm";
 export const CANT_REMOVE_YOURSELF = "Bạn không thể xóa chính mình khỏi nhóm";
 export const CANT_SEND_INVITATION_TO_YOURSELF = "Bạn không thể gửi lời mời đến chính mình";
+
+export const IS_PRESENTING = "Bản trình bày này đang được trình chiếu";
+export const EXISTED_PARTICIPANT_NAME = "Tên người dùng này đã được sử dụng trong phiên trình chiếu này";
+export const ALREADY_SUBMIT_ANSWER = "Bạn đã trả lời slide này rồi";

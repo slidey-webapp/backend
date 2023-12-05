@@ -30,6 +30,10 @@ export default class PresentSession extends Model {
                     type: DataTypes.INTEGER,
                     allowNull: true,
                 },
+                name: {
+                    type: DataTypes.STRING,
+                    allowNull: true,
+                },
             },
             {
                 tableName: "PRESENT_SESSION",

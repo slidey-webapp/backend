@@ -70,17 +70,26 @@ export const createMultipleChoiceSlideOption = async ({ slideID, option }) => {
     return newSlide;
 };
 
-export const createSlideResult = async ({ slideID, accountID, value }) => {
+export const createSlideResult = async ({ slideID, participantID, value }) => {
     const newSlide = (
         await SlideResultTable.create({
             slideID,
-            accountID,
+            participantID,
             value,
         })
     ).get({
         plain: true,
     });
     return newSlide;
+};
+
+export const findSlideResult = async (data) => {
+    return SlideResultTable.findOne({
+        raw: true,
+        where: {
+            ...(data && data),
+        },
+    });
 };
 
 export const deleteSlide = ({ slideID }) => {
@@ -169,6 +178,15 @@ export const getMultipleChoiceSlideOption = ({ slideID }) => {
         raw: true,
         where: {
             slideID,
+        },
+    });
+};
+
+export const findMultipleChoiceSlideOption = (data) => {
+    return MultipleChoiceSlideOptionTable.findOne({
+        raw: true,
+        where: {
+            ...(data && data),
         },
     });
 };

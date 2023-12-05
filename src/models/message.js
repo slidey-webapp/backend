@@ -17,14 +17,6 @@ export default class Message extends Model {
                     type: DataTypes.STRING,
                     allowNull: true,
                 },
-                createdBy: {
-                    type: DataTypes.INTEGER,
-                    allowNull: true,
-                    references: {
-                        model: "ACCOUNT",
-                        key: "accountID",
-                    },
-                },
                 sessionID: {
                     type: DataTypes.INTEGER,
                     allowNull: true,
@@ -33,6 +25,15 @@ export default class Message extends Model {
                         key: "sessionID",
                     },
                     field: "sessionID",
+                },
+                participantID: {
+                    type: DataTypes.INTEGER,
+                    allowNull: true,
+                    references: {
+                        model: "SESSION_PARTICIPANT",
+                        key: "participantID",
+                    },
+                    field: "participantID",
                 },
             },
             {
