@@ -8,7 +8,7 @@ export const createSession = async ({ presentationID, accountID, name }) => {
     const newSession = (
         await PresentSessionTable.create({
             presentationID,
-            accountID,
+            host: accountID,
             status: SESSION_STATUS.STARTING,
             name,
         })

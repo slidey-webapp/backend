@@ -17,7 +17,7 @@ export const getMe = async (req, res, next) => {
                 req.user = null;
             } else {
                 const person = await findPerson({
-                    account: account.accountID,
+                    accountID: account.accountID,
                 });
                 delete account.password;
                 const clone = { ...account };

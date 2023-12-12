@@ -102,7 +102,7 @@ export const cloneSlides = async (slides, presentationID) => {
     return newSlides;
 };
 
-const getSlideDetail = async (slide) => {
+const getSlideDetail = async (slide, getSlideResult = false) => {
     const result = { ...slide };
     const [option] = await Promise.all([
         SlideService.getMultipleChoiceSlideOption({
@@ -110,16 +110,36 @@ const getSlideDetail = async (slide) => {
         }),
     ]);
     if (slide.type === SLIDE_TYPE.MULTIPLE_CHOICE) {
+        if (getSlideResult) {
+            const resultPromise = option.map((item) => {
+                return SlideService.findSlideResult({
+                    value: item.option,
+                    slideID: slide.slideID,
+                });
+            });
+            const slideResult = await Promise.all(resultPromise);
+            option.forEach((item) => {
+                const results = slideResult.filter(
+                    (item1) => item1 && item1.value === item.option && item1.slideID === item.slideID
+                );
+                item.result = results.map((item1) => ({
+                    participantID: item1.participantID,
+                    createdAt: item1.createdAt,
+                    slideResultID: item1.slideResultID,
+                }));
+            });
+        }
+
         result.options = option;
     }
     return result;
 };
 
-export const getDetailSlideOfPresentation = async ({ presentationID }) => {
+export const getDetailSlideOfPresentation = async ({ presentationID }, getSlideResult = false) => {
     let slides = await SlideService.getSlideOfPresentation({
         presentationID,
     });
     slides = slides.map((item) => mapSlide(item));
-    slides = await Promise.all(slides.map((item) => getSlideDetail(item)));
+    slides = await Promise.all(slides.map((item) => getSlideDetail(item, getSlideResult)));
     return slides;
 };

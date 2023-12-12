@@ -109,7 +109,7 @@ export const deletePresentation = ({ presentationID }) => {
     });
 };
 
-export const findAccessiblePresentation = ({ accountID, presentationID }, noSession = true) => {
+export const findAccessiblePresentation = ({ accountID, presentationID, sessionID }, noSession = true) => {
     return PresentationTable.findOne({
         raw: true,
         where: {
@@ -117,7 +117,8 @@ export const findAccessiblePresentation = ({ accountID, presentationID }, noSess
                 createdBy: accountID,
                 "$Collaborations.accountID$": accountID,
             },
-            presentationID,
+            ...(presentationID && { presentationID }),
+            ...(sessionID && { sessionID }),
             ...(noSession && {
                 sessionID: null,
             }),

@@ -1,11 +1,12 @@
 import { Op } from "../../../database";
+import { SessionParticipantTable } from "../session.model";
 import MessageTable from "./message.mode";
 
-export const createMessage = async ({ sessionID, message, participantID }) => {
+export const createMessage = async ({ sessionID, content, participantID }) => {
     const newMessage = (
         await MessageTable.create({
             sessionID,
-            message,
+            content,
             participantID,
         })
     ).get({
@@ -19,11 +20,18 @@ export const getMessageList = ({ sessionID, lastMessageID, limit }) => {
         raw: true,
         where: {
             sessionID,
-            messageID: {
-                [Op.lt]: lastMessageID,
-            },
+            ...(lastMessageID && {
+                messageID: {
+                    [Op.lt]: lastMessageID,
+                },
+            }),
         },
         limit,
         order: [["messageID", "DESC"]],
+        include: {
+            model: SessionParticipantTable,
+            as: "SessionParticipant",
+            duplicating: false,
+        },
     });
 };
