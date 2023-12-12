@@ -1,51 +1,50 @@
 import _sequelize from "sequelize";
 const { Model, Sequelize } = _sequelize;
 
-export default class SlideResult extends Model {
+export default class PresentSession extends Model {
     static init(sequelize, DataTypes) {
         return sequelize.define(
-            "SlideResult",
+            "PresentSession",
             {
-                slideResultID: {
+                sessionID: {
                     autoIncrement: true,
                     type: DataTypes.INTEGER,
                     allowNull: false,
                     primaryKey: true,
-                    field: "slideResultID",
+                    field: "sessionID",
                 },
-                slideID: {
+                presentationID: {
                     type: DataTypes.INTEGER,
                     allowNull: true,
                     references: {
-                        model: "SLIDE",
-                        key: "slideID",
+                        model: "PRESENTATION",
+                        key: "presentationID",
                     },
-                    field: "slideID",
+                    field: "presentationID",
                 },
-                value: {
+                status: {
                     type: DataTypes.STRING,
                     allowNull: true,
                 },
-                participantID: {
+                host: {
                     type: DataTypes.INTEGER,
                     allowNull: true,
-                    references: {
-                        model: "SESSION_PARTICIPANT",
-                        key: "participantID",
-                    },
-                    field: "participantID",
+                },
+                name: {
+                    type: DataTypes.STRING,
+                    allowNull: true,
                 },
             },
             {
-                tableName: "SLIDE_RESULT",
+                tableName: "PRESENT_SESSION",
                 schema: "public",
                 timestamps: true,
                 paranoid: true,
                 indexes: [
                     {
-                        name: "SLIDE_RESULT_pkey",
+                        name: "PRESENT_SESSION_pkey",
                         unique: true,
-                        fields: [{ name: "slideResultID" }],
+                        fields: [{ name: "sessionID" }],
                     },
                 ],
             }

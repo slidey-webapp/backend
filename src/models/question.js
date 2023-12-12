@@ -13,15 +13,6 @@ export default class Question extends Model {
                     primaryKey: true,
                     field: "questionID",
                 },
-                presentationID: {
-                    type: DataTypes.INTEGER,
-                    allowNull: true,
-                    references: {
-                        model: "PRESENTATION",
-                        key: "presentationID",
-                    },
-                    field: "presentationID",
-                },
                 content: {
                     type: DataTypes.STRING,
                     allowNull: true,
@@ -35,6 +26,24 @@ export default class Question extends Model {
                     type: DataTypes.INTEGER,
                     allowNull: true,
                     defaultValue: 0,
+                },
+                sessionID: {
+                    type: DataTypes.INTEGER,
+                    allowNull: true,
+                    references: {
+                        model: "PRESENT_SESSION",
+                        key: "sessionID",
+                    },
+                    field: "sessionID",
+                },
+                participantID: {
+                    type: DataTypes.INTEGER,
+                    allowNull: true,
+                    references: {
+                        model: "SESSION_PARTICIPANT",
+                        key: "participantID",
+                    },
+                    field: "participantID",
                 },
             },
             {

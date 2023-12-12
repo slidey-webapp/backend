@@ -13,10 +13,12 @@ import _MultipleChoiceSlideOption from "./multipleChoiceSlideOption.js";
 import _ParagraphSlide from "./paragraphSlide.js";
 import _Person from "./person.js";
 import _Presentation from "./presentation.js";
+import _PresentSession from "./presentSession.js";
 import _Question from "./question.js";
 import _QuestionVote from "./questionVote.js";
 import _Role from "./role.js";
 import _RoleClaim from "./roleClaim.js";
+import _SessionParticipant from "./sessionParticipant.js";
 import _Slide from "./slide.js";
 import _SlideResult from "./slideResult.js";
 
@@ -34,10 +36,12 @@ export default function initModels(sequelize) {
     const ParagraphSlide = _ParagraphSlide.init(sequelize, DataTypes);
     const Person = _Person.init(sequelize, DataTypes);
     const Presentation = _Presentation.init(sequelize, DataTypes);
+    const PresentSession = _PresentSession.init(sequelize, DataTypes);
     const Question = _Question.init(sequelize, DataTypes);
     const QuestionVote = _QuestionVote.init(sequelize, DataTypes);
     const Role = _Role.init(sequelize, DataTypes);
     const RoleClaim = _RoleClaim.init(sequelize, DataTypes);
+    const SessionParticipant = _SessionParticipant.init(sequelize, DataTypes);
     const Slide = _Slide.init(sequelize, DataTypes);
     const SlideResult = _SlideResult.init(sequelize, DataTypes);
 
@@ -51,40 +55,42 @@ export default function initModels(sequelize) {
     Account.hasMany(Group, { foreignKey: "createdBy" });
     GroupMember.belongsTo(Account, { foreignKey: "accountID" });
     Account.hasMany(GroupMember, { foreignKey: "accountID" });
-    Message.belongsTo(Account, { foreignKey: "createdBy" });
-    Account.hasMany(Message, { foreignKey: "createdBy" });
     Person.belongsTo(Account, { foreignKey: "accountID" });
     Account.hasOne(Person, { foreignKey: "accountID" });
-    QuestionVote.belongsTo(Account, { foreignKey: "accountID" });
-    Account.hasMany(QuestionVote, { foreignKey: "accountID" });
-    QuestionVote.belongsTo(Account, { foreignKey: "createdBy" });
-    Account.hasMany(QuestionVote, { foreignKey: "createdBy" });
-    SlideResult.belongsTo(Account, { foreignKey: "accountID" });
-    Account.hasMany(SlideResult, { foreignKey: "accountID" });
     GroupMember.belongsTo(Group, { foreignKey: "groupID" });
     Group.hasMany(GroupMember, { foreignKey: "groupID" });
-    MultipleChoiceSlideOption.belongsTo(MultipleChoiceSlide, {
-        foreignKey: "slideID",
-    });
-    MultipleChoiceSlide.hasMany(MultipleChoiceSlideOption, {
-        foreignKey: "slideID",
-    });
+    MultipleChoiceSlideOption.belongsTo(MultipleChoiceSlide, { foreignKey: "slideID" });
+    MultipleChoiceSlide.hasMany(MultipleChoiceSlideOption, { foreignKey: "slideID" });
     Collaboration.belongsTo(Presentation, { foreignKey: "presentationID" });
     Presentation.hasMany(Collaboration, { foreignKey: "presentationID" });
     Group.belongsTo(Presentation, { foreignKey: "sharedPresentationID" });
     Presentation.hasMany(Group, { foreignKey: "sharedPresentationID" });
-    Message.belongsTo(Presentation, { foreignKey: "presentationID" });
-    Presentation.hasMany(Message, { foreignKey: "presentationID" });
-    Question.belongsTo(Presentation, { foreignKey: "presentationID" });
-    Presentation.hasMany(Question, { foreignKey: "presentationID" });
+    PresentSession.belongsTo(Presentation, { foreignKey: "presentationID" });
+    Presentation.hasMany(PresentSession, { foreignKey: "presentationID" });
     Slide.belongsTo(Presentation, { foreignKey: "presentationID" });
     Presentation.hasMany(Slide, { foreignKey: "presentationID" });
+    Message.belongsTo(PresentSession, { foreignKey: "sessionID" });
+    PresentSession.hasMany(Message, { foreignKey: "sessionID" });
+    Presentation.belongsTo(PresentSession, { foreignKey: "sessionID" });
+    PresentSession.hasMany(Presentation, { foreignKey: "sessionID" });
+    Question.belongsTo(PresentSession, { foreignKey: "sessionID" });
+    PresentSession.hasMany(Question, { foreignKey: "sessionID" });
+    SessionParticipant.belongsTo(PresentSession, { foreignKey: "sessionID" });
+    PresentSession.hasMany(SessionParticipant, { foreignKey: "sessionID" });
     QuestionVote.belongsTo(Question, { foreignKey: "questionID" });
     Question.hasMany(QuestionVote, { foreignKey: "questionID" });
     AccountRole.belongsTo(Role, { foreignKey: "roleID" });
     Role.hasMany(AccountRole, { foreignKey: "roleID" });
     RoleClaim.belongsTo(Role, { foreignKey: "roleID" });
     Role.hasMany(RoleClaim, { foreignKey: "roleID" });
+    Message.belongsTo(SessionParticipant, { foreignKey: "participantID" });
+    SessionParticipant.hasMany(Message, { foreignKey: "participantID" });
+    Question.belongsTo(SessionParticipant, { foreignKey: "participantID" });
+    SessionParticipant.hasMany(Question, { foreignKey: "participantID" });
+    QuestionVote.belongsTo(SessionParticipant, { foreignKey: "participantID" });
+    SessionParticipant.hasMany(QuestionVote, { foreignKey: "participantID" });
+    SlideResult.belongsTo(SessionParticipant, { foreignKey: "participantID" });
+    SessionParticipant.hasMany(SlideResult, { foreignKey: "participantID" });
     HeadingSlide.belongsTo(Slide, { foreignKey: "slideID" });
     Slide.hasOne(HeadingSlide, { foreignKey: "slideID" });
     MultipleChoiceSlide.belongsTo(Slide, { foreignKey: "slideID" });
@@ -110,10 +116,12 @@ export default function initModels(sequelize) {
         ParagraphSlide,
         Person,
         Presentation,
+        PresentSession,
         Question,
         QuestionVote,
         Role,
         RoleClaim,
+        SessionParticipant,
         Slide,
         SlideResult,
     };

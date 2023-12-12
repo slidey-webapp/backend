@@ -13,26 +13,27 @@ export default class Message extends Model {
                     primaryKey: true,
                     field: "messageID",
                 },
-                presentationID: {
-                    type: DataTypes.INTEGER,
-                    allowNull: true,
-                    references: {
-                        model: "PRESENTATION",
-                        key: "presentationID",
-                    },
-                    field: "presentationID",
-                },
                 content: {
                     type: DataTypes.STRING,
                     allowNull: true,
                 },
-                createdBy: {
+                sessionID: {
                     type: DataTypes.INTEGER,
                     allowNull: true,
                     references: {
-                        model: "ACCOUNT",
-                        key: "accountID",
+                        model: "PRESENT_SESSION",
+                        key: "sessionID",
                     },
+                    field: "sessionID",
+                },
+                participantID: {
+                    type: DataTypes.INTEGER,
+                    allowNull: true,
+                    references: {
+                        model: "SESSION_PARTICIPANT",
+                        key: "participantID",
+                    },
+                    field: "participantID",
                 },
             },
             {

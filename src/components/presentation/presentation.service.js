@@ -3,12 +3,13 @@ import { getInsensitiveCaseRegextForSearchLike } from "../../utilities/string";
 import CollabTable from "./collaboration/collaboration.model";
 import PresentationTable from "./presentation.model";
 
-export const createPresentation = async ({ accountID, name, code }) => {
+export const createPresentation = async ({ accountID, name, code, sessionID }) => {
     const newPresentation = (
         await PresentationTable.create({
             createdBy: accountID,
             name,
             code,
+            sessionID,
         })
     ).get({
         plain: true,
@@ -16,7 +17,7 @@ export const createPresentation = async ({ accountID, name, code }) => {
     return newPresentation;
 };
 
-export const findPresentation = (data) => {
+export const findPresentation = (data, noSession = true) => {
     if (!data) {
         return null;
     }
@@ -24,11 +25,14 @@ export const findPresentation = (data) => {
         raw: true,
         where: {
             ...data,
+            ...(noSession && {
+                sessionID: null,
+            }),
         },
     });
 };
 
-export const getUserPresentation = ({ accountID, offset, limit, name }) => {
+export const getUserPresentation = ({ accountID, offset, limit, name }, noSession = true) => {
     const searchName = getInsensitiveCaseRegextForSearchLike(name || "");
 
     return PresentationTable.findAll({
@@ -41,6 +45,9 @@ export const getUserPresentation = ({ accountID, offset, limit, name }) => {
             name: {
                 [Op.regexp]: searchName,
             },
+            ...(noSession && {
+                sessionID: null,
+            }),
         },
         order: [["createdAt", "DESC"]],
         offset: offset,
@@ -102,7 +109,7 @@ export const deletePresentation = ({ presentationID }) => {
     });
 };
 
-export const findAccessiblePresentation = ({ accountID, presentationID }) => {
+export const findAccessiblePresentation = ({ accountID, presentationID, sessionID }, noSession = true) => {
     return PresentationTable.findOne({
         raw: true,
         where: {
@@ -110,7 +117,11 @@ export const findAccessiblePresentation = ({ accountID, presentationID }) => {
                 createdBy: accountID,
                 "$Collaborations.accountID$": accountID,
             },
-            presentationID,
+            ...(presentationID && { presentationID }),
+            ...(sessionID && { sessionID }),
+            ...(noSession && {
+                sessionID: null,
+            }),
         },
         include: {
             model: CollabTable,

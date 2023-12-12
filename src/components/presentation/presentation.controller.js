@@ -244,10 +244,11 @@ export const addSlide = async (req, res, next) => {
         const slides = await SlideService.getSlideOfPresentation({
             presentationID,
         });
+        console.log("slides:", slides.length);
         const slide = await slideGenerator({
             presentationID,
             type,
-            slideOrder: slides.length,
+            slideOrder: slides.length + 1,
         });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
@@ -278,10 +279,13 @@ export const getPresentationDetail = async (req, res, next) => {
             });
         }
 
-        const presentation = await PresentationService.findAccessiblePresentation({
-            presentationID,
-            accountID: user.accountID,
-        });
+        const presentation = await PresentationService.findAccessiblePresentation(
+            {
+                presentationID,
+                accountID: user.accountID,
+            },
+            false
+        );
         if (!presentation) {
             return res.status(RESPONSE_CODE.NOT_FOUND).json({
                 status: API_STATUS.NOT_FOUND,
