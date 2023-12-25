@@ -9,6 +9,7 @@ export default class MultipleChoiceSlideOption extends Model {
                 slideID: {
                     type: DataTypes.INTEGER,
                     allowNull: false,
+                    primaryKey: true,
                     references: {
                         model: "MULTIPLE_CHOICE_SLIDE",
                         key: "slideID",
@@ -18,13 +19,6 @@ export default class MultipleChoiceSlideOption extends Model {
                 option: {
                     type: DataTypes.STRING,
                     allowNull: true,
-                },
-                optionID: {
-                    autoIncrement: true,
-                    type: DataTypes.INTEGER,
-                    allowNull: false,
-                    primaryKey: true,
-                    field: "optionID",
                 },
             },
             {
@@ -36,7 +30,7 @@ export default class MultipleChoiceSlideOption extends Model {
                     {
                         name: "MULTIPLE_CHOICE_SLIDE_OPTION_pkey",
                         unique: true,
-                        fields: [{ name: "optionID" }],
+                        fields: [{ name: "slideID" }],
                     },
                 ],
             }

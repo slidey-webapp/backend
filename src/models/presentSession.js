@@ -30,6 +30,15 @@ export default class PresentSession extends Model {
                     type: DataTypes.INTEGER,
                     allowNull: true,
                 },
+                groupID: {
+                    type: DataTypes.INTEGER,
+                    allowNull: true,
+                    references: {
+                        model: "GROUP",
+                        key: "groupID",
+                    },
+                    field: "groupID",
+                },
                 name: {
                     type: DataTypes.STRING,
                     allowNull: true,
