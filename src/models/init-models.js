@@ -59,6 +59,8 @@ export default function initModels(sequelize) {
     Account.hasOne(Person, { foreignKey: "accountID" });
     GroupMember.belongsTo(Group, { foreignKey: "groupID" });
     Group.hasMany(GroupMember, { foreignKey: "groupID" });
+    PresentSession.belongsTo(Group, { foreignKey: "groupID" });
+    Group.hasMany(PresentSession, { foreignKey: "groupID" });
     MultipleChoiceSlideOption.belongsTo(MultipleChoiceSlide, { foreignKey: "slideID" });
     MultipleChoiceSlide.hasMany(MultipleChoiceSlideOption, { foreignKey: "slideID" });
     Collaboration.belongsTo(Presentation, { foreignKey: "presentationID" });

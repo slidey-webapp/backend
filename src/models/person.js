@@ -28,7 +28,7 @@ export default class Person extends Model {
                 paranoid: true,
                 indexes: [
                     {
-                        name: "USER_pkey",
+                        name: "PERSON_pkey",
                         unique: true,
                         fields: [{ name: "accountID" }],
                     },
