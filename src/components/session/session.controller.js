@@ -121,7 +121,7 @@ export const joinPresentation = async (req, res, next) => {
             });
         }
         const isJoinable = await joinableSession(session, user);
-        if (!isJoinable) {
+        if (!isJoinable || session.status === SESSION_STATUS.ENDED) {
             return res.status(RESPONSE_CODE.FORBIDDEN).json({
                 status: API_STATUS.PERMISSION_DENIED,
                 message: MESSAGE.PERMISSION_NOT_FOUND,
@@ -516,7 +516,8 @@ export const getQuestionlist = async (req, res, next) => {
         const user = req.user;
         const { sessionID } = req.query;
         const { limit, offset } = getPaginationInfo(req);
-        const isAnswered = queryParamToBool(req.query.isAnswered);
+        const isAnswered =
+            req.query.isAnswered === undefined ? req.query.isAnswered : queryParamToBool(req.query.isAnswered);
 
         const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
             sessionID,
@@ -665,7 +666,7 @@ export const upvoteQuestion = async (req, res, next) => {
     }
 };
 
-export const markAnwseredQuestion = async (req, res, next) => {
+export const markAnsweredQuestion = async (req, res, next) => {
     try {
         const user = req.user;
         const { questionID, sessionID } = req.body;
@@ -903,6 +904,40 @@ export const changeSlide = async (req, res, next) => {
             status: API_STATUS.OK,
             result: slide,
             message: MESSAGE.POST_SUCCESS("Chuyển slide"),
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+            status: API_STATUS.INTERNAL_ERROR,
+            error,
+        });
+    }
+};
+
+export const endSession = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const { sessionID } = req.body;
+        const session = await SessionService.findSession({
+            sessionID,
+            host: user.accountID,
+        });
+
+        if (!session) {
+            return res.status(RESPONSE_CODE.NOT_FOUND).json({
+                status: API_STATUS.NOT_FOUND,
+                message: MESSAGE.QUERY_NOT_FOUND("phiên trình chiếu"),
+            });
+        }
+
+        await SessionService.updateSession({
+            sessionID,
+            status: SESSION_STATUS.ENDED,
+        });
+
+        return res.status(RESPONSE_CODE.SUCCESS).json({
+            status: API_STATUS.OK,
+            message: MESSAGE.POST_SUCCESS("Kết thúc phiên trình chiếu"),
         });
     } catch (error) {
         console.log(error);

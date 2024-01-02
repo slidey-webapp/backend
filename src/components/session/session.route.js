@@ -6,12 +6,13 @@ const sessionRoute = express.Router();
 sessionRoute.post("/start", auth, SessionController.startPresentation);
 sessionRoute.post("/join", getMe, SessionController.joinPresentation);
 sessionRoute.post("/submit-answer", getMe, SessionController.submitAnswer);
+sessionRoute.post("/end", auth, SessionController.endSession);
 
 sessionRoute.post("/message/send", getMe, SessionController.sendMessage);
 sessionRoute.get("/message", getMe, SessionController.getMessageList);
 
 sessionRoute.post("/question/send", getMe, SessionController.sendQuestion);
-sessionRoute.post("/question/anwsered", auth, SessionController.markAnwseredQuestion);
+sessionRoute.post("/question/answered", auth, SessionController.markAnsweredQuestion);
 sessionRoute.post("/question/upvote", getMe, SessionController.upvoteQuestion);
 sessionRoute.get("/question", getMe, SessionController.getQuestionlist);
 
