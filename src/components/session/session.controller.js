@@ -912,3 +912,37 @@ export const changeSlide = async (req, res, next) => {
         });
     }
 };
+
+export const endSession = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const { sessionID } = req.body;
+        const session = await SessionService.findSession({
+            sessionID,
+            host: user.accountID,
+        });
+
+        if (!session) {
+            return res.status(RESPONSE_CODE.NOT_FOUND).json({
+                status: API_STATUS.NOT_FOUND,
+                message: MESSAGE.QUERY_NOT_FOUND("phiên trình chiếu"),
+            });
+        }
+
+        await SessionService.updateSession({
+            sessionID,
+            status: SESSION_STATUS.ENDED,
+        });
+
+        return res.status(RESPONSE_CODE.SUCCESS).json({
+            status: API_STATUS.OK,
+            message: MESSAGE.POST_SUCCESS("Kết thúc phiên trình chiếu"),
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+            status: API_STATUS.INTERNAL_ERROR,
+            error,
+        });
+    }
+};

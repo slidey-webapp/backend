@@ -148,3 +148,19 @@ export const countSessionParticipant = async ({ sessionID, name }) => {
         order: [["createdAt", "DESC"]],
     });
 };
+
+export const updateSession = async ({ sessionID, status }) => {
+    const result = await PresentSessionTable.update(
+        {
+            status: status,
+        },
+        {
+            where: {
+                sessionID,
+            },
+            raw: true,
+            returning: true,
+        }
+    );
+    return result && result.length ? result[1] : null;
+};
