@@ -121,7 +121,7 @@ export const joinPresentation = async (req, res, next) => {
             });
         }
         const isJoinable = await joinableSession(session, user);
-        if (!isJoinable) {
+        if (!isJoinable || session.status === SESSION_STATUS.ENDED) {
             return res.status(RESPONSE_CODE.FORBIDDEN).json({
                 status: API_STATUS.PERMISSION_DENIED,
                 message: MESSAGE.PERMISSION_NOT_FOUND,
@@ -516,7 +516,8 @@ export const getQuestionlist = async (req, res, next) => {
         const user = req.user;
         const { sessionID } = req.query;
         const { limit, offset } = getPaginationInfo(req);
-        const isAnswered = queryParamToBool(req.query.isAnswered);
+        const isAnswered =
+            req.query.isAnswered === undefined ? req.query.isAnswered : queryParamToBool(req.query.isAnswered);
 
         const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
             sessionID,
@@ -665,7 +666,7 @@ export const upvoteQuestion = async (req, res, next) => {
     }
 };
 
-export const markAnwseredQuestion = async (req, res, next) => {
+export const markAnsweredQuestion = async (req, res, next) => {
     try {
         const user = req.user;
         const { questionID, sessionID } = req.body;

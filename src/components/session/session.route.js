@@ -12,7 +12,7 @@ sessionRoute.post("/message/send", getMe, SessionController.sendMessage);
 sessionRoute.get("/message", getMe, SessionController.getMessageList);
 
 sessionRoute.post("/question/send", getMe, SessionController.sendQuestion);
-sessionRoute.post("/question/anwsered", auth, SessionController.markAnwseredQuestion);
+sessionRoute.post("/question/answered", auth, SessionController.markAnsweredQuestion);
 sessionRoute.post("/question/upvote", getMe, SessionController.upvoteQuestion);
 sessionRoute.get("/question", getMe, SessionController.getQuestionlist);
 
