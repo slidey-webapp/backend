@@ -15,6 +15,8 @@ sessionRoute.post("/question/anwsered", auth, SessionController.markAnwseredQues
 sessionRoute.post("/question/upvote", getMe, SessionController.upvoteQuestion);
 sessionRoute.get("/question", getMe, SessionController.getQuestionlist);
 
+sessionRoute.post("/slide/change-slide", auth, SessionController.changeSlide);
+
 sessionRoute.get("/detail/:sessionID", auth, SessionController.getSessionDetail);
 sessionRoute.get("/participant", auth, SessionController.getSessionParticipant);
 

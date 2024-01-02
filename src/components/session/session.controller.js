@@ -11,11 +11,12 @@ import * as SessionService from "./session.service";
 import * as MessageService from "./message/message.service";
 import * as QuestionService from "./question/question.service";
 import { mapMessage } from "./message/message.util";
+import { joinableSession } from "./session.util";
 
 export const startPresentation = async (req, res, next) => {
     try {
         const user = req.user;
-        const { presentationID } = req.body;
+        const { presentationID, groupID } = req.body;
         const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
             presentationID,
         });
@@ -56,6 +57,7 @@ export const startPresentation = async (req, res, next) => {
             presentationID,
             accountID: user.accountID,
             name: presentation.name,
+            groupID: groupID || null,
         });
 
         const sessionPresentation = await PresentationService.createPresentation({
@@ -118,7 +120,13 @@ export const joinPresentation = async (req, res, next) => {
                 message: MESSAGE.QUERY_NOT_FOUND("phiên trình chiếu"),
             });
         }
-
+        const isJoinable = await joinableSession(session, user);
+        if (!isJoinable) {
+            return res.status(RESPONSE_CODE.FORBIDDEN).json({
+                status: API_STATUS.PERMISSION_DENIED,
+                message: MESSAGE.PERMISSION_NOT_FOUND,
+            });
+        }
         const oldParticipant = await SessionService.findParticipant({
             sessionID,
             name,
@@ -208,6 +216,7 @@ export const getMySession = async (req, res, next) => {
 
 export const submitAnswer = async (req, res, next) => {
     try {
+        const user = req.user;
         const { slideID, option, sessionID, participantID } = req.body;
         const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
             slideID,
@@ -241,6 +250,13 @@ export const submitAnswer = async (req, res, next) => {
             return res.status(RESPONSE_CODE.NOT_FOUND).json({
                 status: API_STATUS.NOT_FOUND,
                 message: MESSAGE.QUERY_NOT_FOUND("phiên trình chiếu"),
+            });
+        }
+        const isJoinable = await joinableSession(session, user);
+        if (!isJoinable) {
+            return res.status(RESPONSE_CODE.FORBIDDEN).json({
+                status: API_STATUS.PERMISSION_DENIED,
+                message: MESSAGE.PERMISSION_NOT_FOUND,
             });
         }
         if (!presentation) {
@@ -313,6 +329,7 @@ export const submitAnswer = async (req, res, next) => {
 
 export const sendMessage = async (req, res, next) => {
     try {
+        const user = req.user;
         const { content, sessionID, participantID } = req.body;
         const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
             content,
@@ -340,6 +357,13 @@ export const sendMessage = async (req, res, next) => {
             return res.status(RESPONSE_CODE.NOT_FOUND).json({
                 status: API_STATUS.NOT_FOUND,
                 message: MESSAGE.QUERY_NOT_FOUND("phiên trình chiếu"),
+            });
+        }
+        const isJoinable = await joinableSession(session, user);
+        if (!isJoinable) {
+            return res.status(RESPONSE_CODE.FORBIDDEN).json({
+                status: API_STATUS.PERMISSION_DENIED,
+                message: MESSAGE.PERMISSION_NOT_FOUND,
             });
         }
         if (!participant) {
@@ -370,6 +394,7 @@ export const sendMessage = async (req, res, next) => {
 
 export const getMessageList = async (req, res, next) => {
     try {
+        const user = req.user;
         const { lastMessageID, sessionID } = req.query;
         const { limit } = getPaginationInfo(req);
 
@@ -392,7 +417,13 @@ export const getMessageList = async (req, res, next) => {
                 message: MESSAGE.QUERY_NOT_FOUND("phiên trình chiếu"),
             });
         }
-
+        const isJoinable = await joinableSession(session, user);
+        if (!isJoinable) {
+            return res.status(RESPONSE_CODE.FORBIDDEN).json({
+                status: API_STATUS.PERMISSION_DENIED,
+                message: MESSAGE.PERMISSION_NOT_FOUND,
+            });
+        }
         const messageList = await MessageService.getMessageList({
             sessionID,
             lastMessageID,
@@ -417,6 +448,7 @@ export const getMessageList = async (req, res, next) => {
 
 export const sendQuestion = async (req, res, next) => {
     try {
+        const user = req.user;
         const { content, sessionID, participantID } = req.body;
         const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
             content,
@@ -444,6 +476,13 @@ export const sendQuestion = async (req, res, next) => {
             return res.status(RESPONSE_CODE.NOT_FOUND).json({
                 status: API_STATUS.NOT_FOUND,
                 message: MESSAGE.QUERY_NOT_FOUND("phiên trình chiếu"),
+            });
+        }
+        const isJoinable = await joinableSession(session, user);
+        if (!isJoinable) {
+            return res.status(RESPONSE_CODE.FORBIDDEN).json({
+                status: API_STATUS.PERMISSION_DENIED,
+                message: MESSAGE.PERMISSION_NOT_FOUND,
             });
         }
         if (!participant) {
@@ -474,6 +513,7 @@ export const sendQuestion = async (req, res, next) => {
 
 export const getQuestionlist = async (req, res, next) => {
     try {
+        const user = req.user;
         const { sessionID } = req.query;
         const { limit, offset } = getPaginationInfo(req);
         const isAnswered = queryParamToBool(req.query.isAnswered);
@@ -497,7 +537,13 @@ export const getQuestionlist = async (req, res, next) => {
                 message: MESSAGE.QUERY_NOT_FOUND("phiên trình chiếu"),
             });
         }
-
+        const isJoinable = await joinableSession(session, user);
+        if (!isJoinable) {
+            return res.status(RESPONSE_CODE.FORBIDDEN).json({
+                status: API_STATUS.PERMISSION_DENIED,
+                message: MESSAGE.PERMISSION_NOT_FOUND,
+            });
+        }
         const questionList = await QuestionService.getQuestion({
             sessionID,
             limit,
@@ -540,6 +586,7 @@ export const getQuestionlist = async (req, res, next) => {
 
 export const upvoteQuestion = async (req, res, next) => {
     try {
+        const user = req.user;
         const { questionID, sessionID, participantID } = req.body;
         const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
             questionID,
@@ -571,6 +618,13 @@ export const upvoteQuestion = async (req, res, next) => {
             return res.status(RESPONSE_CODE.NOT_FOUND).json({
                 status: API_STATUS.NOT_FOUND,
                 message: MESSAGE.QUERY_NOT_FOUND("phiên trình chiếu"),
+            });
+        }
+        const isJoinable = await joinableSession(session, user);
+        if (!isJoinable) {
+            return res.status(RESPONSE_CODE.FORBIDDEN).json({
+                status: API_STATUS.PERMISSION_DENIED,
+                message: MESSAGE.PERMISSION_NOT_FOUND,
             });
         }
         if (!participant) {
@@ -784,6 +838,71 @@ export const getSessionParticipant = async (req, res, next) => {
                 currentPage: Math.floor(offset / limit),
             },
             message: MESSAGE.QUERY_SUCCESS("Người tham gia phiên trình chiếu"),
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+            status: API_STATUS.INTERNAL_ERROR,
+            error,
+        });
+    }
+};
+
+export const changeSlide = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const { slideID, sessionID } = req.body;
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            slideID,
+            sessionID,
+        });
+        if (emptyMessage) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: emptyMessage,
+                errors: emptyInputError,
+            });
+        }
+        const [session, presentation] = await Promise.all([
+            SessionService.findSession({
+                sessionID,
+            }),
+            PresentationService.findPresentation(
+                {
+                    sessionID,
+                },
+                false
+            ),
+        ]);
+        if (!session) {
+            return res.status(RESPONSE_CODE.NOT_FOUND).json({
+                status: API_STATUS.NOT_FOUND,
+                message: MESSAGE.QUERY_NOT_FOUND("phiên trình chiếu"),
+            });
+        }
+        if (!presentation) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: MESSAGE.INVALID_INPUT("Session"),
+            });
+        }
+        const slide = await SlideService.findSlide({ slideID, presentationID: presentation.presentationID });
+        if (!slide) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: MESSAGE.INVALID_INPUT("Slide"),
+            });
+        }
+        await PresentationService.updatePresentation({
+            name: presentation.name,
+            updatedBy: user.accountID,
+            currentSlideID: slide.slideID,
+            presentationID: presentation.presentationID,
+        });
+        return res.status(RESPONSE_CODE.SUCCESS).json({
+            status: API_STATUS.OK,
+            result: slide,
+            message: MESSAGE.POST_SUCCESS("Chuyển slide"),
         });
     } catch (error) {
         console.log(error);
