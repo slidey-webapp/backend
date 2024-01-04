@@ -5,13 +5,19 @@ import { getPaginationInfo } from "../../utilities/pagination";
 import * as PresentationService from "../presentation/presentation.service";
 import { SLIDE_TYPE } from "../presentation/slide/slide.model";
 import * as SlideService from "../presentation/slide/slide.service";
-import { cloneSlides, getDetailSlideOfPresentation, mapSlide } from "../presentation/slide/slide.util";
+import {
+    cloneSlides,
+    deleteSlideReference,
+    getDetailSlideOfPresentation,
+    mapSlide,
+} from "../presentation/slide/slide.util";
 import { SESSION_STATUS } from "./session.model";
 import * as SessionService from "./session.service";
 import * as MessageService from "./message/message.service";
 import * as QuestionService from "./question/question.service";
 import { mapMessage } from "./message/message.util";
 import { joinableSession } from "./session.util";
+import { deleteQuestionReference } from "./question/question.util";
 
 export const startPresentation = async (req, res, next) => {
     try {
@@ -918,6 +924,16 @@ export const endSession = async (req, res, next) => {
     try {
         const user = req.user;
         const { sessionID } = req.body;
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            sessionID,
+        });
+        if (emptyMessage) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: emptyMessage,
+                errors: emptyInputError,
+            });
+        }
         const session = await SessionService.findSession({
             sessionID,
             host: user.accountID,
@@ -938,6 +954,124 @@ export const endSession = async (req, res, next) => {
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             message: MESSAGE.POST_SUCCESS("Kết thúc phiên trình chiếu"),
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+            status: API_STATUS.INTERNAL_ERROR,
+            error,
+        });
+    }
+};
+
+export const updateSession = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const { sessionID, name } = req.body;
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            sessionID,
+            name,
+        });
+        if (emptyMessage) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: emptyMessage,
+                errors: emptyInputError,
+            });
+        }
+        const session = await SessionService.findSession({
+            sessionID,
+            host: user.accountID,
+        });
+
+        if (!session) {
+            return res.status(RESPONSE_CODE.NOT_FOUND).json({
+                status: API_STATUS.NOT_FOUND,
+                message: MESSAGE.QUERY_NOT_FOUND("phiên trình chiếu"),
+            });
+        }
+
+        await SessionService.updateSession({
+            sessionID,
+            name,
+        });
+
+        return res.status(RESPONSE_CODE.SUCCESS).json({
+            status: API_STATUS.OK,
+            message: MESSAGE.POST_SUCCESS("Cập nhật phiên"),
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+            status: API_STATUS.INTERNAL_ERROR,
+            error,
+        });
+    }
+};
+
+export const deleteSession = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const { sessionID } = req.body;
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            sessionID,
+        });
+        if (emptyMessage) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: emptyMessage,
+                errors: emptyInputError,
+            });
+        }
+        const [session, presentation] = await Promise.all([
+            SessionService.findSession({
+                sessionID,
+                host: user.accountID,
+            }),
+            PresentationService.findPresentation(
+                {
+                    sessionID,
+                },
+                false
+            ),
+        ]);
+        if (!session) {
+            return res.status(RESPONSE_CODE.NOT_FOUND).json({
+                status: API_STATUS.NOT_FOUND,
+                message: MESSAGE.QUERY_NOT_FOUND("phiên trình chiếu"),
+            });
+        }
+        if (!presentation) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: MESSAGE.INVALID_INPUT("Session"),
+            });
+        }
+        const [slides, questions] = await Promise.all([
+            SlideService.getSlideOfPresentation({
+                presentationID: presentation.presentationID,
+            }),
+            QuestionService.getQuestion({ sessionID }),
+        ]);
+        const promises = slides.map((slide) => deleteSlideReference({ slideID: slide.slideID, type: slide.type }));
+        questions.map((question) => promises.push(deleteQuestionReference({ questionID: question.questionID })));
+        await Promise.all(promises);
+        await SlideService.deleteSlideOfPresentation({
+            presentationID: presentation.presentationID,
+        });
+        const deletePromises = [
+            PresentationService.deletePresentation({
+                presentationID: presentation.presentationID,
+            }),
+            MessageService.deleteMessageOfSession({ sessionID }),
+            QuestionService.deleteQuestionOfSession({ sessionID }),
+            SessionService.deleteSessionParticipant({ sessionID }),
+        ];
+        await Promise.all(deletePromises);
+        await SessionService.deleteSession({ sessionID });
+        return res.status(RESPONSE_CODE.SUCCESS).json({
+            status: API_STATUS.OK,
+            message: MESSAGE.POST_SUCCESS("Xóa phiên"),
         });
     } catch (error) {
         console.log(error);

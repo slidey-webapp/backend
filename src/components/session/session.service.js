@@ -149,10 +149,11 @@ export const countSessionParticipant = async ({ sessionID, name }) => {
     });
 };
 
-export const updateSession = async ({ sessionID, status }) => {
+export const updateSession = async ({ sessionID, status, name }) => {
     const result = await PresentSessionTable.update(
         {
-            status: status,
+            ...(status && { status }),
+            ...(name && { name }),
         },
         {
             where: {
@@ -163,4 +164,12 @@ export const updateSession = async ({ sessionID, status }) => {
         }
     );
     return result && result.length ? result[1] : null;
+};
+
+export const deleteSessionParticipant = ({ sessionID }) => {
+    return SessionParticipantTable.destroy({
+        where: {
+            sessionID,
+        },
+    });
 };

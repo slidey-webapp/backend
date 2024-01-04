@@ -1,4 +1,3 @@
-import { Sequelize } from "sequelize";
 import QuestionTable, { QuestionVoteTable } from "./question.model";
 
 export const createQuestion = async ({ sessionID, content, participantID }) => {
@@ -101,5 +100,21 @@ export const getQuestionUpvote = async ({ questionID }) => {
             questionID,
         },
         order: [["createdAt", "DESC"]],
+    });
+};
+
+export const deleteQuestionVote = ({ questionID }) => {
+    return QuestionVoteTable.destroy({
+        where: {
+            questionID,
+        },
+    });
+};
+
+export const deleteQuestionOfSession = async ({ sessionID }) => {
+    return QuestionTable.destroy({
+        where: {
+            sessionID,
+        },
     });
 };

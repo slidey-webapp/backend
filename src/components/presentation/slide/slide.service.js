@@ -136,7 +136,7 @@ export const deleteMultipleChoiceSlideOption = ({ slideID, optionID }) => {
     return MultipleChoiceSlideOptionTable.destroy({
         where: {
             slideID,
-            optionID,
+            ...(optionID && { optionID }),
         },
     });
 };

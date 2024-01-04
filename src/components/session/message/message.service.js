@@ -35,3 +35,11 @@ export const getMessageList = ({ sessionID, lastMessageID, limit }) => {
         },
     });
 };
+
+export const deleteMessageOfSession = async ({ sessionID }) => {
+    return MessageTable.destroy({
+        where: {
+            sessionID,
+        },
+    });
+};
