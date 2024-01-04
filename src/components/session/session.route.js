@@ -7,7 +7,8 @@ sessionRoute.post("/start", auth, SessionController.startPresentation);
 sessionRoute.post("/join", getMe, SessionController.joinPresentation);
 sessionRoute.post("/submit-answer", getMe, SessionController.submitAnswer);
 sessionRoute.post("/end", auth, SessionController.endSession);
-
+sessionRoute.post("/update", auth, SessionController.updateSession);
+sessionRoute.post("/delete", auth, SessionController.deleteSession);
 sessionRoute.post("/message/send", getMe, SessionController.sendMessage);
 sessionRoute.get("/message", getMe, SessionController.getMessageList);
 
