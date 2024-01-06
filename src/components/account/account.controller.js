@@ -16,7 +16,7 @@ import { sendEmail } from "../../utilities/email";
 import { mapUser } from "../../utilities/mapUser";
 import { validateGoogleToken } from "../../utilities/oauth";
 import * as PersonService from "../person/person.service";
-import { ACCOUNT_STATUS } from "./account.model";
+import { ACCOUNT_SOURCE, ACCOUNT_STATUS } from "./account.model";
 import * as AccountService from "./account.service";
 import { comparePassword } from "./account.util";
 export const signUp = async (req, res, next) => {
@@ -60,6 +60,7 @@ export const signUp = async (req, res, next) => {
         const account = await AccountService.createAccount({
             password: hashPassword,
             email,
+            source: ACCOUNT_SOURCE.NORMAL,
         });
         const { token, refreshToken } = await AccountService.createToken(
             {
@@ -325,6 +326,7 @@ export const googleLogin = async (req, res, next) => {
             const account = await AccountService.createAccount({
                 email: payload.email,
                 status: ACCOUNT_STATUS.ACTIVE,
+                source: ACCOUNT_SOURCE.GOOGLE,
             });
             const person = await PersonService.createPerson({
                 accountID: account.accountID,
@@ -378,6 +380,18 @@ export const changePassword = async (req, res, next) => {
         const account = await AccountService.findAccount({
             accountID,
         });
+        if (!account) {
+            return res.status(RESPONSE_CODE.NOT_FOUND).json({
+                status: API_STATUS.NOT_FOUND,
+                message: MESSAGE.QUERY_NOT_FOUND("Tài khoản"),
+            });
+        }
+        if (!account.password) {
+            return res.status(RESPONSE_CODE.FORBIDDEN).json({
+                status: API_STATUS.PERMISSION_DENIED,
+                message: MESSAGE.PERMISSION_NOT_FOUND,
+            });
+        }
         const isCorrectPassword = await comparePassword({
             account,
             password,
@@ -580,6 +594,60 @@ export const resetPassword = async (req, res, next) => {
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             message: MESSAGE.POST_SUCCESS("Đặt lại mật khẩu"),
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+            status: API_STATUS.INTERNAL_ERROR,
+            message: error.message,
+        });
+    }
+};
+
+export const createPassword = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const accountID = user.accountID;
+        const password = req.body.password;
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            password,
+        });
+        if (emptyMessage) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: emptyMessage,
+                errors: emptyInputError,
+            });
+        }
+        const account = await AccountService.findAccount({
+            accountID,
+        });
+        if (!account) {
+            return res.status(RESPONSE_CODE.NOT_FOUND).json({
+                message: MESSAGE.QUERY_NOT_FOUND("Tài khoản"),
+                status: API_STATUS.NOT_FOUND,
+            });
+        }
+        if (account.password) {
+            return res.status(RESPONSE_CODE.FORBIDDEN).json({
+                message: MESSAGE.PERMISSION_NOT_FOUND,
+                status: API_STATUS.PERMISSION_DENIED,
+            });
+        }
+        const hashPassword = await bcrypt.hash(password, BCRYPT_SALT);
+        const changeResult = await AccountService.updatePassword({
+            accountID,
+            newPassword: hashPassword,
+        });
+        if (!changeResult) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.NOT_FOUND,
+                message: MESSAGE.QUERY_NOT_FOUND("Tài khoản"),
+            });
+        }
+        return res.status(RESPONSE_CODE.SUCCESS).json({
+            status: API_STATUS.OK,
+            message: MESSAGE.POST_SUCCESS("Tạo mật khẩu"),
         });
     } catch (error) {
         console.log(error);

@@ -7,3 +7,8 @@ export const ACCOUNT_STATUS = {
     ACTIVE: "ACTIVE",
     INACTIVE: "INACTIVE",
 };
+
+export const ACCOUNT_SOURCE = {
+    NORMAL: "normal",
+    GOOGLE: "google",
+};

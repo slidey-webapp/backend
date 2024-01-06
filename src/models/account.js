@@ -25,6 +25,10 @@ export default class Account extends Model {
                     type: DataTypes.STRING,
                     allowNull: true,
                 },
+                source: {
+                    type: DataTypes.STRING,
+                    allowNull: true,
+                },
             },
             {
                 tableName: "ACCOUNT",
