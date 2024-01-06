@@ -1,5 +1,6 @@
 export const mapUser = (user) => {
     const result = { ...user };
+    result.hasPassword = !!user.password;
     delete result.password;
     Object.keys(user).forEach((key) => {
         if (key.includes(".")) {

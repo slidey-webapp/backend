@@ -37,6 +37,7 @@ export const auth = (req, res, next) => {
                         result: verifyURL,
                     });
                 }
+                account.hasPassword = !!account.password;
                 delete account.password;
                 const clone = { ...account };
                 Object.keys(clone).forEach((key) => {
