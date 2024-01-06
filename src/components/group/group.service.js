@@ -4,6 +4,7 @@ import { Op } from "../../database";
 import { DEFAULT_LIMIT, DEFAULT_OFFSET } from "../../config/contants";
 import AccountTable from "../account/account.model";
 import PersonTable from "../person/person.model";
+import { Sequelize } from "sequelize";
 
 export const createGroup = async ({ name, code, description, createdBy }) => {
     const newGroup = (
@@ -163,7 +164,11 @@ export const getGroupMember = ({ groupID, offset, limit, name, email }) => {
         raw: true,
         offset: offset || DEFAULT_OFFSET,
         limit: limit || DEFAULT_LIMIT,
-        order: [["createdAt", "DESC"]],
+        order: [
+            Sequelize.literal(`CASE WHEN role = 'OWNER' THEN 0 WHEN role = 'COOWNER' THEN 1 ELSE 2 END`),
+            // Add additional sorting criteria here if needed
+            [["createdAt", "DESC"]],
+        ],
         where: {
             groupID,
             "$Account.email$": {
