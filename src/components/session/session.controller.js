@@ -18,7 +18,7 @@ import * as QuestionService from "./question/question.service";
 import { mapMessage } from "./message/message.util";
 import { joinableSession } from "./session.util";
 import { deleteQuestionReference } from "./question/question.util";
-
+import * as GroupService from "../group/group.service";
 export const startPresentation = async (req, res, next) => {
     try {
         const user = req.user;
@@ -33,8 +33,8 @@ export const startPresentation = async (req, res, next) => {
                 errors: emptyInputError,
             });
         }
-        const presentation = await PresentationService.findAccessiblePresentation({
-            accountID: user.accountID,
+        const presentation = await PresentationService.findPresentation({
+            createdBy: user.accountID,
             presentationID,
         });
         if (!presentation) {
@@ -57,6 +57,18 @@ export const startPresentation = async (req, res, next) => {
                 status: API_STATUS.INVALID_INPUT,
                 message: MESSAGE.IS_PRESENTING,
             });
+        }
+        if (groupID) {
+            const group = await GroupService.findGroup({
+                groupID,
+                createdBy: user.accountID,
+            });
+            if (!group) {
+                return res.status(RESPONSE_CODE.NOT_FOUND).json({
+                    status: API_STATUS.NOT_FOUND,
+                    message: MESSAGE.QUERY_NOT_FOUND("Nhóm"),
+                });
+            }
         }
 
         const session = await SessionService.createSession({

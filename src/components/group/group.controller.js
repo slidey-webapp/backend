@@ -142,6 +142,16 @@ export const sendInviteEmail = async (req, res, next) => {
                 message: MESSAGE.QUERY_NOT_FOUND("Nhóm"),
             });
         }
+        const myRole = await GroupService.findGroupMember({
+            accountID: user.accountID,
+            groupID,
+        });
+        if (!myRole || myRole.role === GROUP_MEMBER_ROLE.MEMBER) {
+            return res.status(RESPONSE_CODE.FORBIDDEN).json({
+                status: API_STATUS.PERMISSION_DENIED,
+                message: MESSAGE.PERMISSION_NOT_FOUND,
+            });
+        }
         const token = jwt.sign(
             {
                 groupID: groupID,
