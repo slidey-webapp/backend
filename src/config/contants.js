@@ -9,7 +9,6 @@ export const TOKEN_EXPIRES_IN = "8h";
 export const REFRESH_TOKEN_EXPIRES_IN = "14d";
 export const DEFAULT_LIMIT = 10;
 export const DEFAULT_OFFSET = 0;
-export const SOCKET_TIMEOUT = 2000;
 export const CUSTOMER_ACCESS_TOKEN_HEADER = "access_token";
 
 export const API_STATUS = {
@@ -65,3 +64,22 @@ export const APP_NAME = process.env.APP_NAME;
 export const APP_HOMEPAGE = process.env.APP_HOMEPAGE;
 export const APP_LOGO = process.env.APP_LOGO;
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+
+export const SOCKET_AUTH_TIMEOUT = 3000;
+
+export const SOCKET_EVENT = {
+    CONNECTION: "connection",
+    AUTHENTICATION: "authentication",
+    JOIN_SESSION: "join_session",
+    MESSAGE: "message",
+    QUESTION: "question",
+    UPVOTE_QUESTION: "upvote_question",
+    ANSWER_QUESTION: "answer_question",
+    SUBMIT_SLIDE_RESULT: "submit_slide_result",
+    CHANGE_SLIDE: "change_slide",
+    END_SESSION: "end_session",
+    START_PRESENTING: "start_presenting",
+    HOST_JOIN_SESSION: "host_join_session",
+};
+
+export const SOCKET_SESSION_ROOM_PREFIX = "session-";

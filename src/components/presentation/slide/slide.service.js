@@ -261,6 +261,20 @@ export const findSlide = async (data) => {
         where: {
             ...data,
         },
+        include: [
+            {
+                model: HeadingSlideTable,
+                duplicating: false,
+            },
+            {
+                model: ParagraphSlideTable,
+                duplicating: false,
+            },
+            {
+                model: MultipleChoiceSlideTable,
+                duplicating: false,
+            },
+        ],
     });
 };
 
