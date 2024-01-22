@@ -11,7 +11,10 @@ export const DEFAULT_LIMIT = 10;
 export const DEFAULT_OFFSET = 0;
 export const SOCKET_TIMEOUT = 2000;
 export const CUSTOMER_ACCESS_TOKEN_HEADER = "access_token";
-
+export const ENVIRONMENT = {
+    PRODUCTION: "production",
+    DEVELOPMENT: "development",
+};
 export const API_STATUS = {
     OK: "OK",
     NOT_FOUND: "NOT_FOUND",

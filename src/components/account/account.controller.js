@@ -80,7 +80,7 @@ export const signUp = async (req, res, next) => {
             },
             subject: MESSAGE.VERIFY_MAIL_SUBJECT,
             htmlData: {
-                dir: "/src/resource/htmlEmailTemplate/verifyEmail.html",
+                dir: "/resource/htmlEmailTemplate/verifyEmail.html",
                 replace: {
                     verifyUrl: verifyURL,
                     appHomePage: APP_HOMEPAGE,
@@ -172,7 +172,7 @@ export const login = async (req, res, next) => {
                 },
                 subject: MESSAGE.VERIFY_MAIL_SUBJECT,
                 htmlData: {
-                    dir: "/src/resource/htmlEmailTemplate/verifyEmail.html",
+                    dir: "/resource/htmlEmailTemplate/verifyEmail.html",
                     replace: {
                         verifyUrl: verifyURL,
                         appHomePage: APP_HOMEPAGE,
@@ -518,7 +518,7 @@ export const forgotPassword = async (req, res, next) => {
             },
             subject: MESSAGE.RESET_PASSWORD_MAIL_SUBJECT,
             htmlData: {
-                dir: "/src/resource/htmlEmailTemplate/resetPassword.html",
+                dir: "/resource/htmlEmailTemplate/resetPassword.html",
                 replace: {
                     verifyUrl: resetPasswordURL,
                     appHomePage: APP_HOMEPAGE,

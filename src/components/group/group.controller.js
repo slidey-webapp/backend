@@ -168,7 +168,7 @@ export const sendInviteEmail = async (req, res, next) => {
             },
             subject: MESSAGE.GROUP_INVITATION_MAIL_SUBJECT,
             htmlData: {
-                dir: "/src/resource/htmlEmailTemplate/groupInvitation.html",
+                dir: "/resource/htmlEmailTemplate/groupInvitation.html",
                 replace: {
                     inviteURL,
                     appHomePage: APP_HOMEPAGE,

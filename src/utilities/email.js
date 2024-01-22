@@ -3,7 +3,7 @@ const nodemailer = require("nodemailer");
 import * as handlebars from "handlebars";
 import * as fs from "fs";
 import * as path from "path";
-import { APP_EMAIL, APP_EMAIL_PASSWORD, APP_NAME } from "../config/contants";
+import { APP_EMAIL, APP_EMAIL_PASSWORD, APP_NAME, ENVIRONMENT } from "../config/contants";
 export const sendEmail = async ({ emailTo, text, subject, replyID, attachments, htmlData }) => {
     try {
         const transporter = nodemailer.createTransport({
@@ -18,7 +18,8 @@ export const sendEmail = async ({ emailTo, text, subject, replyID, attachments, 
         let htmlToSend = null,
             htmlFileToSend = null;
         if (htmlData) {
-            const __dirname = path.resolve();
+            const isProduction = process.env.NODE_ENV === ENVIRONMENT.PRODUCTION;
+            const __dirname = path.resolve() + isProduction ? "dist" : "src";
             const filePath = path.join(__dirname, htmlData.dir);
             const source = fs.readFileSync(filePath, "utf-8").toString();
             const template = handlebars.compile(source);

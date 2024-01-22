@@ -23,7 +23,7 @@ export const auth = (req, res, next) => {
                         },
                         subject: MESSAGE.VERIFY_MAIL_SUBJECT,
                         htmlData: {
-                            dir: "/src/resource/htmlEmailTemplate/verifyEmail.html",
+                            dir: "/resource/htmlEmailTemplate/verifyEmail.html",
                             replace: {
                                 verifyUrl: verifyURL,
                                 appHomePage: APP_HOMEPAGE,
