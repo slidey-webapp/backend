@@ -7,7 +7,7 @@ export const emitSessionMessage = ({ sessionID, message }) => {
 };
 
 export const emitSessionQuestion = ({ sessionID, question }) => {
-    socketServer.to(getSessionRoomName(sessionID)).emit(SOCKET_EVENT.MESSAGE, { question });
+    socketServer.to(getSessionRoomName(sessionID)).emit(SOCKET_EVENT.QUESTION, { question });
 };
 
 export const emitSessionUpvoteQuestion = ({ sessionID, question }) => {

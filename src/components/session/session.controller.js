@@ -30,7 +30,7 @@ import {
     emitSessionSubmitSlideResult,
     emitSessionUpvoteQuestion,
 } from "../socket/socket.eventEmitter";
-export const startPresentation = async (req, res, next) => {
+export const initSession = async (req, res, next) => {
     try {
         const user = req.user;
         const { presentationID, groupID } = req.body;
@@ -103,6 +103,14 @@ export const startPresentation = async (req, res, next) => {
                 presentationID: sessionPresentation.presentationID,
             })
         ).map((item) => mapSlide(item));
+        if (sessionSlides.length) {
+            await PresentationService.updatePresentation({
+                name: sessionPresentation.name,
+                updatedBy: user.accountID,
+                presentationID: sessionPresentation.presentationID,
+                currentSlideID: sessionSlides[0].slideID,
+            });
+        }
 
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
@@ -124,7 +132,7 @@ export const startPresentation = async (req, res, next) => {
     }
 };
 
-export const startedPresentation = async (req, res, next) => {
+export const startPresentation = async (req, res, next) => {
     try {
         const user = req.user;
         const { sessionID } = req.body;
@@ -165,7 +173,6 @@ export const startedPresentation = async (req, res, next) => {
         let slide = await SlideService.findSlide({
             slideID: presentation.currentSlideID,
         });
-
         if (!slide) {
             return res.status(RESPONSE_CODE.NOT_FOUND).json({
                 status: API_STATUS.NOT_FOUND,
@@ -175,12 +182,19 @@ export const startedPresentation = async (req, res, next) => {
         slide = mapSlide(slide);
         slide = await getSlideDetail(slide, true);
 
+        await SessionService.updateSession({
+            sessionID: session.sessionID,
+            status: SESSION_STATUS.STARTED,
+        });
         emitSessionStartPresenting({ sessionID, slide });
 
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             result: {
-                session: session,
+                session: {
+                    ...session,
+                    status: SESSION_STATUS.STARTED,
+                },
             },
             message: MESSAGE.POST_SUCCESS("Bắt đầu trình chiếu"),
         });
