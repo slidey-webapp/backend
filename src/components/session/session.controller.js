@@ -9,6 +9,7 @@ import {
     cloneSlides,
     deleteSlideReference,
     getDetailSlideOfPresentation,
+    getSlideDetail,
     mapSlide,
 } from "../presentation/slide/slide.util";
 import { SESSION_STATUS } from "./session.model";
@@ -19,6 +20,16 @@ import { mapMessage } from "./message/message.util";
 import { joinableSession } from "./session.util";
 import { deleteQuestionReference } from "./question/question.util";
 import * as GroupService from "../group/group.service";
+import {
+    emitSessionAnswerQuestion,
+    emitSessionChangeSlide,
+    emitSessionEnd,
+    emitSessionMessage,
+    emitSessionQuestion,
+    emitSessionStartPresenting,
+    emitSessionSubmitSlideResult,
+    emitSessionUpvoteQuestion,
+} from "../socket/socket.eventEmitter";
 export const startPresentation = async (req, res, next) => {
     try {
         const user = req.user;
@@ -101,6 +112,75 @@ export const startPresentation = async (req, res, next) => {
                     ...sessionPresentation,
                     slides: sessionSlides,
                 },
+            },
+            message: MESSAGE.POST_SUCCESS("Bắt đầu trình chiếu"),
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+            status: API_STATUS.INTERNAL_ERROR,
+            error,
+        });
+    }
+};
+
+export const startedPresentation = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const { sessionID } = req.body;
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            sessionID,
+        });
+        if (emptyMessage) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: emptyMessage,
+                errors: emptyInputError,
+            });
+        }
+        const session = await SessionService.findSession({
+            sessionID,
+            host: user.accountID,
+        });
+        const presentation = await PresentationService.findPresentation(
+            {
+                sessionID: session.sessionID,
+            },
+            false
+        );
+        if (!session || !presentation) {
+            return res.status(RESPONSE_CODE.NOT_FOUND).json({
+                status: API_STATUS.NOT_FOUND,
+                message: MESSAGE.QUERY_NOT_FOUND("phiên trình chiếu"),
+            });
+        }
+
+        if (session.status !== SESSION_STATUS.STARTING) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: "Phiên này đã bắt đầu rồi",
+            });
+        }
+
+        let slide = await SlideService.findSlide({
+            slideID: presentation.currentSlideID,
+        });
+
+        if (!slide) {
+            return res.status(RESPONSE_CODE.NOT_FOUND).json({
+                status: API_STATUS.NOT_FOUND,
+                message: MESSAGE.QUERY_NOT_FOUND("phiên trình chiếu"),
+            });
+        }
+        slide = mapSlide(slide);
+        slide = await getSlideDetail(slide, true);
+
+        emitSessionStartPresenting({ sessionID, slide });
+
+        return res.status(RESPONSE_CODE.SUCCESS).json({
+            status: API_STATUS.OK,
+            result: {
+                session: session,
             },
             message: MESSAGE.POST_SUCCESS("Bắt đầu trình chiếu"),
         });
@@ -326,6 +406,7 @@ export const submitAnswer = async (req, res, next) => {
                 participantID,
                 value: option,
             });
+            emitSessionSubmitSlideResult({ sessionID, option: foundOption });
             return res.status(RESPONSE_CODE.SUCCESS).json({
                 status: API_STATUS.OK,
                 result: slideResult,
@@ -395,7 +476,8 @@ export const sendMessage = async (req, res, next) => {
             participantID,
             content,
         });
-
+        const message = await MessageService.getMessageByID({ messageID: newMessage.messageID });
+        emitSessionMessage({ sessionID, message: mapMessage(message) });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             message: MESSAGE.POST_SUCCESS("Gửi tin nhắn"),
@@ -514,7 +596,7 @@ export const sendQuestion = async (req, res, next) => {
             participantID,
             content: content,
         });
-
+        emitSessionQuestion({ sessionID, question: newQuestion });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             message: MESSAGE.POST_SUCCESS("Gửi câu hỏi"),
@@ -667,6 +749,13 @@ export const upvoteQuestion = async (req, res, next) => {
             totalVoted: (question.totalVoted || 0) + 1,
         });
 
+        emitSessionUpvoteQuestion({
+            sessionID,
+            question: {
+                ...question,
+                totalVoted: (question.totalVoted || 0) + 1,
+            },
+        });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             message: MESSAGE.POST_SUCCESS("Upvote câu hỏi"),
@@ -723,6 +812,13 @@ export const markAnsweredQuestion = async (req, res, next) => {
         }
         await QuestionService.markAnsweredQuestion({
             questionID,
+        });
+        emitSessionAnswerQuestion({
+            sessionID,
+            question: {
+                ...question,
+                isAnswered: true,
+            },
         });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
@@ -905,7 +1001,7 @@ export const changeSlide = async (req, res, next) => {
                 message: MESSAGE.INVALID_INPUT("Session"),
             });
         }
-        const slide = await SlideService.findSlide({ slideID, presentationID: presentation.presentationID });
+        let slide = await SlideService.findSlide({ slideID, presentationID: presentation.presentationID });
         if (!slide) {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
@@ -918,6 +1014,8 @@ export const changeSlide = async (req, res, next) => {
             currentSlideID: slide.slideID,
             presentationID: presentation.presentationID,
         });
+        slide = await getSlideDetail(mapSlide(slide), true);
+        emitSessionChangeSlide({ sessionID, slide });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             result: slide,
@@ -962,7 +1060,7 @@ export const endSession = async (req, res, next) => {
             sessionID,
             status: SESSION_STATUS.ENDED,
         });
-
+        emitSessionEnd({ sessionID });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             message: MESSAGE.POST_SUCCESS("Kết thúc phiên trình chiếu"),

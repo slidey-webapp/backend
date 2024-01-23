@@ -36,6 +36,20 @@ export const getMessageList = ({ sessionID, lastMessageID, limit }) => {
     });
 };
 
+export const getMessageByID = ({ messageID }) => {
+    return MessageTable.findOne({
+        raw: true,
+        where: {
+            messageID,
+        },
+        include: {
+            model: SessionParticipantTable,
+            as: "SessionParticipant",
+            duplicating: false,
+        },
+    });
+};
+
 export const deleteMessageOfSession = async ({ sessionID }) => {
     return MessageTable.destroy({
         where: {

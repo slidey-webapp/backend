@@ -102,7 +102,7 @@ export const cloneSlides = async (slides, presentationID) => {
     return newSlides;
 };
 
-const getSlideDetail = async (slide, getSlideResult = false) => {
+export const getSlideDetail = async (slide, getSlideResult = false) => {
     const result = { ...slide };
     const [option] = await Promise.all([
         SlideService.getMultipleChoiceSlideOption({
