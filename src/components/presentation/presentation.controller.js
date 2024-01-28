@@ -23,16 +23,6 @@ export const createPresentation = async (req, res, next) => {
                 errors: emptyInputError,
             });
         }
-        const oldPresentation = await PresentationService.findPresentation({
-            name,
-            createdBy: user.accountID,
-        });
-        if (oldPresentation) {
-            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
-                status: API_STATUS.EXISTED,
-                message: MESSAGE.EXISTED_PRESENTATION,
-            });
-        }
 
         const newPresentation = await PresentationService.createPresentation({
             name,
