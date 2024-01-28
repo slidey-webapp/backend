@@ -108,12 +108,13 @@ export const deleteSlideOfPresentation = ({ presentationID }) => {
     });
 };
 
-export const deleteSlideContent = ({ slideID, type }) => {
+export const deleteSlideContent = ({ slideID, type }, force = false) => {
     if (type === SLIDE_TYPE.HEADING) {
         return HeadingSlideTable.destroy({
             where: {
                 slideID,
             },
+            force: force,
         });
     }
     if (type === SLIDE_TYPE.PARAGRAPH) {
