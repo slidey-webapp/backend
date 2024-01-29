@@ -228,12 +228,12 @@ export const sendInviteEmail = async (req, res, next) => {
             },
             subject: MESSAGE.GROUP_INVITATION_MAIL_SUBJECT,
             htmlData: {
-                dir: "/resource/htmlEmailTemplate/groupInvitation.html",
+                dir: "/resource/htmlEmailTemplate/collabInvitation.html",
                 replace: {
                     inviteURL,
                     appHomePage: APP_HOMEPAGE,
                     logoUrl: APP_LOGO,
-                    presentation: presentation.name,
+                    presentationName: presentation.name,
                     sender: user.fullname,
                 },
             },
