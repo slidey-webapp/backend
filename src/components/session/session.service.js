@@ -4,12 +4,13 @@ import CollabTable from "../presentation/collaboration/collaboration.model";
 import PresentationTable from "../presentation/presentation.model";
 import PresentSessionTable, { SESSION_STATUS, SessionParticipantTable } from "./session.model";
 
-export const createSession = async ({ presentationID, accountID, name }) => {
+export const createSession = async ({ presentationID, accountID, name, code }) => {
     const newSession = (
         await PresentSessionTable.create({
             presentationID,
             host: accountID,
             status: SESSION_STATUS.STARTING,
+            code,
             name,
         })
     ).get({

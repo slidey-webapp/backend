@@ -17,7 +17,7 @@ import * as SessionService from "./session.service";
 import * as MessageService from "./message/message.service";
 import * as QuestionService from "./question/question.service";
 import { mapMessage } from "./message/message.util";
-import { joinableSession } from "./session.util";
+import { getSessionCode, joinableSession } from "./session.util";
 import { deleteQuestionReference } from "./question/question.util";
 import * as GroupService from "../group/group.service";
 import {
@@ -30,6 +30,7 @@ import {
     emitSessionSubmitSlideResult,
     emitSessionUpvoteQuestion,
 } from "../socket/socket.eventEmitter";
+import { Op } from "../../database";
 export const initSession = async (req, res, next) => {
     try {
         const user = req.user;
@@ -62,8 +63,11 @@ export const initSession = async (req, res, next) => {
 
         const oldSession = await SessionService.findSession({
             presentationID,
+            status: {
+                [Op.ne]: SESSION_STATUS.ENDED,
+            },
         });
-        if (oldSession && oldSession.status !== SESSION_STATUS.ENDED) {
+        if (oldSession) {
             return res.status(RESPONSE_CODE.BAD_REQUEST).json({
                 status: API_STATUS.INVALID_INPUT,
                 message: MESSAGE.IS_PRESENTING,
@@ -82,10 +86,18 @@ export const initSession = async (req, res, next) => {
             }
         }
 
+        const code = await getSessionCode();
+        if (!code) {
+            return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+                status: API_STATUS.INTERNAL_ERROR,
+                message: MESSAGE.SERVER_BUSY,
+            });
+        }
         const session = await SessionService.createSession({
             presentationID,
             accountID: user.accountID,
             name: presentation.name,
+            code,
             groupID: groupID || null,
         });
 
@@ -210,9 +222,9 @@ export const startPresentation = async (req, res, next) => {
 export const joinPresentation = async (req, res, next) => {
     try {
         const user = req.user;
-        const { sessionID, name } = req.body;
+        const { code, name } = req.body;
         const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
-            sessionID,
+            code,
             name,
         });
         if (emptyMessage) {
@@ -224,7 +236,8 @@ export const joinPresentation = async (req, res, next) => {
         }
 
         const session = await SessionService.findSession({
-            sessionID,
+            code,
+            status: SESSION_STATUS.STARTING,
         });
         if (!session) {
             return res.status(RESPONSE_CODE.NOT_FOUND).json({
@@ -240,7 +253,7 @@ export const joinPresentation = async (req, res, next) => {
             });
         }
         const oldParticipant = await SessionService.findParticipant({
-            sessionID,
+            sessionID: session.sessionID,
             name,
         });
         if (oldParticipant) {
@@ -258,7 +271,7 @@ export const joinPresentation = async (req, res, next) => {
 
         const presentation = await PresentationService.findPresentation(
             {
-                sessionID,
+                sessionID: session.sessionID,
             },
             false
         );

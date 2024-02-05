@@ -28,3 +28,4 @@ export const CANT_SEND_INVITATION_TO_YOURSELF = "Bạn không thể gửi lời 
 export const IS_PRESENTING = "Bản trình bày này đang được trình chiếu";
 export const EXISTED_PARTICIPANT_NAME = "Tên người dùng này đã được sử dụng trong phiên trình chiếu này";
 export const ALREADY_SUBMIT_ANSWER = "Bạn đã trả lời slide này rồi";
+export const SERVER_BUSY = "Đã có lỗi xảy ra, vui lòng thử lại sau";
