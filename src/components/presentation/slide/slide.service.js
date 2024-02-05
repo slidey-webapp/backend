@@ -216,7 +216,6 @@ export const updateHeadingSlide = async ({ slideID, heading, subHeading }) => {
             logging: console.log,
         }
     );
-    console.log("🚀 ~ file: slide.service.js:201 ~ updateHeadingSlide ~ result:", result);
     return result && result.length ? result[1] : null;
 };
 
@@ -238,7 +237,6 @@ export const updateParagrahSlide = async ({ slideID, heading, paragraph }) => {
 };
 
 export const updateMultipleChoiceSlide = async ({ slideID, question }) => {
-    console.log("🚀 ~ file: slide.service.js:220 ~ updateMultipleChoiceSlide ~ question:", question, slideID);
     const result = await MultipleChoiceSlideTable.update(
         {
             ...(question && { question }),
@@ -252,7 +250,6 @@ export const updateMultipleChoiceSlide = async ({ slideID, question }) => {
             logging: console.log,
         }
     );
-    console.log("🚀 ~ file: slide.service.js:237 ~ updateMultipleChoiceSlide ~ result:", result);
     return result && result.length ? result[1] : null;
 };
 

@@ -43,6 +43,10 @@ export default class PresentSession extends Model {
                     type: DataTypes.STRING,
                     allowNull: true,
                 },
+                code: {
+                    type: DataTypes.STRING,
+                    allowNull: true,
+                },
             },
             {
                 tableName: "PRESENT_SESSION",
