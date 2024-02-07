@@ -421,6 +421,7 @@ export const submitAnswer = async (req, res, next) => {
         if (slide.type === SLIDE_TYPE.MULTIPLE_CHOICE) {
             const foundOption = await SlideService.findMultipleChoiceSlideOption({
                 option,
+                slideID,
             });
             if (!foundOption) {
                 return res.status(RESPONSE_CODE.BAD_REQUEST).json({
