@@ -330,17 +330,6 @@ export const updatePresentation = async (req, res, next) => {
             });
         }
 
-        const existedName = await PresentationService.findPresentation({
-            name,
-            createdBy: presentation.createdBy,
-        });
-        if (existedName && existedName.presentationID !== presentation.presentationID) {
-            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
-                status: API_STATUS.EXISTED,
-                message: MESSAGE.EXISTED_PRESENTATION,
-            });
-        }
-
         const newSlides = [...slides];
         const oldSlides = (
             await getDetailSlideOfPresentation({
