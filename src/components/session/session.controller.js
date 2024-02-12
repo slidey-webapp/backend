@@ -524,7 +524,7 @@ export const getMessageList = async (req, res, next) => {
     try {
         const user = req.user;
         const { lastMessageID, sessionID } = req.query;
-        const { limit } = getPaginationInfo(req);
+        const { limit, getTotal } = getPaginationInfo(req);
 
         const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
             sessionID,
@@ -557,12 +557,13 @@ export const getMessageList = async (req, res, next) => {
             lastMessageID,
             limit,
         });
-
+        const total = getTotal ? await MessageService.countMessage({ sessionID }) : -1;
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             message: MESSAGE.QUERY_SUCCESS("Tin nhắn"),
             result: {
                 items: messageList.map((item) => mapMessage(item)),
+                totalCount: total,
             },
         });
     } catch (error) {

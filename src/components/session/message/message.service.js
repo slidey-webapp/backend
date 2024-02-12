@@ -36,6 +36,15 @@ export const getMessageList = ({ sessionID, lastMessageID, limit }) => {
     });
 };
 
+export const countMessage = ({ sessionID }) => {
+    return MessageTable.count({
+        raw: true,
+        where: {
+            sessionID,
+        },
+    });
+};
+
 export const getMessageByID = ({ messageID }) => {
     return MessageTable.findOne({
         raw: true,
