@@ -31,6 +31,9 @@ import {
     emitSessionUpvoteQuestion,
 } from "../socket/socket.eventEmitter";
 import { Op } from "../../database";
+import * as AccountService from "../account/account.service";
+import * as PersonService from "../person/person.service";
+import { mapUser } from "../../utilities/mapUser";
 export const initSession = async (req, res, next) => {
     try {
         const user = req.user;
@@ -899,12 +902,21 @@ export const getSessionDetail = async (req, res, next) => {
             });
         }
 
-        const slides = await getDetailSlideOfPresentation(
-            {
-                presentationID: presentation.presentationID,
-            },
-            true
-        );
+        const [host, slides] = await Promise.all([
+            AccountService.findAccount({
+                accountID: session.host,
+            }),
+            getDetailSlideOfPresentation(
+                {
+                    presentationID: presentation.presentationID,
+                },
+                true
+            ),
+        ]);
+        const person = await PersonService.findPerson({
+            accountID: host.accountID,
+        });
+
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             result: {
@@ -913,6 +925,10 @@ export const getSessionDetail = async (req, res, next) => {
                     ...presentation,
                     slides,
                 },
+                host: mapUser({
+                    ...host,
+                    ...person,
+                }),
             },
             message: MESSAGE.QUERY_SUCCESS("Thông tin phiên trình chiếu"),
         });
