@@ -31,6 +31,9 @@ import {
     emitSessionUpvoteQuestion,
 } from "../socket/socket.eventEmitter";
 import { Op } from "../../database";
+import * as AccountService from "../account/account.service";
+import * as PersonService from "../person/person.service";
+import { mapUser } from "../../utilities/mapUser";
 export const initSession = async (req, res, next) => {
     try {
         const user = req.user;
@@ -898,13 +901,22 @@ export const getSessionDetail = async (req, res, next) => {
                 message: MESSAGE.QUERY_NOT_FOUND("Phiên trình chiếu"),
             });
         }
+        const [host, slides, totalMessage] = await Promise.all([
+            AccountService.findAccount({
+                accountID: session.host,
+            }),
+            getDetailSlideOfPresentation(
+                {
+                    presentationID: presentation.presentationID,
+                },
+                true
+            ),
+            MessageService.countMessage({ sessionID }),
+        ]);
+        const person = await PersonService.findPerson({
+            accountID: host.accountID,
+        });
 
-        const slides = await getDetailSlideOfPresentation(
-            {
-                presentationID: presentation.presentationID,
-            },
-            true
-        );
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             result: {
@@ -913,6 +925,11 @@ export const getSessionDetail = async (req, res, next) => {
                     ...presentation,
                     slides,
                 },
+                host: mapUser({
+                    ...host,
+                    ...person,
+                }),
+                totalMessage,
             },
             message: MESSAGE.QUERY_SUCCESS("Thông tin phiên trình chiếu"),
         });
