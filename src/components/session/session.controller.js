@@ -901,8 +901,7 @@ export const getSessionDetail = async (req, res, next) => {
                 message: MESSAGE.QUERY_NOT_FOUND("Phiên trình chiếu"),
             });
         }
-
-        const [host, slides] = await Promise.all([
+        const [host, slides, totalMessage] = await Promise.all([
             AccountService.findAccount({
                 accountID: session.host,
             }),
@@ -912,6 +911,7 @@ export const getSessionDetail = async (req, res, next) => {
                 },
                 true
             ),
+            MessageService.countMessage({ sessionID }),
         ]);
         const person = await PersonService.findPerson({
             accountID: host.accountID,
@@ -929,6 +929,7 @@ export const getSessionDetail = async (req, res, next) => {
                     ...host,
                     ...person,
                 }),
+                totalMessage,
             },
             message: MESSAGE.QUERY_SUCCESS("Thông tin phiên trình chiếu"),
         });
