@@ -61,7 +61,7 @@ export const getUserPresentation = ({ accountID, offset, limit, name }, noSessio
     });
 };
 
-export const countPresentation = ({ accountID, name }) => {
+export const countPresentation = ({ accountID, name }, noSession = true) => {
     const searchName = getInsensitiveCaseRegextForSearchLike(name || "");
     return PresentationTable.count({
         raw: true,
@@ -73,6 +73,9 @@ export const countPresentation = ({ accountID, name }) => {
             name: {
                 [Op.regexp]: searchName,
             },
+            ...(noSession && {
+                sessionID: null,
+            }),
         },
         include: {
             model: CollabTable,

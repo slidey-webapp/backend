@@ -301,15 +301,18 @@ export const getMySession = async (req, res, next) => {
         const user = req.user;
         const { offset, limit } = getPaginationInfo(req);
         const name = req.query.name;
+        const presentationID = req.query.presentationID;
         const sessions = await SessionService.getUserPresentSession({
             accountID: user.accountID,
             offset,
             limit,
             name,
+            presentationID,
         });
         const total = await SessionService.countUserPresentSession({
             accountID: user.accountID,
             name,
+            presentationID,
         });
         const totalParticipant = await Promise.all(
             sessions.map((item) => {
