@@ -28,7 +28,7 @@ export const findSession = (data) => {
     });
 };
 
-export const getUserPresentSession = ({ accountID, offset, limit, name }) => {
+export const getUserPresentSession = ({ accountID, offset, limit, name, presentationID }) => {
     const searchName = getInsensitiveCaseRegextForSearchLike(name || "");
 
     return PresentSessionTable.findAll({
@@ -41,6 +41,7 @@ export const getUserPresentSession = ({ accountID, offset, limit, name }) => {
             name: {
                 [Op.regexp]: searchName,
             },
+            ...(presentationID && { presentationID }),
         },
         order: [["createdAt", "DESC"]],
         offset: offset,
@@ -60,7 +61,7 @@ export const getUserPresentSession = ({ accountID, offset, limit, name }) => {
     });
 };
 
-export const countUserPresentSession = ({ accountID, name }) => {
+export const countUserPresentSession = ({ accountID, name, presentationID }) => {
     const searchName = getInsensitiveCaseRegextForSearchLike(name || "");
 
     return PresentSessionTable.count({
@@ -73,6 +74,7 @@ export const countUserPresentSession = ({ accountID, name }) => {
             name: {
                 [Op.regexp]: searchName,
             },
+            ...(presentationID && { presentationID }),
         },
         order: [["createdAt", "DESC"]],
         include: {
