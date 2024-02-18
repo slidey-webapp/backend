@@ -1,6 +1,6 @@
 import * as PresentationService from "./presentation.service";
 import * as SlideService from "./slide/slide.service";
-
+import * as CollabService from "./collaboration/collaboration.service";
 import * as MESSAGE from "../../resource/message";
 import { API_STATUS, INPUT_ERROR, RESPONSE_CODE } from "../../config/contants";
 import { handleEmptyInput } from "../../utilities/api";
@@ -8,6 +8,7 @@ import { SLIDE_TYPE } from "./slide/slide.model";
 import { getPaginationInfo } from "../../utilities/pagination";
 import { deleteSlideReference, getDetailSlideOfPresentation, mapSlide, slideGenerator } from "./slide/slide.util";
 import { getPresentationCode } from "./presentation.util";
+import { mapCollaborator } from "../../utilities/mapUser";
 
 export const createPresentation = async (req, res, next) => {
     try {
@@ -79,6 +80,18 @@ export const getMyPresentations = async (req, res, next) => {
         const total = await PresentationService.countPresentation({
             accountID: user.accountID,
             name,
+        });
+        const presentCollabs = await Promise.all(
+            presentations.map((item) =>
+                CollabService.getCollaborator({
+                    presentationID: item.presentationID,
+                    offset: 0,
+                    limit: 1000,
+                })
+            )
+        );
+        presentations.forEach((item, index) => {
+            item.collaborators = (presentCollabs[index] || []).map((item) => mapCollaborator(item));
         });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,

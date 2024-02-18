@@ -98,6 +98,18 @@ export const getListGroup = async (req, res, next) => {
         } else if (getJoined) {
             total = await GroupService.countJoinedGroup(query);
         }
+        const groupMembers = await Promise.all(
+            groups.map((item) =>
+                GroupService.getGroupMember({
+                    groupID: item.groupID,
+                    limit: 1000,
+                    offset: 0,
+                })
+            )
+        );
+        groups.forEach((item, index) => {
+            item.members = (groupMembers[index] || []).map((member) => mapGroupMember(member));
+        });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             result: {
