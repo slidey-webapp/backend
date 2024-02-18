@@ -21,3 +21,19 @@ function escapeRegExp(string) {
 export const getInsensitiveCaseRegextForSearchLike = (keyword) => {
     return "(?i).*" + escapeRegExp(keyword) + ".*";
 };
+
+const MAX = 100000;
+
+export const getCode = async (isExistedCode, n = 8) => {
+    let code = generateCode(n);
+    let i = 0;
+    while (i < MAX) {
+        const isFound = await isExistedCode(code);
+        if (!isFound) {
+            return code;
+        }
+        i++;
+        code = generateCode(n);
+    }
+    return null;
+};

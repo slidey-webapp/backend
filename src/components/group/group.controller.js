@@ -12,11 +12,10 @@ import { handleEmptyInput, queryParamToBool } from "../../utilities/api";
 import { sendEmail } from "../../utilities/email";
 import { mapGroupMember } from "../../utilities/mapUser";
 import { getPaginationInfo } from "../../utilities/pagination";
-import { generateCode } from "../../utilities/string";
 import { GROUP_MEMBER_ROLE } from "./group.models";
 import * as GroupService from "./group.service";
 import jwt from "jsonwebtoken";
-import { isValidRole } from "./group.util";
+import { getGroupCode, isValidRole } from "./group.util";
 
 export const createGroup = async (req, res, next) => {
     try {
@@ -41,11 +40,13 @@ export const createGroup = async (req, res, next) => {
                 message: MESSAGE.EXISTED_PRESENTATION,
             });
         }
+
+        const code = await getGroupCode();
         const group = await GroupService.createGroup({
             name,
             description,
             createdBy: user.accountID,
-            code: generateCode(),
+            code,
         });
 
         await GroupService.createGroupMember({

@@ -4,10 +4,10 @@ import * as SlideService from "./slide/slide.service";
 import * as MESSAGE from "../../resource/message";
 import { API_STATUS, INPUT_ERROR, RESPONSE_CODE } from "../../config/contants";
 import { handleEmptyInput } from "../../utilities/api";
-import { generateCode } from "../../utilities/string";
 import { SLIDE_TYPE } from "./slide/slide.model";
 import { getPaginationInfo } from "../../utilities/pagination";
 import { deleteSlideReference, getDetailSlideOfPresentation, mapSlide, slideGenerator } from "./slide/slide.util";
+import { getPresentationCode } from "./presentation.util";
 
 export const createPresentation = async (req, res, next) => {
     try {
@@ -23,11 +23,11 @@ export const createPresentation = async (req, res, next) => {
                 errors: emptyInputError,
             });
         }
-
+        const code = await getPresentationCode();
         const newPresentation = await PresentationService.createPresentation({
             name,
             accountID: user.accountID,
-            code: generateCode(),
+            code,
         });
         const firstSlide = await SlideService.createSlide({
             presentationID: newPresentation.presentationID,
