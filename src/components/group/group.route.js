@@ -12,6 +12,7 @@ groupRoute.post("/delete", GroupController.deleteGroup);
 
 groupRoute.get("/detail", GroupController.getGroupDetail);
 groupRoute.get("/members", GroupController.getGroupMember);
+groupRoute.get("/combo", GroupController.getListGroupCombo);
 groupRoute.get("/", GroupController.getListGroup);
 
 export default groupRoute;

@@ -69,6 +69,40 @@ export const createGroup = async (req, res, next) => {
     }
 };
 
+export const getListGroupCombo = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const query = {
+            accountID: user.accountID,
+        };
+        const groups = await GroupService.getListGroup({
+            ...query,
+            getAll: false,
+            getMine: true,
+            getJoined: false,
+            limit: 1000,
+            offset: 0,
+        });
+        const result = groups.map((item) => {
+            return {
+                value: item.groupID,
+                label: item.name,
+            };
+        });
+        return res.status(RESPONSE_CODE.SUCCESS).json({
+            status: API_STATUS.OK,
+            result: result,
+            message: MESSAGE.QUERY_SUCCESS("Nhóm"),
+        });
+    } catch (error) {
+        console.log("error:", error);
+        return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+            status: API_STATUS.INTERNAL_ERROR,
+            error,
+        });
+    }
+};
+
 export const getListGroup = async (req, res, next) => {
     try {
         const user = req.user;

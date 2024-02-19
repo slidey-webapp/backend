@@ -63,12 +63,14 @@ export const getListGroup = ({ accountID, offset, limit, name, code, getMine, ge
                 "$GroupMembers.accountID$": accountID,
             }),
         },
-        include: {
-            model: GroupMemberTable,
-            attributes: [],
-            as: "GroupMembers",
-            duplicating: false,
-        },
+        ...(!(!getAll && getMine) && {
+            include: {
+                model: GroupMemberTable,
+                attributes: [],
+                as: "GroupMembers",
+                duplicating: false,
+            },
+        }),
     });
 };
 
