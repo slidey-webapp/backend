@@ -30,6 +30,26 @@ export default class Slide extends Model {
                     type: DataTypes.STRING,
                     allowNull: true,
                 },
+                horizontalAlignment: {
+                    type: DataTypes.STRING,
+                    allowNull: true,
+                },
+                verticalAlignment: {
+                    type: DataTypes.STRING,
+                    allowNull: true,
+                },
+                textSize: {
+                    type: DataTypes.STRING,
+                    allowNull: true,
+                },
+                textColor: {
+                    type: DataTypes.STRING,
+                    allowNull: true,
+                },
+                textBackground: {
+                    type: DataTypes.STRING,
+                    allowNull: true,
+                },
             },
             {
                 tableName: "SLIDE",

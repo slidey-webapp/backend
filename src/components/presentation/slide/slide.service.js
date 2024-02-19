@@ -7,12 +7,26 @@ import SlideTable, {
     SlideResultTable,
 } from "./slide.model";
 
-export const createSlide = async ({ type, presentationID, slideOrder }) => {
+export const createSlide = async ({
+    type,
+    presentationID,
+    slideOrder,
+    horizontalAlignment,
+    verticalAlignment,
+    textSize,
+    textColor,
+    textBackground,
+}) => {
     const newSlide = (
         await SlideTable.create({
             type,
             presentationID,
             slideOrder,
+            horizontalAlignment,
+            verticalAlignment,
+            textSize,
+            textColor,
+            textBackground,
         })
     ).get({
         plain: true,
@@ -20,11 +34,12 @@ export const createSlide = async ({ type, presentationID, slideOrder }) => {
     return newSlide;
 };
 
-export const createMultipleChoiceSlide = async ({ slideID, question }) => {
+export const createMultipleChoiceSlide = async ({ slideID, question, chartType }) => {
     const newSlide = (
         await MultipleChoiceSlideTable.create({
             slideID,
             question,
+            chartType: chartType || null,
         })
     ).get({
         plain: true,
@@ -58,11 +73,12 @@ export const createParagraphSlide = async ({ slideID, heading, paragraph }) => {
     return newSlide;
 };
 
-export const createMultipleChoiceSlideOption = async ({ slideID, option }) => {
+export const createMultipleChoiceSlideOption = async ({ slideID, option, color }) => {
     const newSlide = (
         await MultipleChoiceSlideOptionTable.create({
             slideID,
             option,
+            color: color || null,
         })
     ).get({
         plain: true,
@@ -213,13 +229,12 @@ export const updateHeadingSlide = async ({ slideID, heading, subHeading }) => {
             },
             raw: true,
             returning: true,
-            logging: console.log,
         }
     );
     return result && result.length ? result[1] : null;
 };
 
-export const updateParagrahSlide = async ({ slideID, heading, paragraph }) => {
+export const updateParagraphSlide = async ({ slideID, heading, paragraph }) => {
     const result = await ParagraphSlideTable.update(
         {
             ...(heading && { heading }),
@@ -236,10 +251,11 @@ export const updateParagrahSlide = async ({ slideID, heading, paragraph }) => {
     return result && result.length ? result[1] : null;
 };
 
-export const updateMultipleChoiceSlide = async ({ slideID, question }) => {
+export const updateMultipleChoiceSlide = async ({ slideID, question, chartType }) => {
     const result = await MultipleChoiceSlideTable.update(
         {
             ...(question && { question }),
+            ...(chartType !== undefined && { chartType }),
         },
         {
             where: {
@@ -247,7 +263,6 @@ export const updateMultipleChoiceSlide = async ({ slideID, question }) => {
             },
             raw: true,
             returning: true,
-            logging: console.log,
         }
     );
     return result && result.length ? result[1] : null;
@@ -276,10 +291,11 @@ export const findSlide = async (data) => {
     });
 };
 
-export const updateMultipleChoiceSlideOption = async ({ slideID, optionID, option }) => {
+export const updateMultipleChoiceSlideOption = async ({ slideID, optionID, option, color }) => {
     const result = await MultipleChoiceSlideOptionTable.update(
         {
             ...(option && { option }),
+            ...(color !== undefined && { color }),
         },
         {
             where: {
@@ -293,11 +309,26 @@ export const updateMultipleChoiceSlideOption = async ({ slideID, optionID, optio
     return result && result.length ? result[1] : null;
 };
 
-export const updateSlide = async ({ slideID, presentationID, slideOrder, type }) => {
+export const updateSlide = async ({
+    slideID,
+    presentationID,
+    slideOrder,
+    type,
+    horizontalAlignment,
+    verticalAlignment,
+    textSize,
+    textColor,
+    textBackground,
+}) => {
     const result = await SlideTable.update(
         {
             slideOrder,
             ...(type && { type }),
+            ...(horizontalAlignment !== undefined && { horizontalAlignment }),
+            ...(verticalAlignment !== undefined && { verticalAlignment }),
+            ...(textSize !== undefined && { textSize }),
+            ...(textColor !== undefined && { textColor }),
+            ...(textBackground !== undefined && { textBackground }),
         },
         {
             where: {

@@ -20,6 +20,10 @@ export default class MultipleChoiceSlide extends Model {
                     type: DataTypes.STRING,
                     allowNull: true,
                 },
+                chartType: {
+                    type: DataTypes.STRING,
+                    allowNull: true,
+                },
             },
             {
                 tableName: "MULTIPLE_CHOICE_SLIDE",

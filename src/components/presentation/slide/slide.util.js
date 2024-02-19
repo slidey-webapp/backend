@@ -24,6 +24,7 @@ export const mapSlide = (slide) => {
                     break;
                 case SLIDE_TYPE.MULTIPLE_CHOICE:
                     result.question = slide["MultipleChoiceSlide.question"];
+                    result.chartType = slide["MultipleChoiceSlide.chartType"];
                     break;
                 default:
                     break;
@@ -43,11 +44,22 @@ export const slideGenerator = async ({
     subHeading,
     question,
     paragraph,
+    horizontalAlignment,
+    verticalAlignment,
+    textSize,
+    textColor,
+    textBackground,
+    chartType,
 }) => {
     const slide = await SlideService.createSlide({
         type,
         presentationID,
         slideOrder,
+        horizontalAlignment,
+        verticalAlignment,
+        textSize,
+        textColor,
+        textBackground,
     });
     const slideID = slide.slideID;
     if (type === SLIDE_TYPE.HEADING) {
@@ -62,6 +74,7 @@ export const slideGenerator = async ({
         await SlideService.createMultipleChoiceSlide({
             slideID,
             question: question || "",
+            chartType,
         });
         slide.question = question || "";
     } else if (type === SLIDE_TYPE.PARAGRAPH) {
