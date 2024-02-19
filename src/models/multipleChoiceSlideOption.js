@@ -26,6 +26,10 @@ export default class MultipleChoiceSlideOption extends Model {
                     primaryKey: true,
                     field: "optionID",
                 },
+                color: {
+                    type: DataTypes.STRING,
+                    allowNull: true,
+                },
             },
             {
                 tableName: "MULTIPLE_CHOICE_SLIDE_OPTION",

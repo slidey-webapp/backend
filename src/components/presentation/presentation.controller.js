@@ -213,7 +213,15 @@ export const getPresentationSlides = async (req, res, next) => {
 export const addSlide = async (req, res, next) => {
     try {
         const user = req.user;
-        const { presentationID } = req.body;
+        const {
+            presentationID,
+            horizontalAlignment,
+            verticalAlignment,
+            textSize,
+            textColor,
+            textBackground,
+            chartType,
+        } = req.body;
         const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
             presentationID,
         });
@@ -247,11 +255,16 @@ export const addSlide = async (req, res, next) => {
         const slides = await SlideService.getSlideOfPresentation({
             presentationID,
         });
-        console.log("slides:", slides.length);
         const slide = await slideGenerator({
             presentationID,
             type,
             slideOrder: slides.length + 1,
+            horizontalAlignment,
+            verticalAlignment,
+            textSize,
+            textColor,
+            textBackground,
+            chartType,
         });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
@@ -391,6 +404,7 @@ export const updatePresentation = async (req, res, next) => {
                                     SlideService.updateMultipleChoiceSlide({
                                         slideID: newSlides[j].slideID,
                                         question: newSlides[j].question,
+                                        chartType: newSlides[j].chartType,
                                     })
                                 );
                                 if (!newSlides[j].options) {
@@ -405,6 +419,7 @@ export const updatePresentation = async (req, res, next) => {
                                             SlideService.createMultipleChoiceSlideOption({
                                                 slideID: newSlides[j].slideID,
                                                 option: newSlides[j].options[k].option,
+                                                color: newSlides[j].options[k].color,
                                             })
                                         );
                                     }
@@ -418,6 +433,7 @@ export const updatePresentation = async (req, res, next) => {
                                                     slideID: newSlides[j].slideID,
                                                     option: newSlides[j].options[l].option,
                                                     optionID: newSlides[j].options[l].optionID,
+                                                    color: newSlides[j].options[l].color,
                                                 })
                                             );
                                             isDeletedOption = false;
@@ -435,7 +451,7 @@ export const updatePresentation = async (req, res, next) => {
                                 break;
                             case SLIDE_TYPE.PARAGRAPH:
                                 promises.push(
-                                    SlideService.updateParagrahSlide({
+                                    SlideService.updateParagraphSlide({
                                         slideID: newSlides[j].slideID,
                                         heading: newSlides[j].heading,
                                         paragraph: newSlides[j].paragraph,
@@ -479,6 +495,7 @@ export const updatePresentation = async (req, res, next) => {
                                     SlideService.createMultipleChoiceSlide({
                                         slideID: newSlides[j].slideID,
                                         question: newSlides[j].question,
+                                        chartType: newSlides[j].chartType,
                                     })
                                 );
                                 (newSlides[j].options || []).forEach((item) => {
@@ -486,6 +503,7 @@ export const updatePresentation = async (req, res, next) => {
                                         SlideService.createMultipleChoiceSlideOption({
                                             slideID: newSlides[j].slideID,
                                             option: item.option,
+                                            color: item.color,
                                         })
                                     );
                                 });
@@ -502,6 +520,11 @@ export const updatePresentation = async (req, res, next) => {
                             presentationID,
                             slideOrder: newSlides[j].slideOrder,
                             type: newSlides[j].type,
+                            horizontalAlignment: newSlides[j].horizontalAlignment,
+                            verticalAlignment: newSlides[j].verticalAlignment,
+                            textSize: newSlides[j].textSize,
+                            textColor: newSlides[j].textColor,
+                            textBackground: newSlides[j].textBackground,
                         })
                     );
                     break;
