@@ -9,6 +9,7 @@ import { getPaginationInfo } from "../../utilities/pagination";
 import { deleteSlideReference, getDetailSlideOfPresentation, mapSlide, slideGenerator } from "./slide/slide.util";
 import { getPresentationCode } from "./presentation.util";
 import { mapCollaborator } from "../../utilities/mapUser";
+import { getFullAccountInfo } from "../account/account.util";
 
 export const createPresentation = async (req, res, next) => {
     try {
@@ -81,17 +82,21 @@ export const getMyPresentations = async (req, res, next) => {
             accountID: user.accountID,
             name,
         });
-        const presentCollabs = await Promise.all(
-            presentations.map((item) =>
-                CollabService.getCollaborator({
-                    presentationID: item.presentationID,
-                    offset: 0,
-                    limit: 1000,
-                })
-            )
-        );
+        const [presentCollabs, presentCreators] = await Promise.all([
+            Promise.all(
+                presentations.map((item) =>
+                    CollabService.getCollaborator({
+                        presentationID: item.presentationID,
+                        offset: 0,
+                        limit: 1000,
+                    })
+                )
+            ),
+            Promise.all(presentations.map((item) => getFullAccountInfo({ accountID: item.createdBy }, user))),
+        ]);
         presentations.forEach((item, index) => {
             item.collaborators = (presentCollabs[index] || []).map((item) => mapCollaborator(item));
+            item.creator = presentCreators[index] || null;
         });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
@@ -308,9 +313,18 @@ export const getPresentationDetail = async (req, res, next) => {
                 message: MESSAGE.QUERY_NOT_FOUND("Bản trình bày"),
             });
         }
-        const slides = await getDetailSlideOfPresentation({
-            presentationID,
-        });
+        const [slides, creator] = await Promise.all([
+            getDetailSlideOfPresentation({
+                presentationID,
+            }),
+            getFullAccountInfo(
+                {
+                    accountID: presentation.createdBy,
+                },
+                user
+            ),
+        ]);
+        presentation.creator = creator;
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             result: {

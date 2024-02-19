@@ -16,6 +16,7 @@ import { GROUP_MEMBER_ROLE } from "./group.models";
 import * as GroupService from "./group.service";
 import jwt from "jsonwebtoken";
 import { getGroupCode, isValidRole } from "./group.util";
+import { getFullAccountInfo } from "../account/account.util";
 
 export const createGroup = async (req, res, next) => {
     try {
@@ -98,17 +99,21 @@ export const getListGroup = async (req, res, next) => {
         } else if (getJoined) {
             total = await GroupService.countJoinedGroup(query);
         }
-        const groupMembers = await Promise.all(
-            groups.map((item) =>
-                GroupService.getGroupMember({
-                    groupID: item.groupID,
-                    limit: 1000,
-                    offset: 0,
-                })
-            )
-        );
+        const [groupMembers, groupCreator] = await Promise.all([
+            Promise.all(
+                groups.map((item) =>
+                    GroupService.getGroupMember({
+                        groupID: item.groupID,
+                        limit: 1000,
+                        offset: 0,
+                    })
+                )
+            ),
+            Promise.all(groups.map((item) => getFullAccountInfo({ accountID: item.createdBy }, user))),
+        ]);
         groups.forEach((item, index) => {
             item.members = (groupMembers[index] || []).map((member) => mapGroupMember(member));
+            item.creator = groupCreator[index] || null;
         });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
@@ -319,6 +324,7 @@ export const getGroupMember = async (req, res, next) => {
 
 export const getGroupDetail = async (req, res, next) => {
     try {
+        const user = req.user;
         const { groupID } = req.query;
         const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
             groupID,
@@ -337,6 +343,8 @@ export const getGroupDetail = async (req, res, next) => {
                 message: MESSAGE.QUERY_NOT_FOUND("Nhóm"),
             });
         }
+        const creator = await getFullAccountInfo({ accountID: group.createdBy }, user);
+        group.creator = creator;
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             result: {
