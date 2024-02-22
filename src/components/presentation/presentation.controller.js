@@ -10,6 +10,7 @@ import { deleteSlideReference, getDetailSlideOfPresentation, mapSlide, slideGene
 import { getPresentationCode } from "./presentation.util";
 import { mapCollaborator } from "../../utilities/mapUser";
 import { getFullAccountInfo } from "../account/account.util";
+import { emitUpdatePresentation } from "../socket/socket.eventEmitter";
 
 export const createPresentation = async (req, res, next) => {
     try {
@@ -570,13 +571,11 @@ export const updatePresentation = async (req, res, next) => {
         const resultSlides = await getDetailSlideOfPresentation({
             presentationID,
         });
+        const result = { ...presentation, name, slides: resultSlides.map((item) => mapSlide(item)) };
+        emitUpdatePresentation({ presentation: result, user });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
-            result: {
-                ...presentation,
-                name,
-                slides: resultSlides.map((item) => mapSlide(item)),
-            },
+            result: result,
             message: MESSAGE.POST_SUCCESS("Cập nhật bản trình bày"),
         });
     } catch (error) {
