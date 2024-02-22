@@ -69,6 +69,7 @@ export const APP_LOGO = process.env.APP_LOGO;
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 
 export const SOCKET_AUTH_TIMEOUT = 3000;
+export const SOCKET_PING_TIMEOUT = 3000;
 
 export const SOCKET_EVENT = {
     CONNECTION: "connection",
@@ -83,6 +84,11 @@ export const SOCKET_EVENT = {
     END_SESSION: "end_session",
     START_PRESENTING: "start_presenting",
     HOST_JOIN_SESSION: "host_join_session",
+    JOIN_EDIT_PRESENTATION: "join_edit_presentation",
+    UPDATE_PRESENTATION: "update_presentation",
+    PING_EDIT_PRESENTATION: "ping_edit_presentation",
+    LEAVE_EDIT_PRESENTATION: "leave_edit_presentation",
 };
 
 export const SOCKET_SESSION_ROOM_PREFIX = "session-";
+export const SOCKET_EDIT_PRESENTATION_PREFIX = "presentation-";
