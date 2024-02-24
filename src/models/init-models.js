@@ -21,6 +21,7 @@ import _RoleClaim from "./roleClaim.js";
 import _SessionParticipant from "./sessionParticipant.js";
 import _Slide from "./slide.js";
 import _SlideResult from "./slideResult.js";
+import _VisitHistory from "./visitHistory.js";
 
 export default function initModels(sequelize) {
     const Account = _Account.init(sequelize, DataTypes);
@@ -44,6 +45,7 @@ export default function initModels(sequelize) {
     const SessionParticipant = _SessionParticipant.init(sequelize, DataTypes);
     const Slide = _Slide.init(sequelize, DataTypes);
     const SlideResult = _SlideResult.init(sequelize, DataTypes);
+    const VisitHistory = _VisitHistory.init(sequelize, DataTypes);
 
     AccountRole.belongsTo(Account, { foreignKey: "accountID" });
     Account.hasMany(AccountRole, { foreignKey: "accountID" });
@@ -57,6 +59,8 @@ export default function initModels(sequelize) {
     Account.hasMany(GroupMember, { foreignKey: "accountID" });
     Person.belongsTo(Account, { foreignKey: "accountID" });
     Account.hasOne(Person, { foreignKey: "accountID" });
+    VisitHistory.belongsTo(Account, { foreignKey: "accountID" });
+    Account.hasMany(VisitHistory, { foreignKey: "accountID" });
     GroupMember.belongsTo(Group, { foreignKey: "groupID" });
     Group.hasMany(GroupMember, { foreignKey: "groupID" });
     PresentSession.belongsTo(Group, { foreignKey: "groupID" });
@@ -126,5 +130,6 @@ export default function initModels(sequelize) {
         SessionParticipant,
         Slide,
         SlideResult,
+        VisitHistory,
     };
 }

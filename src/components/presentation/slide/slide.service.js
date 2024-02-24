@@ -166,13 +166,15 @@ export const deleteSlideResult = ({ slideID }) => {
     });
 };
 
-export const getSlideOfPresentation = ({ presentationID }) => {
+export const getSlideOfPresentation = ({ presentationID, offset, limit }) => {
     return SlideTable.findAll({
         raw: true,
         where: {
             presentationID,
         },
         order: [["slideOrder", "ASC"]],
+        offset: offset || 0,
+        limit: limit || 1000,
         include: [
             {
                 model: HeadingSlideTable,

@@ -148,9 +148,11 @@ export const getSlideDetail = async (slide, getSlideResult = false) => {
     return result;
 };
 
-export const getDetailSlideOfPresentation = async ({ presentationID }, getSlideResult = false) => {
+export const getDetailSlideOfPresentation = async ({ presentationID, offset, limit }, getSlideResult = false) => {
     let slides = await SlideService.getSlideOfPresentation({
         presentationID,
+        offset,
+        limit,
     });
     slides = slides.map((item) => mapSlide(item));
     slides = await Promise.all(slides.map((item) => getSlideDetail(item, getSlideResult)));
