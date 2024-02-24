@@ -88,6 +88,8 @@ export const SOCKET_EVENT = {
     UPDATE_PRESENTATION: "update_presentation",
     PING_EDIT_PRESENTATION: "ping_edit_presentation",
     LEAVE_EDIT_PRESENTATION: "leave_edit_presentation",
+    REMOVE_COLLAB: "remove_collab",
+    JOIN_COLLAB: "join_collab",
 };
 
 export const SOCKET_SESSION_ROOM_PREFIX = "session-";
