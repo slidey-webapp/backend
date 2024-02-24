@@ -79,3 +79,15 @@ export const emitUpdatePresentation = ({ presentation, user }) => {
         .to(getEditPresentationRoomName(presentation.presentationID))
         .emit(SOCKET_EVENT.UPDATE_PRESENTATION, { presentation, user });
 };
+
+export const emitJoinCollabPresentation = ({ presentationID, user }) => {
+    socketServer
+        .to(getEditPresentationRoomName(presentationID))
+        .emit(SOCKET_EVENT.JOIN_COLLAB, { presentationID, user });
+};
+
+export const emitRemoveCollabPresentation = ({ presentationID, accountID }) => {
+    socketServer
+        .to(getEditPresentationRoomName(presentationID))
+        .emit(SOCKET_EVENT.REMOVE_COLLAB, { presentationID, accountID });
+};

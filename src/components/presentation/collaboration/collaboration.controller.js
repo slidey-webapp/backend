@@ -14,6 +14,7 @@ import { getPaginationInfo } from "../../../utilities/pagination";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../../../utilities/email";
 import { mapCollaborator } from "../../../utilities/mapUser";
+import { emitJoinCollabPresentation, emitRemoveCollabPresentation } from "../../socket/socket.eventEmitter";
 
 export const getCollabs = async (req, res, next) => {
     try {
@@ -125,6 +126,8 @@ export const joinCollab = async (req, res, next) => {
             presentationID,
             accountID: user.accountID,
         });
+
+        emitJoinCollabPresentation({ presentationID, user });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             result: mapCollaborator(collab),
@@ -167,6 +170,10 @@ export const removeCollab = async (req, res, next) => {
         await CollabService.removeCollaborator({
             presentationID,
             accountID,
+        });
+        emitRemoveCollabPresentation({
+            presentationID,
+            accountID: accountID,
         });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,

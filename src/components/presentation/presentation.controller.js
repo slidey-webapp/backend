@@ -272,6 +272,15 @@ export const addSlide = async (req, res, next) => {
             textBackground,
             chartType,
         });
+        getDetailSlideOfPresentation({
+            presentationID,
+        }).then((newSlides) => {
+            emitUpdatePresentation({
+                presentation: { ...presentation, slides: newSlides.map((item) => mapSlide(item)) },
+                user,
+            });
+        });
+
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             result: slide,
