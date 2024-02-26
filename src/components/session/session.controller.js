@@ -405,12 +405,16 @@ export const submitAnswer = async (req, res, next) => {
                 message: MESSAGE.QUERY_NOT_FOUND("Người tham gia"),
             });
         }
-        const [slide, oldResult] = await Promise.all([
+        const [slide, oldResult, oldWordCloudOption] = await Promise.all([
             SlideService.findSlide({
                 presentationID: presentation.presentationID,
                 slideID,
             }),
             SlideService.findSlideResult({
+                participantID,
+                slideID,
+            }),
+            SlideService.findWordCloundSlideOption({
                 participantID,
                 slideID,
             }),
@@ -421,13 +425,14 @@ export const submitAnswer = async (req, res, next) => {
                 message: MESSAGE.QUERY_NOT_FOUND("Slide"),
             });
         }
-        if (oldResult) {
-            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
-                status: API_STATUS.INVALID_INPUT,
-                message: MESSAGE.ALREADY_SUBMIT_ANSWER,
-            });
-        }
+
         if (slide.type === SLIDE_TYPE.MULTIPLE_CHOICE) {
+            if (oldResult) {
+                return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                    status: API_STATUS.INVALID_INPUT,
+                    message: MESSAGE.ALREADY_SUBMIT_ANSWER,
+                });
+            }
             const foundOption = await SlideService.findMultipleChoiceSlideOption({
                 option,
                 slideID,
@@ -447,6 +452,24 @@ export const submitAnswer = async (req, res, next) => {
             return res.status(RESPONSE_CODE.SUCCESS).json({
                 status: API_STATUS.OK,
                 result: slideResult,
+                message: MESSAGE.POST_SUCCESS("Gửi câu trả lời"),
+            });
+        } else if (slide.type === SLIDE_TYPE.WORD_CLOUD) {
+            if (oldWordCloudOption) {
+                return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                    status: API_STATUS.INVALID_INPUT,
+                    message: MESSAGE.ALREADY_SUBMIT_ANSWER,
+                });
+            }
+            const wordCloudSlideOption = await SlideService.createWordCloudSlideOption({
+                slideID,
+                participantID,
+                option,
+            });
+            emitSessionSubmitSlideResult({ sessionID, option: wordCloudSlideOption });
+            return res.status(RESPONSE_CODE.SUCCESS).json({
+                status: API_STATUS.OK,
+                result: wordCloudSlideOption,
                 message: MESSAGE.POST_SUCCESS("Gửi câu trả lời"),
             });
         }

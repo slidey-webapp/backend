@@ -1,10 +1,15 @@
 import SlideTable, {
+    BulletListSlideItemTable,
+    BulletListSlideTable,
     HeadingSlideTable,
     MultipleChoiceSlideOptionTable,
     MultipleChoiceSlideTable,
     ParagraphSlideTable,
+    QuoteSlideTable,
     SLIDE_TYPE,
     SlideResultTable,
+    WordCloudSlideOptionTable,
+    WordCloudSlideTable,
 } from "./slide.model";
 
 export const createSlide = async ({
@@ -99,8 +104,79 @@ export const createSlideResult = async ({ slideID, participantID, value }) => {
     return newSlide;
 };
 
+export const createQuoteSlide = async ({ slideID, quote, author }) => {
+    const newSlide = (
+        await QuoteSlideTable.create({
+            slideID,
+            quote,
+            author,
+        })
+    ).get({
+        plain: true,
+    });
+    return newSlide;
+};
+
+export const createBulletListSlide = async ({ slideID, heading }) => {
+    const newSlide = (
+        await BulletListSlideTable.create({
+            slideID,
+            heading,
+        })
+    ).get({
+        plain: true,
+    });
+    return newSlide;
+};
+
+export const createBulletListSlideItem = async ({ slideID, value }) => {
+    const newSlide = (
+        await BulletListSlideItemTable.create({
+            slideID,
+            value,
+        })
+    ).get({
+        plain: true,
+    });
+    return newSlide;
+};
+
+export const createWordCloudSlide = async ({ slideID, question }) => {
+    const newSlide = (
+        await WordCloudSlideTable.create({
+            slideID,
+            question,
+        })
+    ).get({
+        plain: true,
+    });
+    return newSlide;
+};
+
+export const createWordCloudSlideOption = async ({ slideID, participantID, option }) => {
+    const newSlide = (
+        await WordCloudSlideOptionTable.create({
+            slideID,
+            option,
+            participantID,
+        })
+    ).get({
+        plain: true,
+    });
+    return newSlide;
+};
+
 export const findSlideResult = async (data) => {
     return SlideResultTable.findOne({
+        raw: true,
+        where: {
+            ...(data && data),
+        },
+    });
+};
+
+export const findWordCloundSlideOption = async (data) => {
+    return WordCloudSlideOptionTable.findOne({
         raw: true,
         where: {
             ...(data && data),
@@ -138,6 +214,7 @@ export const deleteSlideContent = ({ slideID, type }, force = false) => {
             where: {
                 slideID,
             },
+            force: force,
         });
     }
     if (type === SLIDE_TYPE.MULTIPLE_CHOICE) {
@@ -145,6 +222,31 @@ export const deleteSlideContent = ({ slideID, type }, force = false) => {
             where: {
                 slideID,
             },
+            force: force,
+        });
+    }
+    if (type === SLIDE_TYPE.BULLET_LIST) {
+        return BulletListSlideTable.destroy({
+            where: {
+                slideID,
+            },
+            force: force,
+        });
+    }
+    if (type === SLIDE_TYPE.QUOTE) {
+        return QuoteSlideTable.destroy({
+            where: {
+                slideID,
+            },
+            force: force,
+        });
+    }
+    if (type === SLIDE_TYPE.WORD_CLOUD) {
+        return WordCloudSlideTable.destroy({
+            where: {
+                slideID,
+            },
+            force: force,
         });
     }
 };
@@ -154,6 +256,24 @@ export const deleteMultipleChoiceSlideOption = ({ slideID, optionID }) => {
         where: {
             slideID,
             ...(optionID && { optionID }),
+        },
+    });
+};
+
+export const deleteBulletListSlideItem = ({ slideID, bulletListSlideItemID }) => {
+    return BulletListSlideItemTable.destroy({
+        where: {
+            slideID,
+            ...(bulletListSlideItemID && { bulletListSlideItemID }),
+        },
+    });
+};
+
+export const deleteWordCloudSlideOption = ({ slideID, wordCloudSlideOptionID }) => {
+    return WordCloudSlideOptionTable.destroy({
+        where: {
+            slideID,
+            ...(wordCloudSlideOptionID && { wordCloudSlideOptionID }),
         },
     });
 };
@@ -188,6 +308,18 @@ export const getSlideOfPresentation = ({ presentationID, offset, limit }) => {
                 model: MultipleChoiceSlideTable,
                 duplicating: false,
             },
+            {
+                model: QuoteSlideTable,
+                duplicating: false,
+            },
+            {
+                model: BulletListSlideTable,
+                duplicating: false,
+            },
+            {
+                model: WordCloudSlideTable,
+                duplicating: false,
+            },
         ],
     });
 };
@@ -198,6 +330,16 @@ export const getMultipleChoiceSlideOption = ({ slideID }) => {
         where: {
             slideID,
         },
+    });
+};
+
+export const getBulletListSlideItem = ({ slideID }) => {
+    return BulletListSlideItemTable.findAll({
+        raw: true,
+        where: {
+            slideID,
+        },
+        order: [["createdAt", "ASC"]],
     });
 };
 
@@ -212,6 +354,15 @@ export const findMultipleChoiceSlideOption = (data) => {
 
 export const getSlideResult = ({ slideID }) => {
     return SlideResultTable.findAll({
+        raw: true,
+        where: {
+            slideID,
+        },
+    });
+};
+
+export const getWordCloudSlideOption = ({ slideID }) => {
+    return WordCloudSlideOptionTable.findAll({
         raw: true,
         where: {
             slideID,
@@ -270,6 +421,72 @@ export const updateMultipleChoiceSlide = async ({ slideID, question, chartType }
     return result && result.length ? result[1] : null;
 };
 
+export const updateQuoteSlide = async ({ slideID, quote, author }) => {
+    const result = await QuoteSlideTable.update(
+        {
+            ...(quote && { quote }),
+            ...(author && { author }),
+        },
+        {
+            where: {
+                slideID,
+            },
+            raw: true,
+            returning: true,
+        }
+    );
+    return result && result.length ? result[1] : null;
+};
+
+export const updateBulletListSlide = async ({ slideID, heading }) => {
+    const result = await BulletListSlideTable.update(
+        {
+            ...(heading && { heading }),
+        },
+        {
+            where: {
+                slideID,
+            },
+            raw: true,
+            returning: true,
+        }
+    );
+    return result && result.length ? result[1] : null;
+};
+
+export const updateWordCloudSlide = async ({ slideID, question }) => {
+    const result = await WordCloudSlideTable.update(
+        {
+            ...(question && { question }),
+        },
+        {
+            where: {
+                slideID,
+            },
+            raw: true,
+            returning: true,
+        }
+    );
+    return result && result.length ? result[1] : null;
+};
+
+export const updateBulletListSlideItem = async ({ slideID, bulletListSlideItemID, value }) => {
+    const result = await BulletListSlideItemTable.update(
+        {
+            ...(value && { value }),
+        },
+        {
+            where: {
+                slideID,
+                bulletListSlideItemID,
+            },
+            raw: true,
+            returning: true,
+        }
+    );
+    return result && result.length ? result[1] : null;
+};
+
 export const findSlide = async (data) => {
     return SlideTable.findOne({
         raw: true,
@@ -287,6 +504,18 @@ export const findSlide = async (data) => {
             },
             {
                 model: MultipleChoiceSlideTable,
+                duplicating: false,
+            },
+            {
+                model: QuoteSlideTable,
+                duplicating: false,
+            },
+            {
+                model: BulletListSlideTable,
+                duplicating: false,
+            },
+            {
+                model: WordCloudSlideTable,
                 duplicating: false,
             },
         ],

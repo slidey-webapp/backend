@@ -3,6 +3,8 @@ const DataTypes = _sequelize.DataTypes;
 import _Account from "./account.js";
 import _AccountRole from "./accountRole.js";
 import _AccountToken from "./accountToken.js";
+import _BulletListSlide from "./bulletListSlide.js";
+import _BulletListSlideItem from "./bulletListSlideItem.js";
 import _Collaboration from "./collaboration.js";
 import _Group from "./group.js";
 import _GroupMember from "./groupMember.js";
@@ -16,17 +18,22 @@ import _Presentation from "./presentation.js";
 import _PresentSession from "./presentSession.js";
 import _Question from "./question.js";
 import _QuestionVote from "./questionVote.js";
+import _QuoteSlide from "./quoteSlide.js";
 import _Role from "./role.js";
 import _RoleClaim from "./roleClaim.js";
 import _SessionParticipant from "./sessionParticipant.js";
 import _Slide from "./slide.js";
 import _SlideResult from "./slideResult.js";
 import _VisitHistory from "./visitHistory.js";
+import _WordCloudSlide from "./wordCloudSlide.js";
+import _WordCloudSlideOption from "./wordCloudSlideOption.js";
 
 export default function initModels(sequelize) {
     const Account = _Account.init(sequelize, DataTypes);
     const AccountRole = _AccountRole.init(sequelize, DataTypes);
     const AccountToken = _AccountToken.init(sequelize, DataTypes);
+    const BulletListSlide = _BulletListSlide.init(sequelize, DataTypes);
+    const BulletListSlideItem = _BulletListSlideItem.init(sequelize, DataTypes);
     const Collaboration = _Collaboration.init(sequelize, DataTypes);
     const Group = _Group.init(sequelize, DataTypes);
     const GroupMember = _GroupMember.init(sequelize, DataTypes);
@@ -40,12 +47,15 @@ export default function initModels(sequelize) {
     const PresentSession = _PresentSession.init(sequelize, DataTypes);
     const Question = _Question.init(sequelize, DataTypes);
     const QuestionVote = _QuestionVote.init(sequelize, DataTypes);
+    const QuoteSlide = _QuoteSlide.init(sequelize, DataTypes);
     const Role = _Role.init(sequelize, DataTypes);
     const RoleClaim = _RoleClaim.init(sequelize, DataTypes);
     const SessionParticipant = _SessionParticipant.init(sequelize, DataTypes);
     const Slide = _Slide.init(sequelize, DataTypes);
     const SlideResult = _SlideResult.init(sequelize, DataTypes);
     const VisitHistory = _VisitHistory.init(sequelize, DataTypes);
+    const WordCloudSlide = _WordCloudSlide.init(sequelize, DataTypes);
+    const WordCloudSlideOption = _WordCloudSlideOption.init(sequelize, DataTypes);
 
     AccountRole.belongsTo(Account, { foreignKey: "accountID" });
     Account.hasMany(AccountRole, { foreignKey: "accountID" });
@@ -61,6 +71,8 @@ export default function initModels(sequelize) {
     Account.hasOne(Person, { foreignKey: "accountID" });
     VisitHistory.belongsTo(Account, { foreignKey: "accountID" });
     Account.hasMany(VisitHistory, { foreignKey: "accountID" });
+    BulletListSlideItem.belongsTo(BulletListSlide, { foreignKey: "slideID" });
+    BulletListSlide.hasMany(BulletListSlideItem, { foreignKey: "slideID" });
     GroupMember.belongsTo(Group, { foreignKey: "groupID" });
     Group.hasMany(GroupMember, { foreignKey: "groupID" });
     PresentSession.belongsTo(Group, { foreignKey: "groupID" });
@@ -97,6 +109,10 @@ export default function initModels(sequelize) {
     SessionParticipant.hasMany(QuestionVote, { foreignKey: "participantID" });
     SlideResult.belongsTo(SessionParticipant, { foreignKey: "participantID" });
     SessionParticipant.hasMany(SlideResult, { foreignKey: "participantID" });
+    WordCloudSlideOption.belongsTo(SessionParticipant, { foreignKey: "participantID" });
+    SessionParticipant.hasMany(WordCloudSlideOption, { foreignKey: "participantID" });
+    BulletListSlide.belongsTo(Slide, { foreignKey: "slideID" });
+    Slide.hasOne(BulletListSlide, { foreignKey: "slideID" });
     HeadingSlide.belongsTo(Slide, { foreignKey: "slideID" });
     Slide.hasOne(HeadingSlide, { foreignKey: "slideID" });
     MultipleChoiceSlide.belongsTo(Slide, { foreignKey: "slideID" });
@@ -105,13 +121,21 @@ export default function initModels(sequelize) {
     Slide.hasOne(ParagraphSlide, { foreignKey: "slideID" });
     Presentation.belongsTo(Slide, { foreignKey: "currentSlideID" });
     Slide.hasMany(Presentation, { foreignKey: "currentSlideID" });
+    QuoteSlide.belongsTo(Slide, { foreignKey: "slideID" });
+    Slide.hasOne(QuoteSlide, { foreignKey: "slideID" });
     SlideResult.belongsTo(Slide, { foreignKey: "slideID" });
     Slide.hasMany(SlideResult, { foreignKey: "slideID" });
+    WordCloudSlide.belongsTo(Slide, { foreignKey: "slideID" });
+    Slide.hasOne(WordCloudSlide, { foreignKey: "slideID" });
+    WordCloudSlideOption.belongsTo(WordCloudSlide, { foreignKey: "slideID" });
+    WordCloudSlide.hasMany(WordCloudSlideOption, { foreignKey: "slideID" });
 
     return {
         Account,
         AccountRole,
         AccountToken,
+        BulletListSlide,
+        BulletListSlideItem,
         Collaboration,
         Group,
         GroupMember,
@@ -125,11 +149,14 @@ export default function initModels(sequelize) {
         PresentSession,
         Question,
         QuestionVote,
+        QuoteSlide,
         Role,
         RoleClaim,
         SessionParticipant,
         Slide,
         SlideResult,
         VisitHistory,
+        WordCloudSlide,
+        WordCloudSlideOption,
     };
 }
