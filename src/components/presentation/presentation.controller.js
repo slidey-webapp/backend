@@ -191,9 +191,9 @@ export const getPresentationSlides = async (req, res, next) => {
             accountID: user.accountID,
         });
         if (!presentation) {
-            return res.status(RESPONSE_CODE.NOT_FOUND).json({
-                status: API_STATUS.NOT_FOUND,
-                message: MESSAGE.QUERY_NOT_FOUND("Bản trình bày"),
+            return res.status(RESPONSE_CODE.FORBIDDEN).json({
+                status: API_STATUS.PERMISSION_DENIED,
+                message: MESSAGE.PERMISSION_NOT_FOUND,
             });
         }
         const slides = await getDetailSlideOfPresentation({
@@ -318,9 +318,9 @@ export const getPresentationDetail = async (req, res, next) => {
             false
         );
         if (!presentation) {
-            return res.status(RESPONSE_CODE.NOT_FOUND).json({
-                status: API_STATUS.NOT_FOUND,
-                message: MESSAGE.QUERY_NOT_FOUND("Bản trình bày"),
+            return res.status(RESPONSE_CODE.FORBIDDEN).json({
+                status: API_STATUS.PERMISSION_DENIED,
+                message: MESSAGE.PERMISSION_NOT_FOUND,
             });
         }
         const [slides, creator] = await Promise.all([
@@ -374,12 +374,11 @@ export const updatePresentation = async (req, res, next) => {
             accountID: user.accountID,
         });
         if (!presentation) {
-            return res.status(RESPONSE_CODE.NOT_FOUND).json({
-                status: API_STATUS.NOT_FOUND,
-                message: MESSAGE.QUERY_NOT_FOUND("Bản trình bày"),
+            return res.status(RESPONSE_CODE.FORBIDDEN).json({
+                status: API_STATUS.PERMISSION_DENIED,
+                message: MESSAGE.PERMISSION_NOT_FOUND,
             });
         }
-
         const newSlides = [...slides];
         const oldSlides = (
             await getDetailSlideOfPresentation({
