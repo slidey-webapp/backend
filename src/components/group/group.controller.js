@@ -314,10 +314,21 @@ export const joinGroup = async (req, res, next) => {
 
 export const getGroupMember = async (req, res, next) => {
     try {
+        const user = req.user;
         const { offset, limit, getTotal } = getPaginationInfo(req);
         const groupID = req.query.groupID;
         const name = req.query.name;
         const email = req.query.email;
+        const member = await GroupService.findGroupMember({
+            accountID: user.accountID,
+            groupID,
+        });
+        if (!member) {
+            return res.status(RESPONSE_CODE.FORBIDDEN).json({
+                status: API_STATUS.PERMISSION_DENIED,
+                message: MESSAGE.PERMISSION_NOT_FOUND,
+            });
+        }
         const members = await GroupService.getGroupMember({
             groupID,
             offset,
@@ -370,11 +381,22 @@ export const getGroupDetail = async (req, res, next) => {
                 errors: emptyInputError,
             });
         }
+
         const group = await GroupService.findGroup({ groupID });
         if (!group) {
             return res.status(RESPONSE_CODE.NOT_FOUND).json({
                 status: API_STATUS.NOT_FOUND,
                 message: MESSAGE.QUERY_NOT_FOUND("Nhóm"),
+            });
+        }
+        const member = await GroupService.findGroupMember({
+            accountID: user.accountID,
+            groupID,
+        });
+        if (!member) {
+            return res.status(RESPONSE_CODE.FORBIDDEN).json({
+                status: API_STATUS.PERMISSION_DENIED,
+                message: MESSAGE.PERMISSION_NOT_FOUND,
             });
         }
         const creator = await getFullAccountInfo({ accountID: group.createdBy }, user);

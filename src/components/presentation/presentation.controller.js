@@ -253,9 +253,9 @@ export const addSlide = async (req, res, next) => {
             accountID: user.accountID,
         });
         if (!presentation) {
-            return res.status(RESPONSE_CODE.NOT_FOUND).json({
-                status: API_STATUS.NOT_FOUND,
-                message: MESSAGE.QUERY_NOT_FOUND("Bản trình bày"),
+            return res.status(RESPONSE_CODE.FORBIDDEN).json({
+                status: API_STATUS.PERMISSION_DENIED,
+                message: MESSAGE.PERMISSION_NOT_FOUND,
             });
         }
         const slides = await SlideService.getSlideOfPresentation({
@@ -482,6 +482,76 @@ export const updatePresentation = async (req, res, next) => {
                                     })
                                 );
                                 break;
+                            case SLIDE_TYPE.QUOTE: {
+                                promises.push(
+                                    SlideService.updateQuoteSlide({
+                                        slideID: newSlides[j].slideID,
+                                        author: newSlides[j].author,
+                                        quote: newSlides[j].quote,
+                                    })
+                                );
+                                break;
+                            }
+                            case SLIDE_TYPE.WORD_CLOUD: {
+                                promises.push(
+                                    SlideService.updateWordCloudSlide({
+                                        slideID: newSlides[j].slideID,
+                                        question: newSlides[j].question,
+                                    })
+                                );
+                                break;
+                            }
+                            case SLIDE_TYPE.BULLET_LIST: {
+                                promises.push(
+                                    SlideService.updateBulletListSlide({
+                                        slideID: newSlides[j].slideID,
+                                        heading: newSlides[j].heading,
+                                    })
+                                );
+                                if (!newSlides[j].items) {
+                                    newSlides[j].items = [];
+                                }
+                                if (!oldSlides[i].items) {
+                                    oldSlides[i].items = [];
+                                }
+                                for (let k = 0; k < newSlides[j].items.length; k++) {
+                                    if (!newSlides[j].items[k].bulletListSlideItemID) {
+                                        promises.push(
+                                            SlideService.createBulletListSlideItem({
+                                                slideID: newSlides[j].slideID,
+                                                value: newSlides[j].items[k].value,
+                                            })
+                                        );
+                                    }
+                                }
+                                for (let k = 0; k < oldSlides[i].items.length; k++) {
+                                    let isDeletedItem = true;
+                                    for (let l = 0; l < newSlides[j].items.length; l++) {
+                                        if (
+                                            newSlides[j].items[l].bulletListSlideItemID ===
+                                            oldSlides[i].items[k].bulletListSlideItemID
+                                        ) {
+                                            promises.push(
+                                                SlideService.updateBulletListSlideItem({
+                                                    slideID: newSlides[j].slideID,
+                                                    value: newSlides[j].items[l].value,
+                                                    bulletListSlideItemID: newSlides[j].items[l].bulletListSlideItemID,
+                                                })
+                                            );
+                                            isDeletedItem = false;
+                                        }
+                                    }
+                                    if (isDeletedItem) {
+                                        promises.push(
+                                            SlideService.deleteBulletListSlideItem({
+                                                slideID: oldSlides[i].slideID,
+                                                bulletListSlideItemID: oldSlides[i].items[k].bulletListSlideItemID,
+                                            })
+                                        );
+                                    }
+                                }
+                                break;
+                            }
                             default:
                                 break;
                         }
@@ -528,6 +598,39 @@ export const updatePresentation = async (req, res, next) => {
                                             slideID: newSlides[j].slideID,
                                             option: item.option,
                                             color: item.color,
+                                        })
+                                    );
+                                });
+                                break;
+                            case SLIDE_TYPE.QUOTE:
+                                promises.push(
+                                    SlideService.createQuoteSlide({
+                                        slideID: newSlides[j].slideID,
+                                        quote: newSlides[j].quote,
+                                        author: newSlides[j].author,
+                                    })
+                                );
+                                break;
+                            case SLIDE_TYPE.WORD_CLOUD:
+                                promises.push(
+                                    SlideService.createWordCloudSlide({
+                                        slideID: newSlides[j].slideID,
+                                        question: newSlides[j].question,
+                                    })
+                                );
+                                break;
+                            case SLIDE_TYPE.BULLET_LIST:
+                                promises.push(
+                                    SlideService.createBulletListSlide({
+                                        slideID: newSlides[j].slideID,
+                                        heading: newSlides[j].heading,
+                                    })
+                                );
+                                (newSlides[j].items || []).forEach((item) => {
+                                    promises.push(
+                                        SlideService.createBulletListSlideItem({
+                                            slideID: newSlides[j].slideID,
+                                            value: item.value,
                                         })
                                     );
                                 });

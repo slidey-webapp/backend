@@ -26,6 +26,16 @@ export const mapSlide = (slide) => {
                     result.question = slide["MultipleChoiceSlide.question"];
                     result.chartType = slide["MultipleChoiceSlide.chartType"];
                     break;
+                case SLIDE_TYPE.BULLET_LIST:
+                    result.heading = slide["BulletListSlide.heading"];
+                    break;
+                case SLIDE_TYPE.WORD_CLOUD:
+                    result.question = slide["WordCloudSlide.question"];
+                    break;
+                case SLIDE_TYPE.QUOTE:
+                    result.quote = slide["QuoteSlide.quote"];
+                    result.author = slide["QuoteSlide.author"];
+                    break;
                 default:
                     break;
             }
@@ -50,6 +60,8 @@ export const slideGenerator = async ({
     textColor,
     textBackground,
     chartType,
+    quote,
+    author,
 }) => {
     const slide = await SlideService.createSlide({
         type,
@@ -85,6 +97,26 @@ export const slideGenerator = async ({
         });
         slide.paragraph = paragraph || "";
         slide.heading = heading || "";
+    } else if (type === SLIDE_TYPE.QUOTE) {
+        await SlideService.createQuoteSlide({
+            slideID,
+            quote: quote || "",
+            author: author || "",
+        });
+        slide.quote = quote || "";
+        slide.author = author || "";
+    } else if (type === SLIDE_TYPE.WORD_CLOUD) {
+        await SlideService.createWordCloudSlide({
+            slideID,
+            question: question || "",
+        });
+        slide.question = question || "";
+    } else if (type === SLIDE_TYPE.BULLET_LIST) {
+        await SlideService.createBulletListSlide({
+            heading: heading || "",
+            slideID,
+        });
+        slide.heading = heading || "";
     }
     return slide;
 };
@@ -96,29 +128,46 @@ export const cloneSlides = async (slides, presentationID) => {
             presentationID,
         });
     });
-    const createOptionsPromises = [];
+    const createAdditionalDataPromises = [];
     const newSlides = await Promise.all(createSlidePromises);
     newSlides.forEach((newSlide) => {
         if (newSlide.type === SLIDE_TYPE.MULTIPLE_CHOICE) {
             const oldSlide = slides.find((item) => item.slideOrder === newSlide.slideOrder);
-            oldSlide.options.forEach((item) => {
-                createOptionsPromises.push(
-                    SlideService.createMultipleChoiceSlideOption({
-                        slideID: newSlide.slideID,
-                        option: item.option,
-                    })
-                );
-            });
+            if (oldSlide) {
+                (oldSlide.options || []).forEach((item) => {
+                    createAdditionalDataPromises.push(
+                        SlideService.createMultipleChoiceSlideOption({
+                            slideID: newSlide.slideID,
+                            option: item.option,
+                        })
+                    );
+                });
+            }
+        } else if (newSlide.type === SLIDE_TYPE.BULLET_LIST) {
+            const oldSlide = slides.find((item) => item.slideOrder === newSlide.slideOrder);
+            if (oldSlide) {
+                (oldSlide.items || []).forEach((item) => {
+                    createAdditionalDataPromises.push(
+                        SlideService.createBulletListSlideItem({
+                            slideID: newSlide.slideID,
+                            value: item.value,
+                        })
+                    );
+                });
+            }
         }
     });
-    await Promise.all(createOptionsPromises);
+    await Promise.all(createAdditionalDataPromises);
     return newSlides;
 };
 
 export const getSlideDetail = async (slide, getSlideResult = false) => {
     const result = { ...slide };
-    const [option] = await Promise.all([
+    const [option, bulletListItem] = await Promise.all([
         SlideService.getMultipleChoiceSlideOption({
+            slideID: slide.slideID,
+        }),
+        SlideService.getBulletListSlideItem({
             slideID: slide.slideID,
         }),
     ]);
@@ -144,6 +193,15 @@ export const getSlideDetail = async (slide, getSlideResult = false) => {
         }
 
         result.options = option;
+    } else if (slide.type === SLIDE_TYPE.BULLET_LIST) {
+        result.items = bulletListItem;
+    } else if (slide.type === SLIDE_TYPE.WORD_CLOUD) {
+        if (getSlideResult) {
+            const slideResult = await SlideService.getWordCloudSlideOption({
+                slideID: slide.slideID,
+            });
+            result.options = slideResult;
+        }
     }
     return result;
 };
