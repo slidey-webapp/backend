@@ -1,4 +1,4 @@
-export const UNAUTHENTICATED = "UNAUTHENTICATED";
+export const UNAUTHORIZED = "UNAUTHORIZED";
 export const NOT_FOUND_ACCOUNT = "Không tìm thấy tài khoản nào";
 export const INCORRECT_PASSWORD = "Mật khẩu không chính xác";
 export const BLOCKED_ACCOUNT = "Tài khoản của bạn đã bị xóa";
