@@ -3,13 +3,14 @@ import { getInsensitiveCaseRegextForSearchLike } from "../../utilities/string";
 import CollabTable from "./collaboration/collaboration.model";
 import PresentationTable from "./presentation.model";
 
-export const createPresentation = async ({ accountID, name, code, sessionID }) => {
+export const createPresentation = async ({ accountID, name, code, sessionID, isTemplate }) => {
     const newPresentation = (
         await PresentationTable.create({
             createdBy: accountID,
             name,
             code,
             sessionID,
+            isTemplate: isTemplate || false,
         })
     ).get({
         plain: true,
@@ -24,6 +25,9 @@ export const findPresentation = (data, noSession = true) => {
     return PresentationTable.findOne({
         raw: true,
         where: {
+            isTemplate: {
+                [Op.not]: true,
+            },
             ...data,
             ...(noSession && {
                 sessionID: null,
@@ -44,6 +48,9 @@ export const getUserPresentation = ({ accountID, offset, limit, name }, noSessio
             },
             name: {
                 [Op.regexp]: searchName,
+            },
+            isTemplate: {
+                [Op.not]: true,
             },
             ...(noSession && {
                 sessionID: null,
@@ -73,6 +80,9 @@ export const countPresentation = ({ accountID, name }, noSession = true) => {
             name: {
                 [Op.regexp]: searchName,
             },
+            isTemplate: {
+                [Op.not]: true,
+            },
             ...(noSession && {
                 sessionID: null,
             }),
@@ -86,6 +96,35 @@ export const countPresentation = ({ accountID, name }, noSession = true) => {
     });
 };
 
+export const getPresentationTemplate = ({ offset, limit, name }) => {
+    const searchName = getInsensitiveCaseRegextForSearchLike(name || "");
+
+    return PresentationTable.findAll({
+        raw: true,
+        where: {
+            name: {
+                [Op.regexp]: searchName,
+            },
+            isTemplate: true,
+        },
+        order: [["createdAt", "DESC"]],
+        offset: offset,
+        limit: limit,
+    });
+};
+
+export const countPresentationTemplate = ({ name }) => {
+    const searchName = getInsensitiveCaseRegextForSearchLike(name || "");
+    return PresentationTable.count({
+        raw: true,
+        where: {
+            name: {
+                [Op.regexp]: searchName,
+            },
+            isTemplate: true,
+        },
+    });
+};
 export const updatePresentation = async ({ name, currentSlideID, updatedBy, presentationID }) => {
     const result = await PresentationTable.update(
         {
@@ -119,6 +158,9 @@ export const findAccessiblePresentation = ({ accountID, presentationID, sessionI
             [Op.or]: {
                 createdBy: accountID,
                 "$Collaborations.accountID$": accountID,
+            },
+            isTemplate: {
+                [Op.not]: true,
             },
             ...(presentationID && { presentationID }),
             ...(sessionID && { sessionID }),

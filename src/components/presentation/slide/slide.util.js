@@ -62,6 +62,8 @@ export const slideGenerator = async ({
     chartType,
     quote,
     author,
+    options,
+    items,
 }) => {
     const slide = await SlideService.createSlide({
         type,
@@ -88,6 +90,15 @@ export const slideGenerator = async ({
             question: question || "",
             chartType,
         });
+        await Promise.all(
+            (options || []).map((option) => {
+                return SlideService.createMultipleChoiceSlideOption({
+                    slideID: slideID,
+                    option: option.option,
+                    color: option.color,
+                });
+            })
+        );
         slide.question = question || "";
     } else if (type === SLIDE_TYPE.PARAGRAPH) {
         await SlideService.createParagraphSlide({
@@ -116,6 +127,14 @@ export const slideGenerator = async ({
             heading: heading || "",
             slideID,
         });
+        await Promise.all(
+            (items || []).map((item) => {
+                return SlideService.createBulletListSlideItem({
+                    slideID: slideID,
+                    value: item.value,
+                });
+            })
+        );
         slide.heading = heading || "";
     }
     return slide;

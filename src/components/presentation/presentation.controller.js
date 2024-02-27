@@ -6,15 +6,95 @@ import { API_STATUS, INPUT_ERROR, RESPONSE_CODE } from "../../config/contants";
 import { handleEmptyInput } from "../../utilities/api";
 import { SLIDE_TYPE } from "./slide/slide.model";
 import { getPaginationInfo } from "../../utilities/pagination";
-import { deleteSlideReference, getDetailSlideOfPresentation, mapSlide, slideGenerator } from "./slide/slide.util";
+import {
+    cloneSlides,
+    deleteSlideReference,
+    getDetailSlideOfPresentation,
+    mapSlide,
+    slideGenerator,
+} from "./slide/slide.util";
 import { getPresentationCode } from "./presentation.util";
 import { mapCollaborator } from "../../utilities/mapUser";
 import { getFullAccountInfo } from "../account/account.util";
 import { emitUpdatePresentation } from "../socket/socket.eventEmitter";
 
+export const createPresentationTemplate = async (req, res, next) => {
+    try {
+        const { name, slides } = req.body;
+
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            name,
+        });
+        if (emptyMessage) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: emptyMessage,
+                errors: emptyInputError,
+            });
+        }
+        const code = await getPresentationCode();
+        const newPresentation = await PresentationService.createPresentation({
+            name,
+            code,
+            isTemplate: true,
+        });
+        const promises = slides.length
+            ? slides.map((slide) => {
+                  return slideGenerator({
+                      presentationID: newPresentation.presentationID,
+                      type: slide.type,
+                      slideOrder: slide.order,
+                      heading: slide.heading,
+                      subHeading: slide.subHeading,
+                      question: slide.question,
+                      paragraph: slide.paragraph,
+                      horizontalAlignment: slide.horizontalAlignment,
+                      verticalAlignment: slide.verticalAlignment,
+                      textSize: slide.textSize,
+                      textColor: slide.textColor,
+                      textBackground: slide.textBackground,
+                      chartType: slide.chartType,
+                      quote: slide.quote,
+                      author: slide.author,
+                      options: slide.options,
+                      items: slide.items,
+                  });
+              })
+            : SlideService.createSlide({
+                  presentationID: newPresentation.presentationID,
+                  slideOrder: 1,
+                  type: SLIDE_TYPE.HEADING,
+              });
+        const createdSlides = await Promise.all(promises);
+        if (createdSlides && createdSlides.length) {
+            await PresentationService.updatePresentation({
+                presentationID: newPresentation.presentationID,
+                currentSlideID: createdSlides[0].slideID,
+            });
+        }
+        const resultSlides = await getDetailSlideOfPresentation({
+            presentationID: newPresentation.presentationID,
+        });
+        return res.status(RESPONSE_CODE.SUCCESS).json({
+            status: API_STATUS.OK,
+            message: MESSAGE.POST_SUCCESS("Tạo mẫu"),
+            result: {
+                presentation: newPresentation,
+                slides: resultSlides,
+            },
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+            status: API_STATUS.INTERNAL_ERROR,
+            error,
+        });
+    }
+};
+
 export const createPresentation = async (req, res, next) => {
     try {
-        const { name } = req.body;
+        const { name, templateID } = req.body;
         const user = req.user;
         const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
             name,
@@ -27,6 +107,55 @@ export const createPresentation = async (req, res, next) => {
             });
         }
         const code = await getPresentationCode();
+        if (templateID) {
+            const templatePresentation = await PresentationService.findPresentation({
+                isTemplate: true,
+                presentationID: templateID,
+            });
+            if (!templatePresentation) {
+                return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                    status: API_STATUS.INVALID_INPUT,
+                    message: MESSAGE.TEMPLATE_NOT_FOUND,
+                    errors: {
+                        templateID: INPUT_ERROR.INVALID,
+                    },
+                });
+            }
+            const templateSlides = (
+                await getDetailSlideOfPresentation({
+                    presentationID: templateID,
+                })
+            ).map((item) => mapSlide(item));
+
+            const clonePresentation = await PresentationService.createPresentation({
+                name: name || templatePresentation.name,
+                accountID: user.createdBy,
+                code: code,
+            });
+            await cloneSlides(templateSlides, clonePresentation.presentationID);
+            const clonedSlides = (
+                await getDetailSlideOfPresentation({
+                    presentationID: clonePresentation.presentationID,
+                })
+            ).map((item) => mapSlide(item));
+            if (clonedSlides.length) {
+                await PresentationService.updatePresentation({
+                    name: clonePresentation.name,
+                    updatedBy: user.accountID,
+                    presentationID: clonePresentation.presentationID,
+                    currentSlideID: clonedSlides[0].slideID,
+                });
+            }
+
+            return res.status(RESPONSE_CODE.SUCCESS).json({
+                status: API_STATUS.OK,
+                result: {
+                    presentation: clonePresentation,
+                    slides: clonedSlides,
+                },
+                message: MESSAGE.POST_SUCCESS("Tạo bản trình chiếu từ mẫu"),
+            });
+        }
         const newPresentation = await PresentationService.createPresentation({
             name,
             accountID: user.accountID,
@@ -110,6 +239,39 @@ export const getMyPresentations = async (req, res, next) => {
                 currentPage: Math.floor(offset / limit),
             },
             message: MESSAGE.QUERY_SUCCESS("Bản trình bày"),
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+            status: API_STATUS.INTERNAL_ERROR,
+            error,
+        });
+    }
+};
+
+export const getPresentationTemplate = async (req, res, next) => {
+    try {
+        const { offset, limit } = getPaginationInfo(req);
+        const name = req.query.name;
+        const presentations = await PresentationService.getPresentationTemplate({
+            offset,
+            limit,
+            name,
+        });
+        const total = await PresentationService.countPresentationTemplate({
+            name,
+        });
+        return res.status(RESPONSE_CODE.SUCCESS).json({
+            status: API_STATUS.OK,
+            result: {
+                items: presentations,
+                totalCount: total,
+                totalPages: total ? Math.floor(total / limit) + 1 : 0,
+                limit,
+                offset,
+                currentPage: Math.floor(offset / limit),
+            },
+            message: MESSAGE.QUERY_SUCCESS("Bản trình bày mẫu"),
         });
     } catch (error) {
         console.log(error);
@@ -335,6 +497,54 @@ export const getPresentationDetail = async (req, res, next) => {
             ),
         ]);
         presentation.creator = creator;
+        return res.status(RESPONSE_CODE.SUCCESS).json({
+            status: API_STATUS.OK,
+            result: {
+                ...presentation,
+                slides, // slides.map((item) => mapSlide(item)),
+            },
+            message: MESSAGE.QUERY_SUCCESS("Bản trình bày"),
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+            status: API_STATUS.INTERNAL_ERROR,
+            error,
+        });
+    }
+};
+
+export const getPresentationTemplateDetail = async (req, res, next) => {
+    try {
+        const { presentationID } = req.params;
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            presentationID,
+        });
+        if (emptyMessage) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: emptyMessage,
+                errors: emptyInputError,
+            });
+        }
+
+        const presentation = await PresentationService.findPresentation(
+            {
+                presentationID,
+                isTemplate: true,
+            },
+            false
+        );
+        if (!presentation) {
+            return res.status(RESPONSE_CODE.FORBIDDEN).json({
+                status: API_STATUS.PERMISSION_DENIED,
+                message: MESSAGE.PERMISSION_NOT_FOUND,
+            });
+        }
+        const slides = await getDetailSlideOfPresentation({
+            presentationID,
+        });
+
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             result: {
