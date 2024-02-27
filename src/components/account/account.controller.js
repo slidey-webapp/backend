@@ -234,9 +234,9 @@ export const verifyEmail = async (req, res, next) => {
         }
         const data = jwt.verify(token, JWT_KEY);
         if (!data) {
-            return res.status(RESPONSE_CODE.UNAUTHORIZED).json({
-                status: API_STATUS.UNAUTHORIZED,
-                message: MESSAGE.UNAUTHORIZED,
+            return res.status(RESPONSE_CODE.UNAUTHENTICATED).json({
+                status: API_STATUS.UNAUTHENTICATED,
+                message: MESSAGE.UNAUTHENTICATED,
             });
         }
         const accountByToken = await AccountService.findAccountByToken(account.accountID, token);
@@ -568,9 +568,9 @@ export const resetPassword = async (req, res, next) => {
         }
         const data = jwt.verify(token, JWT_KEY);
         if (!data) {
-            return res.status(RESPONSE_CODE.UNAUTHORIZED).json({
-                status: API_STATUS.UNAUTHORIZED,
-                message: MESSAGE.UNAUTHORIZED,
+            return res.status(RESPONSE_CODE.UNAUTHENTICATED).json({
+                status: API_STATUS.UNAUTHENTICATED,
+                message: MESSAGE.UNAUTHENTICATED,
             });
         }
         const accountByToken = await AccountService.findAccountByToken(account.accountID, token);
