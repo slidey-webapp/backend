@@ -47,6 +47,10 @@ export default class Presentation extends Model {
                     },
                     field: "sessionID",
                 },
+                isTemplate: {
+                    type: DataTypes.BOOLEAN,
+                    allowNull: true,
+                },
             },
             {
                 tableName: "PRESENTATION",
