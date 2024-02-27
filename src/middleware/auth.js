@@ -52,22 +52,22 @@ export const auth = (req, res, next) => {
                 req.token = token;
                 next();
             } else {
-                return res.status(RESPONSE_CODE.UNAUTHENTICATED).json({
-                    status: API_STATUS.UNAUTHENTICATED,
-                    message: MESSAGE.UNAUTHENTICATED,
+                return res.status(RESPONSE_CODE.UNAUTHORIZED).json({
+                    status: API_STATUS.UNAUTHORIZED,
+                    message: MESSAGE.UNAUTHORIZED,
                 });
             }
         } else {
             console.log(info);
             if (info && info.name === "TokenExpiredError") {
-                return res.status(RESPONSE_CODE.UNAUTHENTICATED).json({
+                return res.status(RESPONSE_CODE.UNAUTHORIZED).json({
                     status: API_STATUS.TOKEN_EXPIRED,
-                    message: MESSAGE.UNAUTHENTICATED,
+                    message: MESSAGE.UNAUTHORIZED,
                 });
             } else {
-                return res.status(RESPONSE_CODE.UNAUTHENTICATED).json({
-                    status: API_STATUS.UNAUTHENTICATED,
-                    message: MESSAGE.UNAUTHENTICATED,
+                return res.status(RESPONSE_CODE.UNAUTHORIZED).json({
+                    status: API_STATUS.UNAUTHORIZED,
+                    message: MESSAGE.UNAUTHORIZED,
                 });
             }
         }
