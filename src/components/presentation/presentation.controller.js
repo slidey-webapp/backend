@@ -20,6 +20,7 @@ import { emitUpdatePresentation } from "../socket/socket.eventEmitter";
 
 export const createPresentationTemplate = async (req, res, next) => {
     try {
+        const user = req.user;
         const { name, slides } = req.body;
 
         const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
@@ -37,6 +38,7 @@ export const createPresentationTemplate = async (req, res, next) => {
             name,
             code,
             isTemplate: true,
+            accountID: user.accountID,
         });
         const promises = slides.length
             ? slides.map((slide) => {
@@ -129,7 +131,7 @@ export const createPresentation = async (req, res, next) => {
 
             const clonePresentation = await PresentationService.createPresentation({
                 name: name || templatePresentation.name,
-                accountID: user.createdBy,
+                accountID: user.accountID,
                 code: code,
             });
             await cloneSlides(templateSlides, clonePresentation.presentationID);
@@ -253,6 +255,7 @@ export const getPresentationTemplate = async (req, res, next) => {
     try {
         const { offset, limit } = getPaginationInfo(req);
         const name = req.query.name;
+        const user = req.user;
         const presentations = await PresentationService.getPresentationTemplate({
             offset,
             limit,
@@ -260,6 +263,20 @@ export const getPresentationTemplate = async (req, res, next) => {
         });
         const total = await PresentationService.countPresentationTemplate({
             name,
+        });
+        const [presentationCreators, presentationSlides] = await Promise.all([
+            Promise.all(presentations.map((item) => getFullAccountInfo({ accountID: item.createdBy }, user))),
+            Promise.all(
+                presentations.map((item) =>
+                    getDetailSlideOfPresentation({
+                        presentationID: item.presentationID,
+                    })
+                )
+            ),
+        ]);
+        presentations.forEach((item, index) => {
+            item.slides = presentationSlides[index];
+            item.creator = presentationCreators[index] || null;
         });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
