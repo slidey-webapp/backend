@@ -233,7 +233,7 @@ export const sendInviteEmail = async (req, res, next) => {
                 address: email,
                 name: "",
             },
-            subject: MESSAGE.GROUP_INVITATION_MAIL_SUBJECT,
+            subject: MESSAGE.COLLAB_INVITATION_MAIL_SUBJECT,
             htmlData: {
                 dir: "/resource/htmlEmailTemplate/collabInvitation.html",
                 replace: {

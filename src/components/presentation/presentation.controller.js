@@ -153,7 +153,7 @@ export const createPresentation = async (req, res, next) => {
                     presentation: clonePresentation,
                     slides: clonedSlides,
                 },
-                message: MESSAGE.POST_SUCCESS("Tạo bản trình chiếu từ mẫu"),
+                message: MESSAGE.POST_SUCCESS("Tạo bài trình chiếu từ mẫu"),
             });
         }
         const newPresentation = await PresentationService.createPresentation({
