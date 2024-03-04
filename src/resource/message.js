@@ -6,6 +6,7 @@ export const SEND_VERIFY_EMAIL = (email) =>
     `Một email xác minh đã được gửi đến ${email}. Vui lòng kiểm tra hộp thư đến (hoặc thư mục thư rác) của bạn và làm theo hướng dẫn.`;
 export const QUERY_SUCCESS = (name) => `Truy vấn ${name || "dữ liệu"} thành công`;
 export const EXISTED_USER = "Tên đăng nhập đã tồn tại";
+export const EXSITED_ACCOUNT_ROLE = "Tài khoản đã có quyền này";
 export const EXISTED_GROUP = "Tên nhóm đã được sử dụng";
 export const EXISTED_EMAIL = "Địa chỉ email đã được sử dụng";
 export const EXISTED_PRESENTATION = "Bản trình bày với tên này đã tồn tại";
