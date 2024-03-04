@@ -1,6 +1,7 @@
 import accountRoute from "../components/account/account.route";
 import groupRoute from "../components/group/group.route";
 import presentationRoute from "../components/presentation/presentation.route";
+import roleRoute from "../components/role/role.route";
 import sessionRoute from "../components/session/session.route";
 import visitHistoryRoute from "../components/visitHistory/visitHistory.route";
 import { API_STATUS, RESPONSE_CODE } from "../config/contants";
@@ -12,6 +13,7 @@ export const router = (app) => {
     app.use("/api/session", sessionRoute);
     app.use("/api/group", auth, groupRoute);
     app.use("/api/visit-history", auth, visitHistoryRoute);
+    app.use("/api/role", auth, roleRoute);
     app.use("/api", async (req, res, next) => {
         try {
             res.status(RESPONSE_CODE.SUCCESS).json({
