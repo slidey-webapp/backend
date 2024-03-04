@@ -3,8 +3,10 @@ import { getToken } from "../utilities/request";
 import passport from "./passport";
 import * as MESSAGE from "../resource/message";
 import * as PersonService from "../components/person/person.service";
+import * as RoleService from "../components/role/role.service";
 import { ACCOUNT_STATUS } from "../components/account/account.model";
 import { sendEmail } from "../utilities/email";
+import { getRoleOfAccount } from "../components/role/role.util";
 export const auth = (req, res, next) => {
     return passport.authenticate("normalStrategy", { session: false }, async function (err, account, info) {
         if (account) {
@@ -45,9 +47,13 @@ export const auth = (req, res, next) => {
                         delete account[key];
                     }
                 });
+                const accountRoles = await getRoleOfAccount({
+                    accountID: account.accountID,
+                });
                 req.user = {
                     ...person,
                     ...account,
+                    claims: accountRoles,
                 };
                 req.token = token;
                 next();
