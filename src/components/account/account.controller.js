@@ -19,6 +19,7 @@ import * as PersonService from "../person/person.service";
 import { ACCOUNT_SOURCE, ACCOUNT_STATUS } from "./account.model";
 import * as AccountService from "./account.service";
 import { comparePassword } from "./account.util";
+import { getRoleOfAccount } from "../role/role.util";
 export const signUp = async (req, res, next) => {
     try {
         const { password, email, fullname, confirmPassword } = req.body;
@@ -88,6 +89,9 @@ export const signUp = async (req, res, next) => {
                 },
             },
         });
+        const accountRoles = await getRoleOfAccount({
+            accountID: account.accountID,
+        });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             result: {
@@ -97,7 +101,7 @@ export const signUp = async (req, res, next) => {
                 }),
                 token: token,
                 refreshToken,
-                claims: [],
+                claims: accountRoles,
             },
             message: MESSAGE.POST_SUCCESS("Tạo tài khoản"),
         });
@@ -186,7 +190,9 @@ export const login = async (req, res, next) => {
                 result: verifyURL,
             });
         }
-
+        const accountRoles = await getRoleOfAccount({
+            accountID: account.accountID,
+        });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             result: {
@@ -196,7 +202,7 @@ export const login = async (req, res, next) => {
                 }),
                 token: token,
                 refreshToken: refreshToken,
-                claims: [],
+                claims: accountRoles,
             },
         });
     } catch (error) {
@@ -437,13 +443,15 @@ export const authToken = async (req, res, next) => {
     try {
         const user = req.user;
         const token = req.token;
-
+        const accountRoles = await getRoleOfAccount({
+            accountID: user.accountID,
+        });
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             result: {
                 user: user,
                 token: token,
-                claims: [],
+                claims: accountRoles,
             },
             message: MESSAGE.POST_SUCCESS("Xác thực"),
         });

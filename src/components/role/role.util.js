@@ -30,3 +30,20 @@ export const getAccountInfoOfRole = async ({ roleID }, user) => {
         };
     });
 };
+
+export const getRoleOfAccount = async ({ accountID }) => {
+    const accountRoles = await RoleService.getAccountRoleOfAccount({ accountID });
+    const roles = await Promise.all(
+        accountRoles.map((item) => {
+            return RoleService.findRole({
+                roleID: item.roleID,
+            });
+        })
+    );
+    return accountRoles.map((item, index) => {
+        return {
+            ...item,
+            ...roles[index],
+        };
+    });
+};
