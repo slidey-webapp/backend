@@ -344,7 +344,9 @@ export const googleLogin = async (req, res, next) => {
                 },
                 true
             );
-
+            const accountRoles = await getRoleOfAccount({
+                accountID: account.accountID,
+            });
             return res.status(RESPONSE_CODE.SUCCESS).json({
                 status: API_STATUS.OK,
                 result: {
@@ -354,6 +356,7 @@ export const googleLogin = async (req, res, next) => {
                     }),
                     token: token,
                     refreshToken: refreshToken,
+                    claims: accountRoles,
                 },
                 message: MESSAGE.POST_SUCCESS("Đăng kí"),
             });

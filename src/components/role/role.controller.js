@@ -9,7 +9,7 @@ import * as AccountService from "../account/account.service";
 export const createNewRole = async (req, res, next) => {
     try {
         const user = req.user;
-        const { name } = req.body;
+        const { name, code } = req.body;
         const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
             name,
         });
@@ -20,7 +20,15 @@ export const createNewRole = async (req, res, next) => {
                 errors: emptyInputError,
             });
         }
-        const code = await getRoleCode();
+        const oldRole = await RoleService.findRole({
+            code,
+        });
+        if (oldRole) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.EXISTED,
+                message: MESSAGE.EXISTED_ROLE,
+            });
+        }
         const role = await RoleService.createRole({
             name,
             code,
@@ -95,8 +103,10 @@ export const getRoleDetail = async (req, res, next) => {
     try {
         const user = req.user;
         const roleID = req.query.roleID;
+        const code = req.query.code;
         const role = await RoleService.findRole({
             roleID,
+            code,
         });
 
         if (!role) {
