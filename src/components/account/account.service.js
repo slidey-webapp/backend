@@ -150,3 +150,42 @@ export const getListAccount = ({ offset, limit, email, fullname }) => {
         },
     });
 };
+
+export const countAccount = ({ email, fullname }) => {
+    const searchName = getInsensitiveCaseRegextForSearchLike(fullname || "");
+    const searchEmail = getInsensitiveCaseRegextForSearchLike(email || "");
+    return AccountTable.count({
+        raw: true,
+        order: [["createdAt", "DESC"]],
+        where: {
+            email: {
+                [Op.regexp]: searchEmail,
+            },
+            "$Person.fullname$": {
+                [Op.regexp]: searchName,
+            },
+        },
+        include: {
+            model: PersonTable,
+            attributes: ["fullname"],
+            as: "Person",
+            duplicating: false,
+        },
+    });
+};
+
+export const changeAccountBlock = async ({ isBlocked, accountID }) => {
+    const result = await AccountTable.update(
+        {
+            isBlocked: !!isBlocked,
+        },
+        {
+            where: {
+                accountID,
+            },
+            raw: true,
+            returning: true,
+        }
+    );
+    return result && result.length ? result[1] : null;
+};

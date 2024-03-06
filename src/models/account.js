@@ -29,6 +29,10 @@ export default class Account extends Model {
                     type: DataTypes.STRING,
                     allowNull: true,
                 },
+                isBlocked: {
+                    type: DataTypes.BOOLEAN,
+                    allowNull: true,
+                },
             },
             {
                 tableName: "ACCOUNT",
