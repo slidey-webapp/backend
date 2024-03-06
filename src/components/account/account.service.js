@@ -1,4 +1,13 @@
-import { JWT_KEY, REFRESH_TOKEN_EXPIRES_IN, TOKEN_EXPIRES_IN } from "../../config/contants";
+import {
+    DEFAULT_LIMIT,
+    DEFAULT_OFFSET,
+    JWT_KEY,
+    REFRESH_TOKEN_EXPIRES_IN,
+    TOKEN_EXPIRES_IN,
+} from "../../config/contants";
+import { Op } from "../../database";
+import { getInsensitiveCaseRegextForSearchLike } from "../../utilities/string";
+import PersonTable from "../person/person.model";
 import AccountTable, { ACCOUNT_STATUS } from "./account.model";
 import AccountTokenTable, { TOKEN_TYPE } from "./accountToken/accountToken.model";
 import jwt from "jsonwebtoken";
@@ -114,5 +123,30 @@ export const deleteToken = ({ accountID, token }) => {
             type: TOKEN_TYPE.TOKEN,
         },
         force: true,
+    });
+};
+
+export const getListAccount = ({ offset, limit, email, fullname }) => {
+    const searchName = getInsensitiveCaseRegextForSearchLike(fullname || "");
+    const searchEmail = getInsensitiveCaseRegextForSearchLike(email || "");
+    return AccountTable.findAll({
+        raw: true,
+        offset: offset || DEFAULT_OFFSET,
+        limit: limit || DEFAULT_LIMIT,
+        order: [["createdAt", "DESC"]],
+        where: {
+            email: {
+                [Op.regexp]: searchEmail,
+            },
+            "$Person.fullname$": {
+                [Op.regexp]: searchName,
+            },
+        },
+        include: {
+            model: PersonTable,
+            attributes: ["fullname"],
+            as: "Person",
+            duplicating: false,
+        },
     });
 };

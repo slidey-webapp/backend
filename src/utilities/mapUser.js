@@ -10,6 +10,12 @@ export const mapUser = (user) => {
     return result;
 };
 
+export const mapUserWithFullname = (user) => {
+    const result = { ...user };
+    result.fullname = user["Person.fullname"] || "";
+    return mapUser(result);
+};
+
 export const mapGroupMember = (groupMember) => {
     const result = {};
     Object.keys(groupMember).forEach((key) => {
