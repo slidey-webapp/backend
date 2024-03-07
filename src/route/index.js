@@ -6,14 +6,15 @@ import sessionRoute from "../components/session/session.route";
 import visitHistoryRoute from "../components/visitHistory/visitHistory.route";
 import { API_STATUS, RESPONSE_CODE } from "../config/contants";
 import { auth } from "../middleware/auth";
+import { blockedCheck } from "../middleware/blockedCheck";
 
 export const router = (app) => {
     app.use("/api/account", accountRoute);
-    app.use("/api/presentation", auth, presentationRoute);
-    app.use("/api/session", sessionRoute);
-    app.use("/api/group", auth, groupRoute);
-    app.use("/api/visit-history", auth, visitHistoryRoute);
-    app.use("/api/role", auth, roleRoute);
+    app.use("/api/presentation", auth, blockedCheck, presentationRoute);
+    app.use("/api/session", blockedCheck, sessionRoute);
+    app.use("/api/group", auth, blockedCheck, groupRoute);
+    app.use("/api/visit-history", auth, blockedCheck, visitHistoryRoute);
+    app.use("/api/role", auth, blockedCheck, roleRoute);
     app.use("/api", async (req, res, next) => {
         try {
             res.status(RESPONSE_CODE.SUCCESS).json({
