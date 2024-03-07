@@ -158,6 +158,12 @@ export const login = async (req, res, next) => {
                 message: MESSAGE.BLOCKED_ACCOUNT,
             });
         }
+        if (account.isBlocked) {
+            return res.status(RESPONSE_CODE.FORBIDDEN).json({
+                status: API_STATUS.PERMISSION_DENIED,
+                message: MESSAGE.BLOCKED_ACCOUNT,
+            });
+        }
         const { token, refreshToken } = await AccountService.createToken(
             {
                 accountID: account.accountID,
@@ -238,6 +244,12 @@ export const verifyEmail = async (req, res, next) => {
                 message: MESSAGE.QUERY_NOT_FOUND("Tài khoản"),
             });
         }
+        if (account.isBlocked) {
+            return res.status(RESPONSE_CODE.FORBIDDEN).json({
+                status: API_STATUS.PERMISSION_DENIED,
+                message: MESSAGE.BLOCKED_ACCOUNT,
+            });
+        }
         const data = jwt.verify(token, JWT_KEY);
         if (!data) {
             return res.status(RESPONSE_CODE.UNAUTHORIZED).json({
@@ -306,6 +318,12 @@ export const googleLogin = async (req, res, next) => {
             email: payload.email,
         });
         if (account) {
+            if (account.isBlocked) {
+                return res.status(RESPONSE_CODE.FORBIDDEN).json({
+                    status: API_STATUS.PERMISSION_DENIED,
+                    message: MESSAGE.BLOCKED_ACCOUNT,
+                });
+            }
             const { token, refreshToken } = await AccountService.createToken(
                 {
                     accountID: account.accountID,

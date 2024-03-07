@@ -1,7 +1,7 @@
 export const UNAUTHORIZED = "UNAUTHORIZED";
 export const NOT_FOUND_ACCOUNT = "Không tìm thấy tài khoản nào";
 export const INCORRECT_PASSWORD = "Mật khẩu không chính xác";
-export const BLOCKED_ACCOUNT = "Tài khoản của bạn đã bị xóa";
+export const BLOCKED_ACCOUNT = "Tài khoản của bạn đã bị khóa";
 export const SEND_VERIFY_EMAIL = (email) =>
     `Một email xác minh đã được gửi đến ${email}. Vui lòng kiểm tra hộp thư đến (hoặc thư mục thư rác) của bạn và làm theo hướng dẫn.`;
 export const QUERY_SUCCESS = (name) => `Truy vấn ${name || "dữ liệu"} thành công`;
