@@ -3,7 +3,7 @@ import * as MESSAGE from "../../../resource/message";
 import { getPaginationInfo } from "../../../utilities/pagination";
 import * as AccountService from "../account.service";
 import { API_STATUS, RESPONSE_CODE } from "../../../config/contants";
-import { mapUserWithFullname } from "../../../utilities/mapUser";
+import { mapUser, mapUserWithFullname } from "../../../utilities/mapUser";
 import { getRoleOfAccount } from "../../role/role.util";
 
 export const blockAccount = async (req, res, next) => {
@@ -28,7 +28,7 @@ export const blockAccount = async (req, res, next) => {
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             result: {
-                account,
+                account: mapUser(account[0]),
             },
             message: MESSAGE.POST_SUCCESS("Khóa tài khoản"),
         });
@@ -127,7 +127,7 @@ export const unblockAccount = async (req, res, next) => {
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
             result: {
-                account,
+                account: mapUser(account[0]),
             },
             message: MESSAGE.POST_SUCCESS("Mở khóa tài khoản"),
         });
