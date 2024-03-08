@@ -1,4 +1,5 @@
 import accountRoute from "../components/account/account.route";
+import commonRoute from "../components/common/common.route";
 import groupRoute from "../components/group/group.route";
 import presentationRoute from "../components/presentation/presentation.route";
 import roleRoute from "../components/role/role.route";
@@ -15,6 +16,7 @@ export const router = (app) => {
     app.use("/api/group", auth, blockedCheck, groupRoute);
     app.use("/api/visit-history", auth, blockedCheck, visitHistoryRoute);
     app.use("/api/role", auth, blockedCheck, roleRoute);
+    app.use("/api/common", auth, blockedCheck, commonRoute);
     app.use("/api", async (req, res, next) => {
         try {
             res.status(RESPONSE_CODE.SUCCESS).json({
