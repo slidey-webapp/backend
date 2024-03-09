@@ -106,7 +106,7 @@ export const getRoleDetail = async (req, res, next) => {
         const code = req.query.code;
         const role = await RoleService.findRole({
             roleID,
-            code,
+            ...(code && { code }),
         });
 
         if (!role) {
@@ -245,23 +245,49 @@ export const addRoleToAccount = async (req, res, next) => {
                 },
             });
         }
-        const oldAccountRoles = await Promise.all(
-            (accountIDs || []).map((item) => RoleService.findAccountRole({ accountID: item, roleID }))
-        );
-        const accountIDsToUse = accountIDs.filter((item, index) => {
-            return !oldAccountRoles[index];
+        const currentAccountRoles = await RoleService.getAccountRoleOfRole({
+            roleID,
         });
+        const isDeletedAccountIDs = [];
+        const isNewAccountIDs = [];
+        currentAccountRoles.forEach((item) => {
+            if (!accountIDs.includes(item.accountID)) {
+                isDeletedAccountIDs.push(item.accountID);
+            }
+        });
+
+        accountIDs.forEach((item) => {
+            if (!currentAccountRoles.find((role) => role.accountID === item)) {
+                isNewAccountIDs.push(item);
+            }
+        });
+
         const results = await Promise.all(
-            accountIDsToUse.map((item) => {
+            isNewAccountIDs.map((item) => {
                 return RoleService.createAccountRole({
                     accountID: item,
                     roleID,
                 });
             })
         );
+        await Promise.all(
+            isDeletedAccountIDs.map((item) => {
+                return RoleService.deleteAccountRole({
+                    accountID: item,
+                    roleID,
+                });
+            })
+        );
+        const accountRoles = await getAccountInfoOfRole(
+            {
+                roleID: roleID,
+            },
+            user
+        );
+
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
-            result: results,
+            result: accountRoles,
             message: MESSAGE.POST_SUCCESS("Thêm quyền cho tài khoản"),
         });
     } catch (error) {
