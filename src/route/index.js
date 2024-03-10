@@ -11,7 +11,7 @@ import { blockedCheck } from "../middleware/blockedCheck";
 export const router = (app) => {
     app.use("/api/account", accountRoute);
     app.use("/api/presentation", auth, blockedCheck, presentationRoute);
-    app.use("/api/session", blockedCheck, sessionRoute);
+    app.use("/api/session", sessionRoute);
     app.use("/api/group", auth, blockedCheck, groupRoute);
     app.use("/api/visit-history", auth, blockedCheck, visitHistoryRoute);
     app.use("/api/role", auth, blockedCheck, roleRoute);
