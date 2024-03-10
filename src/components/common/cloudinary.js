@@ -1,8 +1,8 @@
-import cloudinary from "cloudinary";
+import { v2 as cloudinary } from "cloudinary";
 import dotenv from "dotenv";
 dotenv.config();
 
-cloudinary.v2.config({
+cloudinary.config({
     cloud_name: process.env.CLOUD_NAME,
     api_key: process.env.CLOUD_API_KEY,
     api_secret: process.env.CLOUD_API_SECRET,
@@ -13,7 +13,7 @@ export const CloudinaryFolder = "Slidey";
 export const Cloudinary = {
     upload: async (file, folder = CloudinaryFolder) => {
         return await new Promise((resolve) => {
-            cloudinary.v2.uploader.upload(
+            cloudinary.uploader.upload(
                 file,
                 {
                     folder: folder,
@@ -26,7 +26,7 @@ export const Cloudinary = {
     },
     destroy: async (publicId) => {
         return await new Promise((resolve) => {
-            cloudinary.v2.uploader.destroy(publicId, (result) => {
+            cloudinary.uploader.destroy(publicId, (result) => {
                 resolve({
                     message: "destroy success",
                 });
