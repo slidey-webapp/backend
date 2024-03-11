@@ -16,17 +16,21 @@ export const uploadImage = async (req, res, next) => {
                 message: valid.message,
             });
         }
-        const uploadResult = await CommonService.uploadFile(file);
-        fs.unlink(file.path, (err) => {
-            if (err) throw err;
-        });
-        const media = await MediaAssetService.createMediaAsset({
-            mediaURL: uploadResult.mediaURL,
-            publicID: uploadResult.publicID,
-        });
+        const uploadResult = await CommonService.uploadBuffer(file.buffer);
+        if (uploadResult.publicID) {
+            const media = await MediaAssetService.createMediaAsset({
+                mediaURL: uploadResult.mediaURL,
+                publicID: uploadResult.publicID,
+            });
+            return res.status(RESPONSE_CODE.SUCCESS).json({
+                status: API_STATUS.OK,
+                result: media,
+                message: MESSAGE.POST_SUCCESS("Upload ảnh"),
+            });
+        }
         return res.status(RESPONSE_CODE.SUCCESS).json({
             status: API_STATUS.OK,
-            result: media,
+            result: null,
             message: MESSAGE.POST_SUCCESS("Upload ảnh"),
         });
     } catch (error) {

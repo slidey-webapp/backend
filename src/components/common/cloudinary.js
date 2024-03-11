@@ -24,6 +24,15 @@ export const Cloudinary = {
             );
         });
     },
+    uploadBuffer: async (buffer, folder = CloudinaryFolder) => {
+        return await new Promise((resolve) => {
+            cloudinary.uploader
+                .upload_stream((error, uploadResult) => {
+                    return resolve(uploadResult);
+                })
+                .end(buffer);
+        });
+    },
     destroy: async (publicID) => {
         return await new Promise((resolve) => {
             cloudinary.uploader.destroy(publicID, (result) => {
