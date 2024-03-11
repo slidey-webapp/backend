@@ -1,5 +1,6 @@
 import { SLIDE_TYPE } from "./slide.model";
 import * as SlideService from "./slide.service";
+import * as MediaAssetService from "../../common/mediaAsset/mediaAsset.service";
 export const deleteSlideReference = ({ slideID, type }) => {
     const promises = [
         SlideService.deleteSlideContent({ slideID, type }),
@@ -64,6 +65,8 @@ export const slideGenerator = async ({
     author,
     options,
     items,
+    layout,
+    mediaID,
 }) => {
     const slide = await SlideService.createSlide({
         type,
@@ -74,6 +77,8 @@ export const slideGenerator = async ({
         textSize,
         textColor,
         textBackground,
+        layout,
+        mediaID,
     });
     const slideID = slide.slideID;
     if (type === SLIDE_TYPE.HEADING) {
@@ -182,12 +187,15 @@ export const cloneSlides = async (slides, presentationID) => {
 
 export const getSlideDetail = async (slide, getSlideResult = false) => {
     const result = { ...slide };
-    const [option, bulletListItem] = await Promise.all([
+    const [option, bulletListItem, media] = await Promise.all([
         SlideService.getMultipleChoiceSlideOption({
             slideID: slide.slideID,
         }),
         SlideService.getBulletListSlideItem({
             slideID: slide.slideID,
+        }),
+        MediaAssetService.findMediaAsset({
+            mediaID: slide.mediaID,
         }),
     ]);
     if (slide.type === SLIDE_TYPE.MULTIPLE_CHOICE) {
@@ -221,6 +229,9 @@ export const getSlideDetail = async (slide, getSlideResult = false) => {
             });
             result.options = slideResult;
         }
+    }
+    if (media && slide.mediaID) {
+        result.mediaURL = media.mediaURL;
     }
     return result;
 };

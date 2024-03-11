@@ -10,7 +10,7 @@ export const roleCheck = (req, res, next) => {
     const path = req.originalUrl;
     const user = req.user;
     if (isAdminOnlyPath.includes(path)) {
-        if (user.claims.find((item) => item.code === AdminRole)) {
+        if (user && user.claims.find((item) => item.code === AdminRole)) {
             next();
             return;
         }

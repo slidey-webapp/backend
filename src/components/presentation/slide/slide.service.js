@@ -21,6 +21,8 @@ export const createSlide = async ({
     textSize,
     textColor,
     textBackground,
+    layout,
+    mediaID,
 }) => {
     const newSlide = (
         await SlideTable.create({
@@ -32,6 +34,8 @@ export const createSlide = async ({
             textSize,
             textColor,
             textBackground,
+            layout,
+            mediaID,
         })
     ).get({
         plain: true,
@@ -550,6 +554,8 @@ export const updateSlide = async ({
     textSize,
     textColor,
     textBackground,
+    layout,
+    mediaID,
 }) => {
     const result = await SlideTable.update(
         {
@@ -560,6 +566,8 @@ export const updateSlide = async ({
             ...(textSize !== undefined && { textSize }),
             ...(textColor !== undefined && { textColor }),
             ...(textBackground !== undefined && { textBackground }),
+            ...(layout !== undefined && { layout }),
+            ...(mediaID !== undefined && { mediaID }),
         },
         {
             where: {

@@ -33,3 +33,5 @@ export const EXISTED_PARTICIPANT_NAME = "Tên người dùng này đã được 
 export const ALREADY_SUBMIT_ANSWER = "Bạn đã trả lời slide này rồi";
 export const SERVER_BUSY = "Đã có lỗi xảy ra, vui lòng thử lại sau";
 export const TEMPLATE_NOT_FOUND = "Không tìm thấy mẫu có sẵn nào";
+export const FILE_TOO_BIG = "Kích thước của tập tin không được quá 15MB";
+export const IMAGE_ONLY = "Chỉ hỗ trợ định dạng hình ảnh";

@@ -60,6 +60,8 @@ export const createPresentationTemplate = async (req, res, next) => {
                       author: slide.author,
                       options: slide.options,
                       items: slide.items,
+                      layout: slide.layout,
+                      mediaID: slide.mediaID,
                   });
               })
             : SlideService.createSlide({
@@ -406,6 +408,8 @@ export const addSlide = async (req, res, next) => {
             textColor,
             textBackground,
             chartType,
+            layout,
+            mediaID,
         } = req.body;
         const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
             presentationID,
@@ -450,6 +454,8 @@ export const addSlide = async (req, res, next) => {
             textColor,
             textBackground,
             chartType,
+            layout,
+            mediaID,
         });
         getDetailSlideOfPresentation({
             presentationID,
@@ -878,6 +884,8 @@ export const updatePresentation = async (req, res, next) => {
                             textSize: newSlides[j].textSize,
                             textColor: newSlides[j].textColor,
                             textBackground: newSlides[j].textBackground,
+                            layout: newSlides[j].layout,
+                            mediaID: newSlides[j].mediaID,
                         })
                     );
                     break;
