@@ -9,6 +9,7 @@ import _Collaboration from "./collaboration.js";
 import _Group from "./group.js";
 import _GroupMember from "./groupMember.js";
 import _HeadingSlide from "./headingSlide.js";
+import _MediaAsset from "./mediaAsset.js";
 import _Message from "./message.js";
 import _MultipleChoiceSlide from "./multipleChoiceSlide.js";
 import _MultipleChoiceSlideOption from "./multipleChoiceSlideOption.js";
@@ -38,6 +39,7 @@ export default function initModels(sequelize) {
     const Group = _Group.init(sequelize, DataTypes);
     const GroupMember = _GroupMember.init(sequelize, DataTypes);
     const HeadingSlide = _HeadingSlide.init(sequelize, DataTypes);
+    const MediaAsset = _MediaAsset.init(sequelize, DataTypes);
     const Message = _Message.init(sequelize, DataTypes);
     const MultipleChoiceSlide = _MultipleChoiceSlide.init(sequelize, DataTypes);
     const MultipleChoiceSlideOption = _MultipleChoiceSlideOption.init(sequelize, DataTypes);
@@ -77,6 +79,8 @@ export default function initModels(sequelize) {
     Group.hasMany(GroupMember, { foreignKey: "groupID" });
     PresentSession.belongsTo(Group, { foreignKey: "groupID" });
     Group.hasMany(PresentSession, { foreignKey: "groupID" });
+    Slide.belongsTo(MediaAsset, { foreignKey: "mediaID" });
+    MediaAsset.hasMany(Slide, { foreignKey: "mediaID" });
     MultipleChoiceSlideOption.belongsTo(MultipleChoiceSlide, { foreignKey: "slideID" });
     MultipleChoiceSlide.hasMany(MultipleChoiceSlideOption, { foreignKey: "slideID" });
     Collaboration.belongsTo(Presentation, { foreignKey: "presentationID" });
@@ -140,6 +144,7 @@ export default function initModels(sequelize) {
         Group,
         GroupMember,
         HeadingSlide,
+        MediaAsset,
         Message,
         MultipleChoiceSlide,
         MultipleChoiceSlideOption,

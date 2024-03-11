@@ -50,6 +50,19 @@ export default class Slide extends Model {
                     type: DataTypes.STRING,
                     allowNull: true,
                 },
+                layout: {
+                    type: DataTypes.STRING,
+                    allowNull: true,
+                },
+                mediaID: {
+                    type: DataTypes.INTEGER,
+                    allowNull: true,
+                    references: {
+                        model: "MEDIA_ASSET",
+                        key: "mediaID",
+                    },
+                    field: "mediaID",
+                },
             },
             {
                 tableName: "SLIDE",

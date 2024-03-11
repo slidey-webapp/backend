@@ -24,9 +24,9 @@ export const Cloudinary = {
             );
         });
     },
-    destroy: async (publicId) => {
+    destroy: async (publicID) => {
         return await new Promise((resolve) => {
-            cloudinary.uploader.destroy(publicId, (result) => {
+            cloudinary.uploader.destroy(publicID, (result) => {
                 resolve({
                     message: "destroy success",
                 });
