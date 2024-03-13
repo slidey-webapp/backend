@@ -331,6 +331,7 @@ export const getSlideOfPresentation = ({ presentationID, offset, limit }) => {
 export const getMultipleChoiceSlideOption = ({ slideID }) => {
     return MultipleChoiceSlideOptionTable.findAll({
         raw: true,
+        order: [["createdAt", "ASC"]],
         where: {
             slideID,
         },
@@ -362,6 +363,7 @@ export const getSlideResult = ({ slideID }) => {
         where: {
             slideID,
         },
+        order: [["createdAt", "ASC"]],
     });
 };
 
@@ -371,6 +373,7 @@ export const getWordCloudSlideOption = ({ slideID }) => {
         where: {
             slideID,
         },
+        order: [["createdAt", "ASC"]],
     });
 };
 
