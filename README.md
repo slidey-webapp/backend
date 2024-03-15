@@ -1,15 +1,15 @@
-# backend
+# Hướng dẫn cài đặt mã nguồn Backend
 
-DB_URI=postgres://admin:G557rz82bhf5ohX34q6AKG6IqgoJr5sl@dpg-ck9e7o1ehpqs73cjkang-a.singapore-postgres.render.com/presentation_app
-DB_HOST=dpg-ck9e7o1ehpqs73cjkang-a.singapore-postgres.render.com
-DB_PORT=5432
-DB_USER=admin
-DB_PASSWORD="G557rz82bhf5ohX34q6AKG6IqgoJr5sl"
-DB_DATABASE=presentation_app
-APP_EMAIL=""
-APP_EMAIL_PASSWORD=""
-APP_NAME="SLIDEY"
-APP_HOMEPAGE=""
-APP_LOGO=""
-GOOGLE_CLIENT_Id=5292669152-rvcgmvfhuvsei0c41v8c7smujjpf8j6m.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=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
+## Chuẩn bị môi trường
+
+Để chuẩn bị môi trường cho phần Backend của hệ thống, tạo một file mới cùng cấp với thư mục `src` tên là `.env` và copy nội dung của file `.env.example` vào
+
+## Cài đặt các thư viện
+
+Mở terminal tại thư mục chứa mã nguồn và thực thi lệnh `yarn install` để cài đặt các thư viện cần thiết cho hệ thống.
+
+## Biên dịch và thực thi mã nguồn
+
+Sau khi chuẩn bị môi trường và cái đặt các thư viện cần thiến, biên dịch và thực thi mã nguồn bằng các thực hiện lệnh `yarn dev` hoặc `npm run dev`.
+
+Sau khi thấy dòng `App listening at http://localhost:5000` xuất hiện trên terminal tức là mã nguồn đã được biên dịch và thực thi thành công. Lúc này phần Backend của hệ thống sẽ chạy ở http://localhost:5000
