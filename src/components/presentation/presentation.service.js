@@ -18,16 +18,18 @@ export const createPresentation = async ({ accountID, name, code, sessionID, isT
     return newPresentation;
 };
 
-export const findPresentation = (data, noSession = true) => {
+export const findPresentation = (data, noSession = true, allowTemplate = false) => {
     if (!data) {
         return null;
     }
     return PresentationTable.findOne({
         raw: true,
         where: {
-            isTemplate: {
-                [Op.not]: true,
-            },
+            ...(!allowTemplate && {
+                isTemplate: {
+                    [Op.not]: true,
+                },
+            }),
             ...data,
             ...(noSession && {
                 sessionID: null,
@@ -151,7 +153,11 @@ export const deletePresentation = ({ presentationID }) => {
     });
 };
 
-export const findAccessiblePresentation = ({ accountID, presentationID, sessionID }, noSession = true) => {
+export const findAccessiblePresentation = (
+    { accountID, presentationID, sessionID },
+    noSession = true,
+    allowTemplate = false
+) => {
     return PresentationTable.findOne({
         raw: true,
         where: {
@@ -159,9 +165,12 @@ export const findAccessiblePresentation = ({ accountID, presentationID, sessionI
                 createdBy: accountID,
                 "$Collaborations.accountID$": accountID,
             },
-            isTemplate: {
-                [Op.not]: true,
-            },
+            ...(!allowTemplate && {
+                isTemplate: {
+                    [Op.not]: true,
+                },
+            }),
+
             ...(presentationID && { presentationID }),
             ...(sessionID && { sessionID }),
             ...(noSession && {
