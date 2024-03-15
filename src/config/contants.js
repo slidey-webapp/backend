@@ -69,7 +69,7 @@ export const APP_LOGO = process.env.APP_LOGO;
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 
 export const SOCKET_AUTH_TIMEOUT = 3000;
-export const SOCKET_PING_TIMEOUT = 3000;
+export const SOCKET_PING_TIMEOUT = 5000;
 
 export const SOCKET_EVENT = {
     CONNECTION: "connection",
