@@ -315,16 +315,21 @@ export const deletePresentation = async (req, res, next) => {
                 errors: emptyInputError,
             });
         }
-        const presentation = await PresentationService.findPresentation({
-            presentationID,
-            createdBy: user.accountID,
-        });
+        const presentation = await PresentationService.findPresentation(
+            {
+                presentationID,
+                createdBy: user.accountID,
+            },
+            false,
+            true
+        );
         if (!presentation) {
             return res.status(RESPONSE_CODE.NOT_FOUND).json({
                 status: API_STATUS.NOT_FOUND,
                 message: MESSAGE.QUERY_NOT_FOUND("Bản trình bày"),
             });
         }
+
         await PresentationService.updatePresentation({
             presentationID,
             currentSlideID: null,
@@ -602,10 +607,14 @@ export const updatePresentation = async (req, res, next) => {
             });
         }
 
-        const presentation = await PresentationService.findAccessiblePresentation({
-            presentationID,
-            accountID: user.accountID,
-        });
+        const presentation = await PresentationService.findAccessiblePresentation(
+            {
+                presentationID,
+                accountID: user.accountID,
+            },
+            false,
+            true
+        );
         if (!presentation) {
             return res.status(RESPONSE_CODE.FORBIDDEN).json({
                 status: API_STATUS.PERMISSION_DENIED,
