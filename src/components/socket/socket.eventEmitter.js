@@ -50,27 +50,27 @@ export const emitEditPresentationPing = ({ presentationID, user }, socket) => {
     }
 };
 
-export const emitEditPresentationJoin = ({ presentationID, user }, socket) => {
+export const emitEditPresentationJoin = ({ presentationID, user, allUsers }, socket) => {
     if (socket) {
         socket.broadcast
             .to(getEditPresentationRoomName(presentationID))
-            .emit(SOCKET_EVENT.JOIN_EDIT_PRESENTATION, { presentationID, user });
+            .emit(SOCKET_EVENT.JOIN_EDIT_PRESENTATION, { presentationID, user, allUsers });
     } else {
         socketServer
             .to(getEditPresentationRoomName(presentationID))
-            .emit(SOCKET_EVENT.JOIN_EDIT_PRESENTATION, { presentationID, user });
+            .emit(SOCKET_EVENT.JOIN_EDIT_PRESENTATION, { presentationID, user, allUsers });
     }
 };
 
-export const emitEditPresentationLeave = ({ presentationID, user }, socket) => {
+export const emitEditPresentationLeave = ({ presentationID, user, allUsers }, socket) => {
     if (socket) {
         socket.broadcast
             .to(getEditPresentationRoomName(presentationID))
-            .emit(SOCKET_EVENT.LEAVE_EDIT_PRESENTATION, { presentationID, user });
+            .emit(SOCKET_EVENT.LEAVE_EDIT_PRESENTATION, { presentationID, user, allUsers });
     } else {
         socketServer
             .to(getEditPresentationRoomName(presentationID))
-            .emit(SOCKET_EVENT.LEAVE_EDIT_PRESENTATION, { presentationID, user });
+            .emit(SOCKET_EVENT.LEAVE_EDIT_PRESENTATION, { presentationID, user, allUsers });
     }
 };
 

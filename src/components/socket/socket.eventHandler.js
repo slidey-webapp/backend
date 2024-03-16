@@ -1,7 +1,7 @@
 import * as MESSAGE from "../../resource/message";
 import { JWT_KEY, SOCKET_AUTH_TIMEOUT, SOCKET_EVENT, SOCKET_PING_TIMEOUT } from "../../config/contants";
 import * as SessionService from "../session/session.service";
-import { getEditPresentationRoomName, getSessionRoomName } from "./socket.util";
+import { getEditPresentationRoomName, getSessionRoomName, getUsersInEditPresentationRoom } from "./socket.util";
 import * as AccountService from "../account/account.service";
 import * as PersonService from "../person/person.service";
 import jwt from "jsonwebtoken";
@@ -89,7 +89,7 @@ const onHostJoinSession = async (socket, payload) => {
     }
 };
 
-const onJoinEditPresentation = async (socket, payload) => {
+const onJoinEditPresentation = async (socket, payload, io) => {
     try {
         const { presentationID, accountID, token } = payload;
         const data = jwt.verify(token, JWT_KEY);
@@ -116,59 +116,58 @@ const onJoinEditPresentation = async (socket, payload) => {
             socket.joinPresentation = [];
         }
 
+        const user = {
+            ...mapUser({
+                ...person,
+                ...accountByToken,
+            }),
+            clientID: socket.id,
+        };
+        socket.user = {
+            accountID: user.accountID,
+            fullname: user.fullname,
+            clientID: socket.id,
+        };
         socket.join(getEditPresentationRoomName(presentationID));
-        const user = mapUser({
-            ...person,
-            ...accountByToken,
-        });
-        let timeoutID = setTimeout(() => {
-            console.log("Disconnecting due to un-ping:", socket.id);
-            emitEditPresentationLeave({ presentationID, user });
-            socket.disconnect();
-        }, SOCKET_PING_TIMEOUT);
+        const userInTheRoom = await getUsersInEditPresentationRoom(io, presentationID);
 
         emitEditPresentationJoin(
             {
                 presentationID,
                 user,
+                allUsers: userInTheRoom,
             },
             socket
         );
 
-        socket.on(SOCKET_EVENT.PING_EDIT_PRESENTATION, (payload) => {
-            clearTimeout(timeoutID);
-            emitEditPresentationPing(
-                {
-                    presentationID,
-                    user,
-                },
-                socket
-            );
-            timeoutID = setTimeout(() => {
-                console.log("Disconnecting due to un-ping:", socket.id);
-                emitEditPresentationLeave({ presentationID, user }, socket);
-                socket.disconnect();
-            }, SOCKET_PING_TIMEOUT);
+        socket.on(SOCKET_EVENT.LEAVE_EDIT_PRESENTATION, async (payload) => {
+            const userInTheRoom = await getUsersInEditPresentationRoom(io, presentationID, socket.id);
+            emitEditPresentationLeave({ presentationID, user, allUsers: userInTheRoom });
+            socket.disconnect();
         });
 
-        socket.on(SOCKET_EVENT.LEAVE_EDIT_PRESENTATION, (payload) => {
-            clearTimeout(timeoutID);
-            console.log("Disconnecting due to manual leave:", socket.id);
-            emitEditPresentationLeave({ presentationID, user });
-            socket.disconnect();
+        socket.on(SOCKET_EVENT.DISCONNECT, async (payload) => {
+            console.log("Disconnecting due to socket disconnect:", socket.id);
+            const userInTheRoom = await getUsersInEditPresentationRoom(io, presentationID, socket.id);
+            emitEditPresentationLeave({ presentationID, user, allUsers: userInTheRoom });
+        });
+        socket.emit(SOCKET_EVENT.JOIN_EDIT_PRESENTATION, {
+            presentationID,
+            user,
+            allUsers: userInTheRoom,
         });
     } catch (error) {
         console.log("socket onJoinEditPresentation error:", error);
     }
 };
 
-export const onSocketConnection = (socket) => {
+export const onSocketConnection = (socket, io) => {
     console.log("connecting:", socket.id);
     socket.auth = false;
 
     socket.on(SOCKET_EVENT.HOST_JOIN_SESSION, (payload) => onHostJoinSession(socket, payload));
     socket.on(SOCKET_EVENT.JOIN_SESSION, (payload) => onJoinSession(socket, payload));
-    socket.on(SOCKET_EVENT.JOIN_EDIT_PRESENTATION, (payload) => onJoinEditPresentation(socket, payload));
+    socket.on(SOCKET_EVENT.JOIN_EDIT_PRESENTATION, (payload) => onJoinEditPresentation(socket, payload, io));
     setTimeout(() => {
         if (!socket.auth) {
             console.log("Disconnecting due to un-auth:", socket.id);

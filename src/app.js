@@ -35,7 +35,7 @@ const io = new SocketIO.Server(server, {
     path: "/api/socket",
 });
 
-io.on(SOCKET_EVENT.CONNECTION, SocketEventHandler.onSocketConnection);
+io.on(SOCKET_EVENT.CONNECTION, (socket) => SocketEventHandler.onSocketConnection(socket, io));
 
 testDBConnection(sequelize).then(() => {
     server.listen(process.env.PORT || port, async () => {
