@@ -73,6 +73,7 @@ export const SOCKET_PING_TIMEOUT = 5000;
 
 export const SOCKET_EVENT = {
     CONNECTION: "connection",
+    DISCONNECT: "disconnect",
     AUTHENTICATION: "authentication",
     JOIN_SESSION: "join_session",
     MESSAGE: "message",
