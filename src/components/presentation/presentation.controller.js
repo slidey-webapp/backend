@@ -446,13 +446,11 @@ export const addSlide = async (req, res, next) => {
                 message: MESSAGE.PERMISSION_NOT_FOUND,
             });
         }
-        const slides = await SlideService.getSlideOfPresentation({
-            presentationID,
-        });
+        const maxSlideOrder = await SlideService.findMaxSlideOrder({ presentationID });
         const slide = await slideGenerator({
             presentationID,
             type,
-            slideOrder: slides.length + 1,
+            slideOrder: (maxSlideOrder || 0) + 1,
             horizontalAlignment,
             verticalAlignment,
             textSize,
