@@ -328,6 +328,14 @@ export const getSlideOfPresentation = ({ presentationID, offset, limit }) => {
     });
 };
 
+export const findMaxSlideOrder = ({ presentationID }) => {
+    return SlideTable.max("slideOrder", {
+        where: {
+            presentationID,
+        },
+    });
+};
+
 export const getMultipleChoiceSlideOption = ({ slideID }) => {
     return MultipleChoiceSlideOptionTable.findAll({
         raw: true,
