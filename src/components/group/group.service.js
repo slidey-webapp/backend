@@ -265,3 +265,20 @@ export const removeAllGroupMember = ({ groupID }) => {
         },
     });
 };
+
+export const updateGroup = async ({ groupID, name, description }) => {
+    const result = await GroupTable.update(
+        {
+            name,
+            description,
+        },
+        {
+            where: {
+                groupID,
+            },
+            raw: true,
+            returning: true,
+        }
+    );
+    return result && result.length ? result[1] : null;
+};

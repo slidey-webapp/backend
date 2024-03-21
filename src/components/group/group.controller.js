@@ -657,3 +657,55 @@ export const deleteGroup = async (req, res, next) => {
         });
     }
 };
+
+export const updateGroup = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const { groupID, name, description } = req.body;
+        const { message: emptyMessage, inputError: emptyInputError } = handleEmptyInput({
+            groupID,
+            name,
+            description,
+        });
+        if (emptyMessage) {
+            return res.status(RESPONSE_CODE.BAD_REQUEST).json({
+                status: API_STATUS.INVALID_INPUT,
+                message: emptyMessage,
+                errors: emptyInputError,
+            });
+        }
+        const group = await GroupService.findGroup({ groupID });
+        if (!group) {
+            return res.status(RESPONSE_CODE.NOT_FOUND).json({
+                status: API_STATUS.NOT_FOUND,
+                message: MESSAGE.QUERY_NOT_FOUND("Nhóm"),
+            });
+        }
+        const myRole = await GroupService.findGroupMember({
+            accountID: user.accountID,
+            groupID,
+        });
+        if (!myRole || myRole.role !== GROUP_MEMBER_ROLE.OWNER) {
+            return res.status(RESPONSE_CODE.FORBIDDEN).json({
+                status: API_STATUS.PERMISSION_DENIED,
+                message: MESSAGE.PERMISSION_NOT_FOUND,
+            });
+        }
+        const newGroup = await GroupService.updateGroup({
+            groupID,
+            name,
+            description,
+        });
+        return res.status(RESPONSE_CODE.SUCCESS).json({
+            status: API_STATUS.OK,
+            result: newGroup,
+            message: MESSAGE.POST_SUCCESS("Cập nhật"),
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(RESPONSE_CODE.INTERNAL_SERVER).json({
+            status: API_STATUS.INTERNAL_ERROR,
+            error,
+        });
+    }
+};
