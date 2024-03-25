@@ -95,6 +95,11 @@ export const createMultipleChoiceSlideOption = async ({ slideID, option, color }
     return newSlide;
 };
 
+export const createMultipleChoiceSlideOptionArray = async (array) => {
+    const newItems = await MultipleChoiceSlideOptionTable.bulkCreate(array);
+    return newItems;
+};
+
 export const createSlideResult = async ({ slideID, participantID, value }) => {
     const newSlide = (
         await SlideResultTable.create({
@@ -131,6 +136,11 @@ export const createBulletListSlide = async ({ slideID, heading }) => {
         plain: true,
     });
     return newSlide;
+};
+
+export const createBulletListSlideItemArray = async (array) => {
+    const newItems = await BulletListSlideItemTable.bulkCreate(array);
+    return newItems;
 };
 
 export const createBulletListSlideItem = async ({ slideID, value }) => {

@@ -95,13 +95,13 @@ export const slideGenerator = async ({
             question: question || "",
             chartType,
         });
-        await Promise.all(
+        await SlideService.createMultipleChoiceSlideOptionArray(
             (options || []).map((option) => {
-                return SlideService.createMultipleChoiceSlideOption({
+                return {
                     slideID: slideID,
                     option: option.option,
                     color: option.color,
-                });
+                };
             })
         );
         slide.question = question || "";
@@ -133,12 +133,12 @@ export const slideGenerator = async ({
             heading: heading || "",
             slideID,
         });
-        await Promise.all(
+        await SlideService.createBulletListSlideItemArray(
             (items || []).map((item) => {
-                return SlideService.createBulletListSlideItem({
+                return {
                     slideID: slideID,
                     value: item.value,
-                });
+                };
             })
         );
         slide.heading = heading || "";
