@@ -398,8 +398,8 @@ export const getWordCloudSlideOption = ({ slideID }) => {
 export const updateHeadingSlide = async ({ slideID, heading, subHeading }) => {
     const result = await HeadingSlideTable.update(
         {
-            ...(heading && { heading }),
-            ...(subHeading && { subHeading }),
+            ...(heading !== undefined && { heading }),
+            ...(subHeading !== undefined && { subHeading }),
         },
         {
             where: {
@@ -415,8 +415,8 @@ export const updateHeadingSlide = async ({ slideID, heading, subHeading }) => {
 export const updateParagraphSlide = async ({ slideID, heading, paragraph }) => {
     const result = await ParagraphSlideTable.update(
         {
-            ...(heading && { heading }),
-            ...(paragraph && { paragraph }),
+            ...(heading !== undefined && { heading }),
+            ...(paragraph !== undefined && { paragraph }),
         },
         {
             where: {
@@ -432,7 +432,7 @@ export const updateParagraphSlide = async ({ slideID, heading, paragraph }) => {
 export const updateMultipleChoiceSlide = async ({ slideID, question, chartType }) => {
     const result = await MultipleChoiceSlideTable.update(
         {
-            ...(question && { question }),
+            ...(question !== undefined && { question }),
             ...(chartType !== undefined && { chartType }),
         },
         {
@@ -449,8 +449,8 @@ export const updateMultipleChoiceSlide = async ({ slideID, question, chartType }
 export const updateQuoteSlide = async ({ slideID, quote, author }) => {
     const result = await QuoteSlideTable.update(
         {
-            ...(quote && { quote }),
-            ...(author && { author }),
+            ...(quote !== undefined && { quote }),
+            ...(author !== undefined && { author }),
         },
         {
             where: {
@@ -466,7 +466,7 @@ export const updateQuoteSlide = async ({ slideID, quote, author }) => {
 export const updateBulletListSlide = async ({ slideID, heading }) => {
     const result = await BulletListSlideTable.update(
         {
-            ...(heading && { heading }),
+            ...(heading !== undefined && { heading }),
         },
         {
             where: {
@@ -482,7 +482,7 @@ export const updateBulletListSlide = async ({ slideID, heading }) => {
 export const updateWordCloudSlide = async ({ slideID, question }) => {
     const result = await WordCloudSlideTable.update(
         {
-            ...(question && { question }),
+            ...(question !== undefined && { question }),
         },
         {
             where: {
@@ -498,7 +498,7 @@ export const updateWordCloudSlide = async ({ slideID, question }) => {
 export const updateBulletListSlideItem = async ({ slideID, bulletListSlideItemID, value }) => {
     const result = await BulletListSlideItemTable.update(
         {
-            ...(value && { value }),
+            ...(value !== undefined && { value }),
         },
         {
             where: {
@@ -550,7 +550,7 @@ export const findSlide = async (data) => {
 export const updateMultipleChoiceSlideOption = async ({ slideID, optionID, option, color }) => {
     const result = await MultipleChoiceSlideOptionTable.update(
         {
-            ...(option && { option }),
+            ...(option !== undefined && { option }),
             ...(color !== undefined && { color }),
         },
         {
