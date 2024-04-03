@@ -271,6 +271,7 @@ export const deleteMultipleChoiceSlideOption = ({ slideID, optionID }) => {
             slideID,
             ...(optionID && { optionID }),
         },
+        force: true,
     });
 };
 
@@ -280,6 +281,7 @@ export const deleteBulletListSlideItem = ({ slideID, bulletListSlideItemID }) =>
             slideID,
             ...(bulletListSlideItemID && { bulletListSlideItemID }),
         },
+        force: true,
     });
 };
 
@@ -289,6 +291,7 @@ export const deleteWordCloudSlideOption = ({ slideID, wordCloudSlideOptionID }) 
             slideID,
             ...(wordCloudSlideOptionID && { wordCloudSlideOptionID }),
         },
+        force: true,
     });
 };
 
@@ -297,6 +300,7 @@ export const deleteSlideResult = ({ slideID }) => {
         where: {
             slideID,
         },
+        force: true,
     });
 };
 

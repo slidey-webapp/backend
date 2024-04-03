@@ -796,13 +796,10 @@ export const updatePresentation = async (req, res, next) => {
                         }
                     } else {
                         promises.push(
-                            SlideService.deleteSlideContent(
-                                {
-                                    slideID: oldSlides[i].slideID,
-                                    type: oldSlides[i].type,
-                                },
-                                true
-                            )
+                            deleteSlideReference({
+                                slideID: oldSlides[i].slideID,
+                                type: oldSlides[i].type,
+                            })
                         );
                         switch (newSlides[j].type) {
                             case SLIDE_TYPE.HEADING:

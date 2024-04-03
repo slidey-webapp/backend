@@ -179,3 +179,61 @@ export const deleteSessionParticipant = ({ sessionID }) => {
         },
     });
 };
+
+export const getSessionOfGroup = ({ offset, limit, name, presentationID, groupID }) => {
+    const searchName = getInsensitiveCaseRegextForSearchLike(name || "");
+
+    return PresentSessionTable.findAll({
+        raw: true,
+        where: {
+            name: {
+                [Op.regexp]: searchName,
+            },
+            ...(presentationID && { presentationID }),
+            ...(groupID && { groupID }),
+        },
+        order: [["createdAt", "DESC"]],
+        offset: offset,
+        limit: limit,
+        include: {
+            model: PresentationTable,
+            attributes: [],
+            as: "Presentations",
+            duplicating: false,
+            include: {
+                model: CollabTable,
+                attributes: [],
+                as: "Collaborations",
+                duplicating: false,
+            },
+        },
+    });
+};
+
+export const countSessionOfGroup = ({ name, presentationID, groupID }) => {
+    const searchName = getInsensitiveCaseRegextForSearchLike(name || "");
+
+    return PresentSessionTable.count({
+        raw: true,
+        where: {
+            name: {
+                [Op.regexp]: searchName,
+            },
+            ...(presentationID && { presentationID }),
+            ...(groupID && { groupID }),
+        },
+        order: [["createdAt", "DESC"]],
+        include: {
+            model: PresentationTable,
+            attributes: [],
+            as: "Presentations",
+            duplicating: false,
+            include: {
+                model: CollabTable,
+                attributes: [],
+                as: "Collaborations",
+                duplicating: false,
+            },
+        },
+    });
+};

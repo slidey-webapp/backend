@@ -1,13 +1,15 @@
 import { SLIDE_TYPE } from "./slide.model";
 import * as SlideService from "./slide.service";
 import * as MediaAssetService from "../../common/mediaAsset/mediaAsset.service";
-export const deleteSlideReference = ({ slideID, type }) => {
+export const deleteSlideReference = async ({ slideID, type }) => {
     const promises = [
-        SlideService.deleteSlideContent({ slideID, type }),
         SlideService.deleteSlideResult({ slideID }),
         SlideService.deleteMultipleChoiceSlideOption({ slideID }),
+        SlideService.deleteBulletListSlideItem({ slideID }),
+        SlideService.deleteWordCloudSlideOption({ slideID }),
     ];
-    return Promise.all(promises);
+    await Promise.all(promises);
+    return SlideService.deleteSlideContent({ slideID, type }, true);
 };
 
 export const mapSlide = (slide) => {
