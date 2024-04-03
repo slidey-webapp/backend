@@ -303,20 +303,29 @@ export const getMySession = async (req, res, next) => {
         const name = req.query.name;
         const groupID = req.query.groupID;
         const presentationID = req.query.presentationID;
-        const sessions = await SessionService.getUserPresentSession({
-            accountID: user.accountID,
-            offset,
-            limit,
-            name,
-            presentationID,
-            groupID,
-        });
-        const total = await SessionService.countUserPresentSession({
-            accountID: user.accountID,
-            name,
-            presentationID,
-            groupID,
-        });
+        const sessions = groupID
+            ? await SessionService.getSessionOfGroup({
+                  offset,
+                  limit,
+                  name,
+                  presentationID,
+                  groupID,
+              })
+            : await SessionService.getUserPresentSession({
+                  accountID: user.accountID,
+                  offset,
+                  limit,
+                  name,
+                  presentationID,
+              });
+        const total = groupID
+            ? await SessionService.countSessionOfGroup({ name, presentationID, groupID })
+            : await SessionService.countUserPresentSession({
+                  accountID: user.accountID,
+                  name,
+                  presentationID,
+                  groupID,
+              });
         const totalParticipant = await Promise.all(
             sessions.map((item) => {
                 return SessionService.countSessionParticipant({
